@@ -17,3 +17,4 @@ coverage/
 *.sqlite-journal
 *.sqlite-wal
 *.sqlite-shm
+demo-library/
