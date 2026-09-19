@@ -7,13 +7,17 @@
 ## 📑 Table of Contents
 1. [Executive Summary & Vision](#1-executive-summary--vision)
 2. [The Story, Legacy & Name](#2-the-story-legacy--name)
-3. [Technology Stack & Architectural Alignment](#3-technology-stack--architectural-alignment)
-4. [System Architecture & Evaluative Blueprint](#4-system-architecture--evaluative-blueprint)
-5. [Calibre Database & Flattened Storage Engine](#5-calibre-database--flattened-storage-engine)
-6. [Calibre Desktop & Multi-Device Sync Protocols](#6-calibre-desktop--multi-device-sync-protocols)
-7. [Contract-First API & Zero-Rewrite Go Transition Strategy](#7-contract-first-api--zero-rewrite-go-transition-strategy)
-8. [Memory Footprint & Performance Benchmark Analysis](#8-memory-footprint--performance-benchmark-analysis)
-9. [End-to-End Phased Implementation Roadmap](#9-end-to-end-phased-implementation-roadmap)
+3. [End-to-End Phased Implementation Roadmap](#3-end-to-end-phased-implementation-roadmap)
+4. [Technology Stack & Architectural Alignment](#4-technology-stack--architectural-alignment)
+5. [System Architecture & Evaluative Blueprint](#5-system-architecture--evaluative-blueprint)
+6. [Calibre Database & Storage Engine Lifecycle](#6-calibre-database--storage-engine-lifecycle)
+   - [6.1 Calibre SQLite Schema Audit](#61-calibre-sqlite-schema-audit)
+   - [6.2 The Purpose & Need for the Flattened View in the MVP](#62-the-purpose--need-for-the-flattened-view-in-the-mvp)
+   - [6.3 Flattened View Lifecycle & Phase-by-Phase Limitations](#63-flattened-view-lifecycle--phase-by-phase-limitations)
+   - [6.4 Flattened Read-Model Definition (`v_books_flattened`)](#64-flattened-read-model-definition-v_books_flattened)
+7. [Calibre Desktop & Multi-Device Sync Protocols](#7-calibre-desktop--multi-device-sync-protocols)
+8. [Contract-First API & Zero-Rewrite Go Transition Strategy](#8-contract-first-api--zero-rewrite-go-transition-strategy)
+9. [Memory Footprint & Performance Benchmark Analysis](#9-memory-footprint--performance-benchmark-analysis)
 10. [Testing, Quality Assurance & Verification Strategy](#10-testing-quality-assurance--verification-strategy)
 
 ---
@@ -73,11 +77,86 @@ Styled with European phonetic clarity, **`Skalybr`** serves as the sovereign sag
 
 ---
 
-## 3. Technology Stack & Architectural Alignment
+## 3. End-to-End Phased Implementation Roadmap
 
-Skalybr leverages a unified, modern TypeScript/Node.js stack that shares architectural patterns and component libraries with proven production codebases.
+Skalybr is built following an **incremental capability milestone model**. Each phase delivers a complete, vertically verified slice of functionality from database to UI.
 
-### 3.1 Technology Matrix
+```mermaid
+flowchart LR
+    P1["Phase 1: Core MVP<br/>(✅ Completed)"] --> P2["Phase 2: E-Reader Sync<br/>(🔄 In Progress)"]
+    P2 --> P3["Phase 3: Shelves & Auth<br/>(📋 Planned)"]
+    P3 --> P4["Phase 4: In-Browser Readers<br/>(📋 Planned)"]
+    P4 --> P5["Phase 5: Ingest & Scrapers<br/>(📋 Planned)"]
+    P5 -.-> P6["Phase 6: Go Backend Swap<br/>(📋 Optional)"]
+```
+
+### ✅ Phase 1: Core MVP & Catalog Engine *(Completed)*
+- [x] Auto-initializing `v_books_flattened` database view for sub-millisecond querying.
+- [x] Multi-library discovery and instant switching across sub-libraries.
+- [x] `better-sqlite3` connection pooling with SQLite WAL (Write-Ahead Logging) mode.
+- [x] `sharp` on-the-fly WebP cover thumbnail streaming with HTTP caching.
+- [x] Responsive React 19 / Tailwind CSS v4 book grid with instant debounced search and faceted filtering.
+- [x] Book details modal with blurb preview, download links, and metadata editing (Title, Rating, Description).
+- [x] OpenAPI 3.1 specification with interactive Scalar docs at `/api/reference`.
+- [x] Vitest automated test suite executing in `< 100ms`.
+
+### 🔄 Phase 2: E-Reader Protocols & Wireless Sync *(In Progress)*
+- [ ] **OPDS 1.2 XML Feed (`/opds`)**:
+  - Atom+XML catalog feeds for Moon+ Reader, FBReader, Thorium, and KyBook.
+  - Hierarchical navigation: By Author, Series, Tag, Collection, and Recent.
+  - OpenSearch XML integration for remote catalog searching.
+- [ ] **Kobo Wireless Sync API (`/api/v1/kobo/...`)**:
+  - Kobo Store protocol emulation (`v1/initialization`, `v1/library/sync`, `v1/books/{id}/reading_state`).
+  - Device token pairing, reading progress synchronization, and bookmark management.
+- [ ] **On-the-Fly KePub Transformation**:
+  - Dynamic KePub span tag injection for native Kobo page calculation and fast flipping.
+
+### 📋 Phase 3: User Shelves, Reading Status & Authentication *(Planned)*
+- [ ] **Application Database Schema (`app.db`)**:
+  - SQL migrations for user accounts, reading state, custom shelves, and sync logs.
+- [ ] **Authentication & Access Control**:
+  - Stateless encrypted sessions (`iron-session`).
+  - Reverse-proxy header authentication (`Remote-User`) for Authelia / Authentik setups.
+  - Role-based permissions (Admin, Editor, Downloader, Viewer).
+- [ ] **Reading State Tracking**:
+  - Read / Unread / In-Progress status with timestamped reading history.
+- [ ] **Custom Shelves & Drag-and-Drop Organization**:
+  - Public and private user shelves with `@dnd-kit` reordering.
+
+### 📋 Phase 4: In-Browser E-Readers & PWA Offline Reading *(Planned)*
+- [ ] **Embedded EPUB Reader**:
+  - Fullscreen EpubJS reader with custom typography, themes (Light/Dark/Sepia), and progress saving.
+- [ ] **PDF Viewer**:
+  - Continuous-scroll PDF.js viewer with zoom and page bookmarks.
+- [ ] **Comic & Manga Canvas Reader**:
+  - Client-side CBZ/CBR image extractor and dual-page manga viewer.
+- [ ] **Audiobook Streaming Player**:
+  - HTML5 audio player with position bookmarking for M4B and MP3 audiobooks.
+- [ ] **Installable PWA & Offline Cache**:
+  - Progressive Web App service worker caching selected books for offline reading.
+
+### 📋 Phase 5: Ingestion, Metadata Scraping & Delivery *(Planned)*
+- [ ] **File Ingestion Engine**:
+  - Drag-and-drop uploader for EPUB, MOBI, PDF, CBZ, and CBR with automatic metadata extraction.
+- [ ] **Online Metadata Scraping**:
+  - Multi-provider search integration (Google Books, Goodreads, Amazon, ComicVine).
+- [ ] **Send-to-Kindle Delivery**:
+  - Direct SMTP and OAuth delivery to `@kindle.com` addresses.
+- [ ] **Calibre Directory Management**:
+  - Safe folder renaming (`Author/Title (id)/Title - Author.ext`) on metadata update.
+
+### ⚡ Phase 6: Optional Single-Binary Go Backend *(Future Evolution)*
+- [ ] Drop-in Go HTTP server implementing identical OpenAPI routes.
+- [ ] Embedded static React assets via `//go:embed`.
+- [ ] Standalone static executables for Linux (x86_64, ARM64), macOS, and Windows.
+
+---
+
+## 4. Technology Stack & Architectural Alignment
+
+Skalybr leverages a unified, modern TypeScript/Node.js stack engineered for minimal latency and maximum development velocity.
+
+### 4.1 Technology Matrix
 
 | Layer | Technology | Rationale & Capabilities |
 | :--- | :--- | :--- |
@@ -92,16 +171,16 @@ Skalybr leverages a unified, modern TypeScript/Node.js stack that shares archite
 | **Toast Notifications**| Sonner | Lightweight notification system for feedback and async operations |
 | **Test Runner** | Vitest + Playwright | Sub-second unit tests and full-stack browser end-to-end testing |
 
-### 3.2 Production Pattern Reuse
+### 4.2 Production Best Practices
 - **Standalone Docker Deployment**: Configured with `output: 'standalone'` in `next.config.ts` to produce a minimal deployment container containing only production assets.
 - **Strict Node.js Server Boundary**: Database interactions and disk I/O are isolated inside server handlers (`export const runtime = 'nodejs'`).
 - **Zod Schema Validation**: All incoming requests, query parameters, metadata modifications, and external payloads are validated against Zod schemas.
 
 ---
 
-## 4. System Architecture & Evaluative Blueprint
+## 5. System Architecture & Evaluative Blueprint
 
-### 4.1 Evaluation: Modular Monolith vs. Microservices
+### 5.1 Evaluation: Modular Monolith vs. Microservices
 
 An evaluation of system architecture demonstrates why a **Modular Monolith** is the optimal choice for a self-hosted Calibre system:
 
@@ -113,7 +192,7 @@ An evaluation of system architecture demonstrates why a **Modular Monolith** is 
 | **File Operations** | Distributed transactions for file and folder renames | Atomic local filesystem and database transactions |
 | **Industry Precedent** | Rare for media management | Standard (Jellyfin, Navidrome, Immich, Audiobookshelf) |
 
-### 4.2 Hexagonal Ports & Adapters Diagram
+### 5.2 Hexagonal Ports & Adapters Diagram
 
 ```mermaid
 flowchart TD
@@ -171,9 +250,9 @@ flowchart TD
 
 ---
 
-## 5. Calibre Database & Flattened Storage Engine
+## 6. Calibre Database & Storage Engine Lifecycle
 
-### 5.1 Calibre SQLite Schema Audit
+### 6.1 Calibre SQLite Schema Audit
 A structural audit of native `metadata.db` Calibre databases identified 40 tables, 13 views, and 44 triggers:
 
 - **Entity Tables (11)**: `books`, `authors`, `tags`, `series`, `publishers`, `languages`, `ratings`, `identifiers`, `comments`, `data`, `feeds`.
@@ -182,8 +261,62 @@ A structural audit of native `metadata.db` Calibre databases identified 40 table
 - **FTS5 & Annotations (12)**: `annotations`, `annotations_dirtied`, `annotations_fts*`.
 - **System State & Preferences (7)**: `library_id`, `preferences`, `last_read_positions`, `books_plugin_data`, `conversion_options`, `metadata_dirtied`, `sqlite_sequence`.
 
-### 5.2 Flattened Read-Model (`v_books_flattened`)
-To eliminate multi-table join overhead on every search query, Skalybr initializes an optimized SQLite view:
+---
+
+### 6.2 The Purpose & Need for the Flattened View in the MVP
+
+In standard Calibre libraries, fetching a book with its authors, tags, series, publisher, language, rating, and custom collections requires executing complex SQL queries with up to **8 `LEFT JOIN` operations and aggregate grouping** across relational junction link tables (`books_authors_link`, `books_tags_link`, etc.).
+
+During **Phase 1 (Core MVP)**, the flattened view (`v_books_flattened`) was introduced to solve three critical requirements:
+
+1. **Sub-Millisecond Query Velocity**: A pre-compiled SQL view allows SQLite to optimize query execution plans internally, delivering full catalog searches across 500+ books in `< 1ms`.
+2. **Radical Backend Simplicity**: Eliminates the need for heavy ORMs (like SQLAlchemy or Prisma) or dynamic query builder abstractions. The REST API routes can perform simple `SELECT * FROM v_books_flattened WHERE ...` queries with standard `LIKE` and pagination clauses.
+3. **Clean, Flattened JSON Models**: Returns a flat JavaScript object matching the frontend React UI requirements directly, eliminating complex in-memory grouping loops in Node.js.
+
+---
+
+### 6.3 Flattened View Lifecycle & Phase-by-Phase Limitations
+
+While the flattened view provides an optimal read-model for catalog browsing, it is an **explicit architectural stepping stone**. As Skalybr advances through the roadmap, its utility evolves:
+
+```
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│                        THE FLATTENED VIEW ARCHITECTURAL LIFECYCLE                      │
+├────────────────────────────────────────────────────────────────────────────────────────┤
+│ Phase 1 & 2 (MVP & Feeds)        │ 🟢 Core Engine: Ideal for single-pass catalog       │
+│                                  │    listing, filtering, OPDS XML & Kobo sync feeds.  │
+├──────────────────────────────────┼─────────────────────────────────────────────────────┤
+│ Phase 3 (Shelves & Multi-User)   │ 🟡 Partial Limit: Cannot represent user-specific    │
+│                                  │    read status, private shelves, or bookmarks       │
+│                                  │    (requires joining with user state in app.db).    │
+├──────────────────────────────────┼─────────────────────────────────────────────────────┤
+│ Phase 5 (Ingestion & Deep CRUD)  │ 🔴 Reaches End of Life for Writes: Calibre writes   │
+│                                  │    require normalized relational mutations          │
+│                                  │    (author splitting, series indexing, format data).│
+│                                  │    View becomes a read-only CQRS query projection.  │
+└────────────────────────────────────────────────────────────────────────────────────────┘
+```
+
+#### Where the Flattened View Reaches Its Limits:
+
+1. **Multi-User State Separation (Phase 3)**:
+   - The flattened view lives inside Calibre's `metadata.db` (which is shared across all users and strictly models book metadata).
+   - User-specific state (read progress, private shelves, personal bookmarks) is stored in `app.db`.
+   - **Transition**: Queries requiring combined book and user state will join the catalog repository with `app.db` repositories rather than relying solely on `v_books_flattened`.
+
+2. **Complex Entity Normalization on Ingestion & Editing (Phase 5)**:
+   - Updating complex multi-author books (e.g. splitting "Terry Pratchett & Neil Gaiman" into separate author rows with distinct sort keys and author links) cannot be done through a SQL view.
+   - Uploading new books and managing format entries in the `data` table requires atomic inserts across `books`, `authors`, `tags`, `series`, and `data` tables.
+   - **Transition**: The write pipeline uses a dedicated **Normalized Relational Mutation Engine**, while `v_books_flattened` is retained strictly as a **CQRS (Command Query Responsibility Segregation) Read-Model** for high-speed catalog listing and search.
+
+3. **Fine-Grained Relational Filtering (Advanced Facets)**:
+   - Filtering by explicit author ID, publisher ID, or specific series identifiers is more efficiently executed against indexed foreign key link tables than string matching on aggregated text fields.
+
+---
+
+### 6.4 Flattened Read-Model Definition (`v_books_flattened`)
+
+The SQL view definition utilized in the core catalog engine:
 
 ```sql
 CREATE VIEW IF NOT EXISTS v_books_flattened AS
@@ -258,8 +391,7 @@ SELECT
 FROM books b;
 ```
 
-### 5.3 Flattened TypeScript Entity Interface
-
+#### TypeScript Read Entity Interface
 ```typescript
 export interface BookFlattened {
   id: number;
@@ -286,7 +418,7 @@ export interface BookFlattened {
 
 ---
 
-## 6. Calibre Desktop & Multi-Device Sync Protocols
+## 7. Calibre Desktop & Multi-Device Sync Protocols
 
 Skalybr supports four complementary synchronization workflows with Calibre Desktop:
 
@@ -332,7 +464,7 @@ flowchart TD
 
 ---
 
-## 7. Contract-First API & Zero-Rewrite Go Transition Strategy
+## 8. Contract-First API & Zero-Rewrite Go Transition Strategy
 
 Skalybr is built with an **API-First (Ports & Adapters)** model. Every client-side feature interacts exclusively through documented HTTP endpoints.
 
@@ -383,9 +515,9 @@ flowchart TD
 
 ---
 
-## 8. Memory Footprint & Performance Benchmark Analysis
+## 9. Memory Footprint & Performance Benchmark Analysis
 
-### 8.1 Memory Consumption Breakdown
+### 9.1 Memory Consumption Breakdown
 
 | Runtime State | Python Calibre-Web (Legacy) | Skalybr (Next.js / Node) | Skalybr (Compiled Go) |
 | :--- | :--- | :--- | :--- |
@@ -395,83 +527,10 @@ flowchart TD
 | **Long-Running Stable State** | 300 MB – 450 MB | **100 MB – 140 MB** | 25 MB – 35 MB |
 | **Container Image Size** | 600 MB – 1.2 GB | **~150 MB – 220 MB** | ~30 MB – 50 MB |
 
-### 8.2 Performance Advantages
+### 9.2 Performance Advantages
 - **`better-sqlite3` vs SQLAlchemy**: Direct synchronous C++ SQLite bindings eliminate Python ORM object allocation overhead and GC pressure.
 - **`sharp` (libvips) vs Wand / Pillow**: Streaming memory pipelines resize images in memory buffers with 5x lower RAM consumption.
 - **V8 Heap Management**: Aggressive garbage collection and memory compaction prevent unbounded memory growth during long uptimes.
-
----
-
-## 9. End-to-End Phased Implementation Roadmap
-
-```mermaid
-flowchart LR
-    P1["Phase 1: Core MVP<br/>(✅ Completed)"] --> P2["Phase 2: E-Reader Sync<br/>(🔄 In Progress)"]
-    P2 --> P3["Phase 3: Shelves & Auth<br/>(📋 Planned)"]
-    P3 --> P4["Phase 4: In-Browser Readers<br/>(📋 Planned)"]
-    P4 --> P5["Phase 5: Ingest & Scrapers<br/>(📋 Planned)"]
-    P5 -.-> P6["Phase 6: Go Backend Swap<br/>(📋 Optional)"]
-```
-
-### ✅ Phase 1: Core MVP & Flattened Catalog Engine *(Completed)*
-- [x] Auto-initializing `v_books_flattened` database view.
-- [x] Multi-library discovery and instant switching across sub-libraries.
-- [x] `better-sqlite3` connection manager with SQLite WAL mode.
-- [x] `sharp` on-the-fly WebP cover thumbnail streaming with HTTP caching.
-- [x] Responsive React 19 / Tailwind CSS v4 book grid with instant debounced search and faceted filtering.
-- [x] Book details modal with blurb preview and metadata editing (Title, Rating, Description).
-- [x] OpenAPI 3.1 specification with interactive Scalar docs at `/api/reference`.
-- [x] Vitest automated test suite executing in `< 100ms`.
-
-### 🔄 Phase 2: E-Reader Protocols & Wireless Sync *(In Progress)*
-- [ ] **OPDS 1.2 XML Feed (`/opds`)**:
-  - Atom+XML catalog feeds for Moon+ Reader, FBReader, Thorium, and KyBook.
-  - Hierarchical navigation: By Author, Series, Tag, Collection, and Recent.
-  - OpenSearch XML integration for remote catalog searching.
-- [ ] **Kobo Wireless Sync API (`/api/v1/kobo/...`)**:
-  - Kobo Store protocol emulation (`v1/initialization`, `v1/library/sync`, `v1/books/{id}/reading_state`).
-  - Device token pairing, reading progress synchronization, and bookmark management.
-- [ ] **On-the-Fly KePub Transformation**:
-  - Dynamic KePub span tag injection for native Kobo page calculation and fast flipping.
-
-### 📋 Phase 3: User Shelves, Reading Status & Authentication *(Planned)*
-- [ ] **Application Database Schema (`app.db`)**:
-  - SQL migrations for user accounts, reading state, custom shelves, and sync logs.
-- [ ] **Authentication & Access Control**:
-  - Stateless encrypted sessions (`iron-session`).
-  - Reverse-proxy header authentication (`Remote-User`) for Authelia / Authentik setups.
-  - Role-based permissions (Admin, Editor, Downloader, Viewer).
-- [ ] **Reading State Tracking**:
-  - Read / Unread / In-Progress status with timestamped reading history.
-- [ ] **Custom Shelves & Drag-and-Drop Organization**:
-  - Public and private user shelves with `@dnd-kit` reordering.
-
-### 📋 Phase 4: In-Browser E-Readers & PWA Offline Reading *(Planned)*
-- [ ] **Embedded EPUB Reader**:
-  - Fullscreen EpubJS reader with custom typography, themes (Light/Dark/Sepia), and progress saving.
-- [ ] **PDF Viewer**:
-  - Continuous-scroll PDF.js viewer with zoom and page bookmarks.
-- [ ] **Comic & Manga Canvas Reader**:
-  - Client-side CBZ/CBR image extractor and dual-page manga viewer.
-- [ ] **Audiobook Streaming Player**:
-  - HTML5 audio player with position bookmarking for M4B and MP3 audiobooks.
-- [ ] **Installable PWA & Offline Cache**:
-  - Progressive Web App service worker caching selected books for offline reading.
-
-### 📋 Phase 5: Ingestion, Metadata Scraping & Delivery *(Planned)*
-- [ ] **File Ingestion Engine**:
-  - Drag-and-drop uploader for EPUB, MOBI, PDF, CBZ, and CBR with automatic metadata extraction.
-- [ ] **Online Metadata Scraping**:
-  - Multi-provider search integration (Google Books, Goodreads, Amazon, ComicVine).
-- [ ] **Send-to-Kindle Delivery**:
-  - Direct SMTP and OAuth delivery to `@kindle.com` addresses.
-- [ ] **Calibre Directory Management**:
-  - Safe folder renaming (`Author/Title (id)/Title - Author.ext`) on metadata update.
-
-### ⚡ Phase 6: Optional Single-Binary Go Backend *(Future Evolution)*
-- [ ] Drop-in Go HTTP server implementing identical OpenAPI routes.
-- [ ] Embedded static React assets via `//go:embed`.
-- [ ] Standalone static executables for Linux (x86_64, ARM64), macOS, and Windows.
 
 ---
 
