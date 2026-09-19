@@ -180,27 +180,35 @@ Skalybr leverages a unified, modern TypeScript/Node.js stack engineered for mini
 
 ## 5. System Architecture & Evaluative Blueprint
 
-### 5.1 Architectural Evaluation: Microservices vs. Next.js vs. Future Go Backend
+### 5.1 Architectural Evaluation: Microservices vs. Next.js Monolith vs. Future Go Backend
 
-Evaluating architectural patterns and runtime choices clarifies the transition from rapid Next.js fullstack development to an optional compiled Go binary distribution:
+Choosing the optimal architecture requires balancing developer velocity, deployment topology, concurrency characteristics, and operational constraints for self-hosted Calibre media environments.
 
-| Evaluation Dimension | **Microservices Architecture** | **Modular Monolith (Next.js / TypeScript)** | **Modular Monolith (Future Go Backend Drop-in)** |
+| Architectural Dimension | **Microservices Architecture** | **Modular Monolith (Next.js / TypeScript)** | **Modular Monolith (Future Go Backend Drop-in)** |
 | :--- | :--- | :--- | :--- |
-| **Packaging & Deployment** | ❌ **High Complexity**: 4–7 containers, Redis broker, API gateway, Docker Compose / K8s | ✅ **Simple**: Single standalone Docker container (`output: 'standalone'`) | ⭐️ **Ultimate Portability**: Single static executable binary (`./skalybr`) with embedded React frontend (`//go:embed`) |
-| **Memory Footprint (RSS)** | ❌ 400 MB – 1.5 GB+ across container runtimes | 🟢 **80 MB – 120 MB** (sub-100MB idle, low footprint for Node) | ⭐️ **18 MB – 35 MB** (near-zero idle RAM, ideal for 256MB micro-servers / Pi Zero) |
-| **SQLite Concurrency** | ❌ Multi-container disk lock contention (`database is locked`) | ✅ In-process, synchronous C++ bindings (`better-sqlite3`) + WAL mode | ✅ In-process pure-Go or CGO SQLite (`modernc.org/sqlite`) + WAL mode |
-| **Development Velocity** | ❌ Low (RPC serialization, distributed tracing, network boilerplate) | ⭐️ **Highest**: Shared TypeScript interfaces, rapid React UI iteration | ⚡ **High Velocity**: Implements established OpenAPI contract via `oapi-codegen` |
-| **In-Browser Reader DX** | ❌ Complex token handshakes & asset proxies | ⭐️ **Native**: Direct React components (EpubJS, PDF.js, Canvas comics) | ✅ **Static Embed**: Pre-compiled React SPA served directly from Go HTTP router |
-| **Concurrency Model** | ❌ Distributed network queues & pub-sub brokers | 🟢 Node.js Event Loop + libuv worker threadpool (`sharp` image tasks) | ⭐️ **Goroutines & Channels**: Lightweight native green threads for conversion & email workers |
-| **Startup Time** | ❌ 15–45 seconds across orchestration stack | 🟢 1–2 seconds | ⭐️ **< 20 milliseconds** instant boot |
-| **Maintenance Burden** | ❌ Multi-repo / multi-container CI pipelines | 🟢 Single language across frontend, API, and database layers | 🟢 Decoupled clean architecture (Frontend SPA + Go domain engine) |
+| **Primary Architectural Strengths** | • Independent horizontal scaling per service<br/>• Strict service boundary isolation<br/>• Polyglot freedom (e.g. Python for scrapers, Rust for parsers, Node for SSR)<br/>• Fault isolation (converter crash does not affect catalog) | • High development velocity with shared TypeScript models<br/>• Zero IPC serialization overhead<br/>• Unified full-stack tooling (Next.js, Tailwind v4, React 19)<br/>• Native in-browser reader ecosystem (EpubJS, PDF.js) | • Ultra-low resource footprint (~25MB RAM)<br/>• Single static binary distribution (`./skalybr`)<br/>• High-throughput native concurrency (Goroutines)<br/>• Fast cold start (< 20ms) for low-power edge nodes |
+| **Operational & Deployment Model** | Distributed: 4–7 container services orchestrated via Docker Compose or Kubernetes with message brokers | Containerized: Single standalone Docker container (`output: 'standalone'`) or Node.js runtime | Standalone Executable: Zero-dependency cross-platform binary with embedded assets (`//go:embed`) |
+| **Memory Profile (RSS)** | 400 MB – 1.5 GB+ across container runtimes and brokers | 80 MB – 120 MB baseline under active browsing | 18 MB – 35 MB baseline (suitable for 256MB micro-appliances) |
+| **Data Persistence & SQLite Interaction** | Requires centralized Database Broker service or network volume sharing with strict serialized access | Direct in-process SQLite bindings (`better-sqlite3`) utilizing WAL mode for concurrent reads | Direct in-process pure-Go or CGO SQLite (`modernc.org/sqlite`) with WAL mode |
+| **Task Processing & Heavy Workloads** | Dedicated worker containers with message queues (RabbitMQ / Redis) | In-process worker threadpools (libuv / `sharp`) with optional remote webhook dispatch | In-process worker channels & Goroutine pools with optional sidecar worker support |
+| **Developer Ergonomics & Complexity** | Higher initial complexity: RPC contracts, network retry policies, distributed logging, local orchestrations | High velocity: End-to-end type safety from SQLite to UI, hot reloading, unified package management | High velocity once contracts exist: Generated Go server stubs (`oapi-codegen`) matching OpenAPI specs |
+| **Optimal Target Environments** | Multi-tenant SaaS, enterprise digital archives, large organizations with multiple development teams | Standard self-hosted servers, NAS devices (Synology, unRAID, TrueNAS), home labs with Docker | Ultra-low-resource hardware (Raspberry Pi Zero, embedded routers), minimal containers, and single-file CLI users |
 
-#### Strategic Role of the Future Go Backend:
-1. **Why Start with Next.js**: Maximizes delivery speed and UI richness. You get instant reactivity, typed fullstack developer ergonomics, and native in-browser reader components out of the box.
-2. **Why the Go Backend is a Compelling Future Step**:
-   - Compiles to a single zero-dependency static executable (`./skalybr`) that runs on Linux (x86_64, ARM64/Raspberry Pi), macOS, and Windows without requiring Node.js or Docker.
-   - Lowers the baseline memory footprint to ~25MB RAM, matching gold-standard Go media servers like **Navidrome** and **Gitea**.
-3. **The Zero-Rewrite Guarantee**: Because all client interactions communicate strictly through the **OpenAPI 3.1 REST API**, **OPDS 1.2 XML feed**, and **Kobo Sync protocol**, the backend engine can be swapped for Go with **zero alterations** to the React UI, reader components, or e-reader client configs.
+---
+
+#### Key Trade-Off Rationale for Skalybr's Architecture:
+
+1. **Why a Modular Monolith for Core Operations**:
+   - Calibre's native database (`metadata.db`) is an in-process, single-file SQLite database located alongside book files on disk. A modular monolith allows direct, synchronous, sub-millisecond database queries without network serialization or distributed transaction overhead.
+   - For 95%+ of self-hosters running on a home server or NAS, a single container or binary provides the simplest operational model with trivial volume mounting (`-v /books:/books`).
+
+2. **The Extensible Hybrid / Sidecar Pattern**:
+   - While the core catalog, auth, OPDS, and Kobo engines remain a modular monolith, Skalybr is designed to support **optional sidecar workers**.
+   - Heavy, long-running CPU workloads (such as Calibre `ebook-convert` format conversions or batch OCR scrapers) can execute locally via in-process workers or optionally dispatch to external compute nodes via standard webhooks, providing the scaling benefits of microservices without imposing multi-container complexity on standard deployments.
+
+3. **The Role of the Next.js to Go Evolution**:
+   - **Phase 1–5 (Next.js / TypeScript)**: Prioritizes rapid feature delivery, dynamic UI iteration, rich in-browser readers, and protocol stabilization.
+   - **Phase 6 (Optional Go Backend)**: Provides a drop-in single-binary distribution option for users seeking minimal memory consumption (~25MB) and zero runtime dependencies, without requiring any frontend rewrites thanks to strict OpenAPI 3.1 contracts.
 
 ### 5.2 Hexagonal Ports & Adapters Diagram
 
