@@ -180,17 +180,27 @@ Skalybr leverages a unified, modern TypeScript/Node.js stack engineered for mini
 
 ## 5. System Architecture & Evaluative Blueprint
 
-### 5.1 Evaluation: Modular Monolith vs. Microservices
+### 5.1 Architectural Evaluation: Microservices vs. Next.js vs. Future Go Backend
 
-An evaluation of system architecture demonstrates why a **Modular Monolith** is the optimal choice for a self-hosted Calibre system:
+Evaluating architectural patterns and runtime choices clarifies the transition from rapid Next.js fullstack development to an optional compiled Go binary distribution:
 
-| Dimension | Microservices | Modular Monolith (Skalybr) |
-| :--- | :--- | :--- |
-| **Deployment Complexity** | High (Docker Compose / K8s, 4-7 containers, Redis broker) | Minimal (Single container or static binary) |
-| **SQLite Concurrency** | Prone to file locking issues across network mounts | In-process thread-safe access with SQLite WAL |
-| **Memory Footprint** | 400MB – 1.5GB+ idle across containers | 80MB – 120MB (Node) / 20MB – 35MB (Go) |
-| **File Operations** | Distributed transactions for file and folder renames | Atomic local filesystem and database transactions |
-| **Industry Precedent** | Rare for media management | Standard (Jellyfin, Navidrome, Immich, Audiobookshelf) |
+| Evaluation Dimension | **Microservices Architecture** | **Modular Monolith (Next.js / TypeScript)** | **Modular Monolith (Future Go Backend Drop-in)** |
+| :--- | :--- | :--- | :--- |
+| **Packaging & Deployment** | ❌ **High Complexity**: 4–7 containers, Redis broker, API gateway, Docker Compose / K8s | ✅ **Simple**: Single standalone Docker container (`output: 'standalone'`) | ⭐️ **Ultimate Portability**: Single static executable binary (`./skalybr`) with embedded React frontend (`//go:embed`) |
+| **Memory Footprint (RSS)** | ❌ 400 MB – 1.5 GB+ across container runtimes | 🟢 **80 MB – 120 MB** (sub-100MB idle, low footprint for Node) | ⭐️ **18 MB – 35 MB** (near-zero idle RAM, ideal for 256MB micro-servers / Pi Zero) |
+| **SQLite Concurrency** | ❌ Multi-container disk lock contention (`database is locked`) | ✅ In-process, synchronous C++ bindings (`better-sqlite3`) + WAL mode | ✅ In-process pure-Go or CGO SQLite (`modernc.org/sqlite`) + WAL mode |
+| **Development Velocity** | ❌ Low (RPC serialization, distributed tracing, network boilerplate) | ⭐️ **Highest**: Shared TypeScript interfaces, rapid React UI iteration | ⚡ **High Velocity**: Implements established OpenAPI contract via `oapi-codegen` |
+| **In-Browser Reader DX** | ❌ Complex token handshakes & asset proxies | ⭐️ **Native**: Direct React components (EpubJS, PDF.js, Canvas comics) | ✅ **Static Embed**: Pre-compiled React SPA served directly from Go HTTP router |
+| **Concurrency Model** | ❌ Distributed network queues & pub-sub brokers | 🟢 Node.js Event Loop + libuv worker threadpool (`sharp` image tasks) | ⭐️ **Goroutines & Channels**: Lightweight native green threads for conversion & email workers |
+| **Startup Time** | ❌ 15–45 seconds across orchestration stack | 🟢 1–2 seconds | ⭐️ **< 20 milliseconds** instant boot |
+| **Maintenance Burden** | ❌ Multi-repo / multi-container CI pipelines | 🟢 Single language across frontend, API, and database layers | 🟢 Decoupled clean architecture (Frontend SPA + Go domain engine) |
+
+#### Strategic Role of the Future Go Backend:
+1. **Why Start with Next.js**: Maximizes delivery speed and UI richness. You get instant reactivity, typed fullstack developer ergonomics, and native in-browser reader components out of the box.
+2. **Why the Go Backend is a Compelling Future Step**:
+   - Compiles to a single zero-dependency static executable (`./skalybr`) that runs on Linux (x86_64, ARM64/Raspberry Pi), macOS, and Windows without requiring Node.js or Docker.
+   - Lowers the baseline memory footprint to ~25MB RAM, matching gold-standard Go media servers like **Navidrome** and **Gitea**.
+3. **The Zero-Rewrite Guarantee**: Because all client interactions communicate strictly through the **OpenAPI 3.1 REST API**, **OPDS 1.2 XML feed**, and **Kobo Sync protocol**, the backend engine can be swapped for Go with **zero alterations** to the React UI, reader components, or e-reader client configs.
 
 ### 5.2 Hexagonal Ports & Adapters Diagram
 
