@@ -19,8 +19,7 @@ Total Books: **489**
 
 ---
 
-<a id="art-aesthetics-perception"></a>
-## 🏷️ Art, Aesthetics & Perception
+## Art, Aesthetics & Perception
 
 | # | Title | Author(s) | Rating | Formats | Tags | Description |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -73,8 +72,7 @@ Total Books: **489**
 
 ---
 
-<a id="consciousness-plant-medicine"></a>
-## 🏷️ Consciousness & Plant Medicine
+## Consciousness & Plant Medicine
 
 | # | Title | Author(s) | Rating | Formats | Tags | Description |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -129,8 +127,7 @@ Total Books: **489**
 
 ---
 
-<a id="deep-ecology-earth-systems"></a>
-## 🏷️ Deep Ecology & Earth Systems
+## Deep Ecology & Earth Systems
 
 | # | Title | Author(s) | Rating | Formats | Tags | Description |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -209,8 +206,7 @@ Total Books: **489**
 
 ---
 
-<a id="essential-non-fiction"></a>
-## 🏷️ Essential Non-Fiction
+## Essential Non-Fiction
 
 | # | Title | Author(s) | Rating | Formats | Tags | Description |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -232,8 +228,7 @@ Total Books: **489**
 
 ---
 
-<a id="history-civilization-dynamics"></a>
-## 🏷️ History & Civilization Dynamics
+## History & Civilization Dynamics
 
 | # | Title | Author(s) | Rating | Formats | Tags | Description |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -275,8 +270,7 @@ Total Books: **489**
 
 ---
 
-<a id="indigenous-wisdom-shamanism"></a>
-## 🏷️ Indigenous Wisdom & Shamanism
+## Indigenous Wisdom & Shamanism
 
 | # | Title | Author(s) | Rating | Formats | Tags | Description |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -325,8 +319,7 @@ Total Books: **489**
 
 ---
 
-<a id="philosophy-existential-thought"></a>
-## 🏷️ Philosophy & Existential Thought
+## Philosophy & Existential Thought
 
 | # | Title | Author(s) | Rating | Formats | Tags | Description |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -395,8 +388,7 @@ Total Books: **489**
 
 ---
 
-<a id="self-mastery-human-potential"></a>
-## 🏷️ Self-Mastery & Human Potential
+## Self-Mastery & Human Potential
 
 | # | Title | Author(s) | Rating | Formats | Tags | Description |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -447,8 +439,7 @@ Total Books: **489**
 
 ---
 
-<a id="sociocracy-cooperative-governance"></a>
-## 🏷️ Sociocracy & Cooperative Governance
+## Sociocracy & Cooperative Governance
 
 | # | Title | Author(s) | Rating | Formats | Tags | Description |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -515,8 +506,7 @@ Total Books: **489**
 
 ---
 
-<a id="software-craft-systems-thinking"></a>
-## 🏷️ Software Craft & Systems Thinking
+## Software Craft & Systems Thinking
 
 | # | Title | Author(s) | Rating | Formats | Tags | Description |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
