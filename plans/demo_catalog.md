@@ -6,20 +6,20 @@ Total Books: **489**
 
 ## 📑 Categories & Collections
 
-1. [Art, Aesthetics & Perception](#1-art-aesthetics--perception)
-2. [Consciousness & Plant Medicine](#2-consciousness--plant-medicine)
-3. [Deep Ecology & Earth Systems](#3-deep-ecology--earth-systems)
-4. [Essential Non-Fiction](#4-essential-non-fiction)
-5. [History & Civilization Dynamics](#5-history--civilization-dynamics)
-6. [Indigenous Wisdom & Shamanism](#6-indigenous-wisdom--shamanism)
-7. [Philosophy & Existential Thought](#7-philosophy--existential-thought)
-8. [Self-Mastery & Human Potential](#8-self-mastery--human-potential)
-9. [Sociocracy & Cooperative Governance](#9-sociocracy--cooperative-governance)
-10. [Software Craft & Systems Thinking](#10-software-craft--systems-thinking)
+1. [Art, Aesthetics & Perception](#col-1)
+2. [Consciousness & Plant Medicine](#col-2)
+3. [Deep Ecology & Earth Systems](#col-3)
+4. [Essential Non-Fiction](#col-4)
+5. [History & Civilization Dynamics](#col-5)
+6. [Indigenous Wisdom & Shamanism](#col-6)
+7. [Philosophy & Existential Thought](#col-7)
+8. [Self-Mastery & Human Potential](#col-8)
+9. [Sociocracy & Cooperative Governance](#col-9)
+10. [Software Craft & Systems Thinking](#col-10)
 
 ---
 
-## 1. Art, Aesthetics & Perception
+<h2 id="col-1">1. Art, Aesthetics & Perception</h2>
 
 | # | Title | Author(s) | Rating | Formats | Tags | Description |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -72,7 +72,7 @@ Total Books: **489**
 
 ---
 
-## 2. Consciousness & Plant Medicine
+<h2 id="col-2">2. Consciousness & Plant Medicine</h2>
 
 | # | Title | Author(s) | Rating | Formats | Tags | Description |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -127,7 +127,7 @@ Total Books: **489**
 
 ---
 
-## 3. Deep Ecology & Earth Systems
+<h2 id="col-3">3. Deep Ecology & Earth Systems</h2>
 
 | # | Title | Author(s) | Rating | Formats | Tags | Description |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -206,7 +206,7 @@ Total Books: **489**
 
 ---
 
-## 4. Essential Non-Fiction
+<h2 id="col-4">4. Essential Non-Fiction</h2>
 
 | # | Title | Author(s) | Rating | Formats | Tags | Description |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -228,7 +228,7 @@ Total Books: **489**
 
 ---
 
-## 5. History & Civilization Dynamics
+<h2 id="col-5">5. History & Civilization Dynamics</h2>
 
 | # | Title | Author(s) | Rating | Formats | Tags | Description |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -270,7 +270,7 @@ Total Books: **489**
 
 ---
 
-## 6. Indigenous Wisdom & Shamanism
+<h2 id="col-6">6. Indigenous Wisdom & Shamanism</h2>
 
 | # | Title | Author(s) | Rating | Formats | Tags | Description |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -319,7 +319,7 @@ Total Books: **489**
 
 ---
 
-## 7. Philosophy & Existential Thought
+<h2 id="col-7">7. Philosophy & Existential Thought</h2>
 
 | # | Title | Author(s) | Rating | Formats | Tags | Description |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -388,7 +388,7 @@ Total Books: **489**
 
 ---
 
-## 8. Self-Mastery & Human Potential
+<h2 id="col-8">8. Self-Mastery & Human Potential</h2>
 
 | # | Title | Author(s) | Rating | Formats | Tags | Description |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -439,7 +439,7 @@ Total Books: **489**
 
 ---
 
-## 9. Sociocracy & Cooperative Governance
+<h2 id="col-9">9. Sociocracy & Cooperative Governance</h2>
 
 | # | Title | Author(s) | Rating | Formats | Tags | Description |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -506,7 +506,7 @@ Total Books: **489**
 
 ---
 
-## 10. Software Craft & Systems Thinking
+<h2 id="col-10">10. Software Craft & Systems Thinking</h2>
 
 | # | Title | Author(s) | Rating | Formats | Tags | Description |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
