@@ -19,7 +19,7 @@ Total Books: **489**
 
 ---
 
-<h2 id="col-1">1. Art, Aesthetics & Perception</h2>
+## 1. Art, Aesthetics & Perception
 
 | # | Title | Author(s) | Rating | Formats | Tags | Description |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -72,7 +72,7 @@ Total Books: **489**
 
 ---
 
-<h2 id="col-2">2. Consciousness & Plant Medicine</h2>
+## 1. Art, Aesthetics & Perception
 
 | # | Title | Author(s) | Rating | Formats | Tags | Description |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -127,7 +127,7 @@ Total Books: **489**
 
 ---
 
-<h2 id="col-3">3. Deep Ecology & Earth Systems</h2>
+## 1. Art, Aesthetics & Perception
 
 | # | Title | Author(s) | Rating | Formats | Tags | Description |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -206,7 +206,7 @@ Total Books: **489**
 
 ---
 
-<h2 id="col-4">4. Essential Non-Fiction</h2>
+## 1. Art, Aesthetics & Perception
 
 | # | Title | Author(s) | Rating | Formats | Tags | Description |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -228,7 +228,7 @@ Total Books: **489**
 
 ---
 
-<h2 id="col-5">5. History & Civilization Dynamics</h2>
+## 1. Art, Aesthetics & Perception
 
 | # | Title | Author(s) | Rating | Formats | Tags | Description |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -270,7 +270,7 @@ Total Books: **489**
 
 ---
 
-<h2 id="col-6">6. Indigenous Wisdom & Shamanism</h2>
+## 1. Art, Aesthetics & Perception
 
 | # | Title | Author(s) | Rating | Formats | Tags | Description |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -319,7 +319,7 @@ Total Books: **489**
 
 ---
 
-<h2 id="col-7">7. Philosophy & Existential Thought</h2>
+## 1. Art, Aesthetics & Perception
 
 | # | Title | Author(s) | Rating | Formats | Tags | Description |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -388,7 +388,7 @@ Total Books: **489**
 
 ---
 
-<h2 id="col-8">8. Self-Mastery & Human Potential</h2>
+## 1. Art, Aesthetics & Perception
 
 | # | Title | Author(s) | Rating | Formats | Tags | Description |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -439,7 +439,7 @@ Total Books: **489**
 
 ---
 
-<h2 id="col-9">9. Sociocracy & Cooperative Governance</h2>
+## 1. Art, Aesthetics & Perception
 
 | # | Title | Author(s) | Rating | Formats | Tags | Description |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -506,7 +506,7 @@ Total Books: **489**
 
 ---
 
-<h2 id="col-10">10. Software Craft & Systems Thinking</h2>
+## 1. Art, Aesthetics & Perception
 
 | # | Title | Author(s) | Rating | Formats | Tags | Description |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
