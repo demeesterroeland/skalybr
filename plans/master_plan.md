@@ -16,9 +16,15 @@
    - [6.3 Flattened View Lifecycle & Phase-by-Phase Limitations](#63-flattened-view-lifecycle--phase-by-phase-limitations)
    - [6.4 Flattened Read-Model Definition (`v_books_flattened`)](#64-flattened-read-model-definition-v_books_flattened)
 7. [Calibre Desktop & Multi-Device Sync Protocols](#7-calibre-desktop--multi-device-sync-protocols)
-8. [Contract-First API & Zero-Rewrite Go Transition Strategy](#8-contract-first-api--zero-rewrite-go-transition-strategy)
-9. [Memory Footprint & Performance Benchmark Analysis](#9-memory-footprint--performance-benchmark-analysis)
-10. [Testing, Quality Assurance & Verification Strategy](#10-testing-quality-assurance--verification-strategy)
+8. [API Protocol & Interface Specifications Matrix](#8-api-protocol--interface-specifications-matrix)
+   - [8.1 Native OpenAPI 3.1 REST API (`/api/v1/*`)](#81-native-openapi-31-rest-api-apiv1)
+   - [8.2 OPDS Catalog Protocols (OPDS 1.2 Atom XML & OPDS 2.0 JSON)](#82-opds-catalog-protocols-opds-12-atom-xml--opds-20-json)
+   - [8.3 Kobo Wireless Hardware Sync API (`/kobo/<token>/v1/*`)](#83-kobo-wireless-hardware-sync-api-kobotokenv1)
+   - [8.4 KOReader Progress Sync API (`/api/v1/kosync/*`)](#84-koreader-progress-sync-api-apiv1kosync)
+   - [8.5 Calibre Content Server Protocol Emulation (`/interface-data/*` & `/cdb/*`)](#85-calibre-content-server-protocol-emulation-interface-data--cdb)
+9. [Contract-First API & Zero-Rewrite Go Transition Strategy](#9-contract-first-api--zero-rewrite-go-transition-strategy)
+10. [Memory Footprint & Performance Benchmark Analysis](#10-memory-footprint--performance-benchmark-analysis)
+11. [Testing, Quality Assurance & Verification Strategy](#11-testing-quality-assurance--verification-strategy)
 
 ---
 
@@ -279,6 +285,8 @@ A structural audit of native `metadata.db` Calibre databases identified 40 table
 - **FTS5 & Annotations (12)**: `annotations`, `annotations_dirtied`, `annotations_fts*`.
 - **System State & Preferences (7)**: `library_id`, `preferences`, `last_read_positions`, `books_plugin_data`, `conversion_options`, `metadata_dirtied`, `sqlite_sequence`.
 
+> 💡 **Full Catalog Listing**: The complete 489-book curated demo dataset spanning 10 disciplines and custom collections is documented in [demo_catalog.md](file:///home/roeland/projects/skalybr/plans/demo_catalog.md).
+
 ---
 
 ### 6.2 The Purpose & Need for the Flattened View in the MVP
@@ -482,7 +490,105 @@ flowchart TD
 
 ---
 
-## 8. Contract-First API & Zero-Rewrite Go Transition Strategy
+## 8. API Protocol & Interface Specifications Matrix
+
+To deliver seamless interoperability across modern web apps, mobile e-readers, e-ink hardware devices, and desktop managers, Skalybr implements **five distinct API protocol surfaces**. Each protocol targets specific client requirements:
+
+```
+┌────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│                                   SKALYBR API INGRESS ARCHITECTURE                                    │
+├──────────────────────┬──────────────────────┬────────────────────────┬─────────────────────────────────┤
+│ Protocol Surface     │ Client Targets       │ Payload Format         │ Core Functionality              │
+├──────────────────────┼──────────────────────┼────────────────────────┼─────────────────────────────────┤
+│ 1. OpenAPI 3.1 REST  │ Web UI, PWA, 3rd-pty │ JSON (Strict Zod)      │ Full catalog, CRUD, auth, admin │
+│ 2. OPDS 1.2 & 2.0    │ Moon+, FBReader, etc.│ Atom XML & JSON-LD     │ Hierarchical navigation, search │
+│ 3. Kobo Sync         │ Kobo E-Ink Readers   │ Kobo JSON / KePub      │ Firmware sync, reading states   │
+│ 4. KOReader Sync     │ KOReader (E-Ink/App) │ JSON (kosync protocol) │ Exact progress, bookmarks, sync │
+│ 5. Calibre Server    │ Calibre Desktop      │ JSON / Multipart Form  │ Desktop library remote connect  │
+└──────────────────────┴──────────────────────┴────────────────────────┴─────────────────────────────────┘
+```
+
+---
+
+### 8.1 Native OpenAPI 3.1 REST API (`/api/v1/*`)
+The primary first-party API powering the Next.js React 19 UI, PWA offline clients, and external automation scripts.
+
+* **Documentation & Contract**: Interactive Scalar UI at `/api/reference`, raw schema at `/api/openapi.json`.
+* **Authentication**: Cookie session (`iron-session`), Bearer API Tokens (`Authorization: Bearer <token>`), or Reverse-Proxy header (`Remote-User`).
+* **Key Endpoint Groups**:
+  * `GET /api/v1/libraries`: Discovers all configured Calibre sub-libraries.
+  * `GET /api/v1/libraries/{libraryId}/books`: Paginated catalog search with faceted filtering (`query`, `tag`, `author`, `series`, `collection`, `sort`, `order`, `limit`, `offset`).
+  * `GET /api/v1/libraries/{libraryId}/books/{id}`: Full book metadata record with resolved relations and file links.
+  * `PATCH /api/v1/libraries/{libraryId}/books/{id}`: Metadata modification (Title, Rating, Description, Tags, Series).
+  * `GET /api/v1/libraries/{libraryId}/books/{id}/cover`: On-the-fly streaming WebP/JPEG thumbnail generator (`sharp`).
+  * `GET /api/v1/libraries/{libraryId}/books/{id}/download/{format}`: Binary file streaming (`Content-Disposition: attachment`).
+  * `GET /api/v1/libraries/{libraryId}/facets`: Aggregate lists of Authors, Series, Tags, and Custom Collections.
+
+---
+
+### 8.2 OPDS Catalog Protocols (OPDS 1.2 Atom XML & OPDS 2.0 JSON)
+The Open Publication Distribution System (OPDS) is the open international standard used by mobile reading apps.
+
+* **OPDS 1.2 (`/opds`)**:
+  * **Payload**: `application/atom+xml;profile=opds-catalog;kind=acquisition`.
+  * **Supported Clients**: Moon+ Reader (Android), FBReader, Thorium Reader, KyBook (iOS), Aldiko, PocketBook.
+  * **Hierarchy**:
+    * `/opds`: Root acquisition navigation feed (New, Authors, Series, Tags, Collections).
+    * `/opds/authors`, `/opds/series`, `/opds/tags`, `/opds/collections`: Categorical navigation sub-feeds.
+    * `/opds/search?q={query}`: OpenSearch 1.1 XML descriptor (`/opds/opensearch.xml`) allowing live in-app searching.
+    * Acquisition links: `<link rel="http://opds-spec.org/acquisition" href="..." type="application/epub+zip"/>`.
+* **OPDS 2.0 (`/opds/v2`)**:
+  * **Payload**: `application/opds+json`.
+  * Modern JSON-LD publication manifest for next-generation clients like Thorium Reader.
+
+---
+
+### 8.3 Kobo Wireless Hardware Sync API (`/kobo/<token>/v1/*`)
+Emulates the proprietary Kobo Cloud Store sync protocol, allowing Kobo Clara, Libra, Sage, and Elipsa devices to synchronize books and reading progress over Wi-Fi without USB cables.
+
+* **Client Setup**: The user points the Kobo configuration (`.kobo/Kobo eReader.conf` → `[OneStoreServices]` → `api_endpoint`) to `http://<skalybr-host>/kobo/<user-token>/v1`.
+* **Protocol Emulation Endpoints**:
+  * `GET /kobo/{token}/v1/initialization`: Returns device setup parameters, store configuration, and user metadata.
+  * `GET /kobo/{token}/v1/user/profile`: Returns active user account profile information.
+  * `GET /kobo/{token}/v1/library/sync`: Full multi-page catalog synchronization returning additions, removals, and shelf mappings.
+  * `PUT /kobo/{token}/v1/books/{id}/reading_state`: Receives read progress, current chapter bookmark, and percentage from the hardware.
+  * `GET /kobo/{token}/v1/books/{id}/file/{format}`: Streams books with on-the-fly KePub transformation (`kepub.epub` with pre-computed `koboSpan` tags for fast page turning).
+
+---
+
+### 8.4 KOReader Progress Sync API (`/api/v1/kosync/*`)
+KOReader is the leading open-source reading software running on jailbroken Kindles, Kobo, Android, and Linux e-readers. Skalybr implements the official `kosync` (KOReader Sync) protocol specification.
+
+* **Client Setup**: In KOReader, enable *Progress Sync* and set Custom Sync Server to `http://<skalybr-host>/api/v1/kosync`.
+* **Protocol Endpoints**:
+  * `GET /api/v1/kosync/users/auth`: Validates user credentials and returns session authorization.
+  * `GET /api/v1/kosync/syncs/progress/{document_hash}`: Retrieves the last recorded reading progress, percentage, and timestamp for a specific document hash.
+  * `PUT /api/v1/kosync/syncs/progress`: Uploads updated reading progress, percentage, device identifier, and bookmark metadata:
+    ```json
+    {
+      "document": "e83d8a1...",
+      "progress": "epubcfi(/6/14[chapter-2]!/4/2/10/1:0)",
+      "percentage": 0.42,
+      "device": "Kobo Clara 2E",
+      "device_id": "c1a4..."
+    }
+    ```
+
+---
+
+### 8.5 Calibre Content Server Protocol Emulation (`/interface-data/*` & `/cdb/*`)
+Enables Calibre Desktop (Linux, macOS, Windows) to natively connect to Skalybr using its built-in *Connect to Content Server* feature without mounting shared filesystem drives.
+
+* **Protocol Architecture**: Emulates Calibre's internal server endpoints (located in Calibre's `srv/ajax.py` & `srv/cdb.py`):
+  * `GET /interface-data/init`: Returns library metadata, custom column schema definitions (`#collection`), and category counts.
+  * `GET /interface-data/books`: Fetches batched book IDs and core attributes.
+  * `GET /interface-data/more-books`: Paged fetch of book metadata chunks.
+  * `POST /cdb/cmd/list`: Executes search queries and retrieves formatted book records.
+  * `POST /cdb/cmd/set_metadata`: Allows Calibre Desktop to push updated book metadata directly into Skalybr.
+
+---
+
+## 9. Contract-First API & Zero-Rewrite Go Transition Strategy
 
 Skalybr is built with an **API-First (Ports & Adapters)** model. Every client-side feature interacts exclusively through documented HTTP endpoints.
 
@@ -533,9 +639,9 @@ flowchart TD
 
 ---
 
-## 9. Memory Footprint & Performance Benchmark Analysis
+## 10. Memory Footprint & Performance Benchmark Analysis
 
-### 9.1 Memory Consumption Breakdown
+### 10.1 Memory Consumption Breakdown
 
 | Runtime State | Python Calibre-Web (Legacy) | Skalybr (Next.js / Node) | Skalybr (Compiled Go) |
 | :--- | :--- | :--- | :--- |
@@ -545,18 +651,18 @@ flowchart TD
 | **Long-Running Stable State** | 300 MB – 450 MB | **100 MB – 140 MB** | 25 MB – 35 MB |
 | **Container Image Size** | 600 MB – 1.2 GB | **~150 MB – 220 MB** | ~30 MB – 50 MB |
 
-### 9.2 Performance Advantages
+### 10.2 Performance Advantages
 - **`better-sqlite3` vs SQLAlchemy**: Direct synchronous C++ SQLite bindings eliminate Python ORM object allocation overhead and GC pressure.
 - **`sharp` (libvips) vs Wand / Pillow**: Streaming memory pipelines resize images in memory buffers with 5x lower RAM consumption.
 - **V8 Heap Management**: Aggressive garbage collection and memory compaction prevent unbounded memory growth during long uptimes.
 
 ---
 
-## 10. Testing, Quality Assurance & Verification Strategy
+## 11. Testing, Quality Assurance & Verification Strategy
 
 Skalybr enforces automated verification across all layers:
 
-### 10.1 Test Matrix
+### 11.1 Test Matrix
 1. **Unit & Repository Tests (`testing/unit/`)**:
    - Executes against real Calibre `metadata.db` files.
    - Validates query performance (< 10ms for 500+ books), search filtering, and `#collection` resolution.
