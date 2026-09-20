@@ -15,12 +15,14 @@ import {
   Check,
   X,
   Plus,
+  Image as ImageIcon,
 } from 'lucide-react';
 import { BookQueryOptions } from '@/lib/types';
 
 interface FacetItem {
   name: string;
   count: number;
+  value?: string;
   rating?: number;
 }
 
@@ -121,7 +123,7 @@ function FilterPopoverButton({
           {/* Item List */}
           <div className="max-h-56 overflow-y-auto space-y-0.5 pr-1">
             {filteredItems.slice(0, isHighCardinality && !search ? 30 : undefined).map((item) => {
-              const itemVal = item.rating !== undefined ? String(item.rating) : item.name;
+              const itemVal = item.rating !== undefined ? String(item.rating) : item.value || item.name;
               const isSelected = selectedValues.includes(itemVal);
 
               return (
@@ -181,6 +183,7 @@ interface CommandBarFiltersProps {
     ratings?: FacetItem[];
     tags?: FacetItem[];
     collections?: FacetItem[];
+    covers?: FacetItem[];
   };
   filters: BookQueryOptions;
   onFilterChange: (filters: Partial<BookQueryOptions>) => void;
@@ -327,6 +330,31 @@ export default function CommandBarFilters({
           isHighCardinality={false}
           onToggle={(val) => toggleMultiSelect('collections', val)}
           onClear={() => clearKey('collections')}
+          accentColor="sky"
+        />
+      )}
+
+      {/* 9. Covers Popover */}
+      {(facets.covers?.length || 0) > 0 && (
+        <FilterPopoverButton
+          title="Covers"
+          icon={ImageIcon}
+          items={facets.covers || []}
+          selectedValues={
+            filters.hasCover !== undefined
+              ? [filters.hasCover ? 'true' : 'false']
+              : []
+          }
+          isHighCardinality={false}
+          onToggle={(val) => {
+            const boolVal = val === 'true';
+            if (filters.hasCover === boolVal) {
+              onFilterChange({ hasCover: undefined, page: 1 });
+            } else {
+              onFilterChange({ hasCover: boolVal, page: 1 });
+            }
+          }}
+          onClear={() => onFilterChange({ hasCover: undefined, page: 1 })}
           accentColor="sky"
         />
       )}

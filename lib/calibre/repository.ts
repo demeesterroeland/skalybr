@@ -173,6 +173,11 @@ export class FlatBookRepository {
       params.push(...options.ratings);
     }
 
+    if (options.hasCover !== undefined) {
+      conditions.push('has_cover = ?');
+      params.push(options.hasCover ? 1 : 0);
+    }
+
     const whereClause = conditions.join(' AND ');
 
     // Sorting
@@ -293,6 +298,7 @@ export class FlatBookRepository {
     ratings: { name: string; rating: number; count: number }[];
     tags: { name: string; count: number }[];
     collections: { name: string; count: number }[];
+    covers: { name: string; value: string; count: number }[];
   } {
     const db = getDatabaseConnection(this.libraryPath);
 
@@ -388,7 +394,22 @@ export class FlatBookRepository {
         .all() as any[];
     }
 
-    return { authors, languages, series, formats, publishers, ratings, tags, collections };
+    const coversRaw = db
+      .prepare(`
+        SELECT has_cover, count(*) as count
+        FROM books
+        GROUP BY has_cover
+        ORDER BY has_cover DESC
+      `)
+      .all() as any[];
+
+    const covers = coversRaw.map((c) => ({
+      name: c.has_cover === 1 ? 'Has Cover' : 'No Cover',
+      value: c.has_cover === 1 ? 'true' : 'false',
+      count: c.count,
+    }));
+
+    return { authors, languages, series, formats, publishers, ratings, tags, collections, covers };
   }
 
   public updateBookMetadata(id: number, input: UpdateBookInput): BookFlattened | null {

@@ -48,6 +48,14 @@ export async function GET(req: NextRequest) {
       : undefined;
     const rating = searchParams.get('rating') ? parseFloat(searchParams.get('rating')!) : undefined;
 
+    const hasCoverParam = searchParams.get('hasCover');
+    const hasCover =
+      hasCoverParam === 'true' || hasCoverParam === '1'
+        ? true
+        : hasCoverParam === 'false' || hasCoverParam === '0'
+        ? false
+        : undefined;
+
     const sort = (searchParams.get('sort') as any) || 'id';
     const order = (searchParams.get('order') as any) || 'desc';
     const page = parseInt(searchParams.get('page') || '1', 10);
@@ -72,6 +80,7 @@ export async function GET(req: NextRequest) {
       formats,
       rating,
       ratings,
+      hasCover,
       sort,
       order,
       page,

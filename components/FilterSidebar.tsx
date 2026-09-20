@@ -15,12 +15,14 @@ import {
   Check,
   X,
   SlidersHorizontal,
+  Image as ImageIcon,
 } from 'lucide-react';
 import { BookQueryOptions } from '@/lib/types';
 
 interface FacetItem {
   name: string;
   count: number;
+  value?: string;
   rating?: number;
 }
 
@@ -34,6 +36,7 @@ interface FilterSidebarProps {
     ratings?: FacetItem[];
     tags?: FacetItem[];
     collections?: FacetItem[];
+    covers?: FacetItem[];
   };
   filters: BookQueryOptions;
   onFilterChange: (filters: Partial<BookQueryOptions>) => void;
@@ -61,6 +64,7 @@ export default function FilterSidebar({
   onCloseMobile,
 }: FilterSidebarProps) {
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
+    covers: true,
     collections: true,
     languages: true,
     formats: true,
@@ -79,6 +83,15 @@ export default function FilterSidebar({
 
   const handleSearchChange = (id: string, q: string) => {
     setSearchQueries((prev) => ({ ...prev, [id]: q }));
+  };
+
+  const toggleCoverFilter = (value: string) => {
+    const boolVal = value === 'true';
+    if (filters.hasCover === boolVal) {
+      onFilterChange({ hasCover: undefined, page: 1 });
+    } else {
+      onFilterChange({ hasCover: boolVal, page: 1 });
+    }
   };
 
   const toggleMultiSelect = (
@@ -177,6 +190,18 @@ export default function FilterSidebar({
         keyName: 'collections',
         isHighCardinality: false,
       },
+      {
+        id: 'covers',
+        title: 'Covers',
+        icon: ImageIcon,
+        items: facets?.covers || [],
+        selectedValues:
+          filters.hasCover !== undefined
+            ? [filters.hasCover ? 'true' : 'false']
+            : [],
+        keyName: 'hasCover' as any,
+        isHighCardinality: false,
+      },
     ];
   }, [facets, filters]);
 
@@ -188,7 +213,8 @@ export default function FilterSidebar({
     (filters.publishers?.length || 0) +
     (filters.languages?.length || 0) +
     (filters.formats?.length || 0) +
-    (filters.ratings?.length || 0);
+    (filters.ratings?.length || 0) +
+    (filters.hasCover !== undefined ? 1 : 0);
 
   const renderContent = () => (
     <div className="flex flex-col h-full">
@@ -289,7 +315,10 @@ export default function FilterSidebar({
                     }`}
                   >
                     {filteredItems.slice(0, sec.isHighCardinality && !query ? 25 : undefined).map((item) => {
-                      const itemVal = sec.id === 'ratings' && item.rating !== undefined ? String(item.rating) : item.name;
+                      const itemVal =
+                        sec.id === 'ratings' && item.rating !== undefined
+                          ? String(item.rating)
+                          : item.value || item.name;
                       const isSelected = sec.selectedValues.includes(itemVal);
 
                       return (
@@ -297,7 +326,11 @@ export default function FilterSidebar({
                           key={item.name}
                           onClick={(e) => {
                             e.preventDefault();
-                            toggleMultiSelect(sec.keyName as any, itemVal);
+                            if (sec.id === 'covers') {
+                              toggleCoverFilter(itemVal);
+                            } else {
+                              toggleMultiSelect(sec.keyName as any, itemVal);
+                            }
                           }}
                           className={`flex items-center justify-between px-2 py-1 rounded-lg text-xs transition-colors cursor-pointer select-none ${
                             isSelected

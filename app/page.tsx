@@ -54,6 +54,7 @@ export default function HomePage() {
   if (filters.formats && filters.formats.length > 0) queryParams.set('formats', filters.formats.join(','));
   if (filters.rating !== undefined) queryParams.set('rating', String(filters.rating));
   if (filters.ratings && filters.ratings.length > 0) queryParams.set('ratings', filters.ratings.join(','));
+  if (filters.hasCover !== undefined) queryParams.set('hasCover', String(filters.hasCover));
   if (filters.sort) queryParams.set('sort', filters.sort);
   if (filters.order) queryParams.set('order', filters.order);
   queryParams.set('page', String(filters.page || 1));
@@ -94,7 +95,8 @@ export default function HomePage() {
     (filters.publishers?.length || 0) +
     (filters.languages?.length || 0) +
     (filters.formats?.length || 0) +
-    (filters.ratings?.length || 0);
+    (filters.ratings?.length || 0) +
+    (filters.hasCover !== undefined ? 1 : 0);
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-950">

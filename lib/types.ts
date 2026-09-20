@@ -49,6 +49,7 @@ export interface BookQueryOptions {
   formats?: string[];
   rating?: number;
   ratings?: number[];
+  hasCover?: boolean;
   sort?: 'title' | 'authors' | 'pubdate' | 'rating' | 'id';
   order?: 'asc' | 'desc';
   page?: number;

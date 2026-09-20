@@ -15,6 +15,7 @@ import {
   Star,
   PanelLeft,
   Command,
+  Image as ImageIcon,
 } from 'lucide-react';
 import { BookQueryOptions } from '@/lib/types';
 
@@ -286,6 +287,20 @@ export default function SearchFilters({
               </button>
             </span>
           ))}
+
+          {/* Covers */}
+          {filters.hasCover !== undefined && (
+            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg text-xs font-medium bg-sky-500/15 text-sky-300 border border-sky-500/30">
+              <ImageIcon className="w-3 h-3 text-sky-400" />
+              <span>{filters.hasCover ? 'Has Cover' : 'No Cover'}</span>
+              <button
+                onClick={() => onFilterChange({ hasCover: undefined, page: 1 })}
+                className="hover:text-white p-0.5 cursor-pointer"
+              >
+                <X className="w-3 h-3" />
+              </button>
+            </span>
+          )}
         </div>
       )}
     </div>
