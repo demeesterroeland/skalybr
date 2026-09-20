@@ -54,16 +54,25 @@ export default function LibraryManagerModal({
   const [deleteConfirmText, setDeleteConfirmText] = useState('');
   const [isDeleting, setIsDeleting] = useState(false);
 
-  // Fetch all libraries (including hidden)
-  const { data: libraries = [], isLoading, refetch } = useQuery<LibraryInfo[]>({
+  // Fetch all libraries (including hidden) & server max upload size
+  const { data: libResponse, isLoading, refetch } = useQuery<{ libraries: LibraryInfo[]; maxUploadSizeMb: number }>({
     queryKey: ['libraries', 'all'],
     queryFn: async () => {
       const res = await fetch('/api/v1/libraries?all=true');
       const json = await res.json();
-      return json.data || [];
+      return {
+        libraries: json.data || [],
+        maxUploadSizeMb: json.maxUploadSizeMb || 1024,
+      };
     },
     enabled: isOpen,
   });
+
+  const libraries = libResponse?.libraries || [];
+  const maxUploadSizeMb = libResponse?.maxUploadSizeMb || 1024;
+  const maxLimitLabel = maxUploadSizeMb >= 1024
+    ? `${(maxUploadSizeMb / 1024).toFixed(maxUploadSizeMb % 1024 === 0 ? 0 : 1)} GB`
+    : `${maxUploadSizeMb} MB`;
 
   // Handle Upload or Remote URL Import
   const handleUploadSubmit = async (e: React.FormEvent) => {
@@ -72,8 +81,8 @@ export default function LibraryManagerModal({
       toast.error('Please select a ZIP file');
       return;
     }
-    if (uploadMode === 'file' && uploadFile && uploadFile.size > 1024 * 1024 * 1024) {
-      toast.error('File size exceeds the 1 GB maximum limit');
+    if (uploadMode === 'file' && uploadFile && uploadFile.size > maxUploadSizeMb * 1024 * 1024) {
+      toast.error(`File size exceeds the ${maxLimitLabel} maximum limit`);
       return;
     }
     if (uploadMode === 'url' && !remoteUrl.trim()) {
@@ -248,10 +257,13 @@ export default function LibraryManagerModal({
               {/* Upload / Import Section */}
               <div className="bg-slate-950/80 border border-slate-800/80 rounded-xl p-4 sm:p-5">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
-                  <h3 className="text-sm font-semibold text-slate-200 flex items-center gap-2">
+                  <div className="flex items-center gap-2">
                     <Plus className="w-4 h-4 text-sky-400" />
-                    <span>Add New Library</span>
-                  </h3>
+                    <span className="text-sm font-semibold text-slate-200">Add New Library</span>
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-sky-500/15 text-sky-300 border border-sky-500/30 shadow-xs">
+                      Max {maxLimitLabel}
+                    </span>
+                  </div>
                   {/* Mode Switcher */}
                   <div className="flex items-center bg-slate-900 border border-slate-800 rounded-lg p-0.5 text-xs self-start sm:self-auto">
                     <button
@@ -304,22 +316,40 @@ export default function LibraryManagerModal({
                       <label htmlFor="library-zip-input" className="cursor-pointer block">
                         <FolderArchive className="w-8 h-8 text-slate-500 mx-auto mb-2" />
                         {uploadFile ? (
-                          <p className="text-sm font-medium text-sky-300 truncate max-w-xs mx-auto">
-                            Selected: {uploadFile.name} ({(uploadFile.size / (1024 * 1024)).toFixed(1)} MB)
-                          </p>
+                          <div>
+                            <p className="text-sm font-medium text-sky-300 truncate max-w-xs mx-auto">
+                              Selected: {uploadFile.name} ({(uploadFile.size / (1024 * 1024)).toFixed(1)} MB)
+                            </p>
+                            {uploadFile.size > maxUploadSizeMb * 1024 * 1024 ? (
+                              <p className="text-[11px] text-rose-400 font-semibold mt-1">
+                                ⚠️ File size exceeds maximum limit of {maxLimitLabel}!
+                              </p>
+                            ) : (
+                              <p className="text-[11px] text-emerald-400 font-medium mt-1">
+                                ✓ Within {maxLimitLabel} limit &bull; ZIP contains metadata.db
+                              </p>
+                            )}
+                          </div>
                         ) : (
                           <div>
                             <p className="text-xs font-semibold text-slate-300">Click to select a Calibre library ZIP file</p>
-                            <p className="text-[11px] text-slate-500 mt-0.5">ZIP archive must contain metadata.db (max 1 GB)</p>
+                            <p className="text-[11px] text-slate-400 mt-1">
+                              ZIP archive must contain <code className="text-slate-200">metadata.db</code> &bull; <span className="text-sky-400 font-semibold">Max {maxLimitLabel}</span>
+                            </p>
                           </div>
                         )}
                       </label>
                     </div>
                   ) : (
                     <div className="space-y-2">
-                      <label className="text-xs font-medium text-slate-400 block">
-                        Remote ZIP URL (Cloud or Web)
-                      </label>
+                      <div className="flex items-center justify-between">
+                        <label className="text-xs font-medium text-slate-400 block">
+                          Remote ZIP URL (Cloud or Web)
+                        </label>
+                        <span className="text-[10px] font-mono font-semibold text-sky-400 bg-sky-500/10 border border-sky-500/20 px-2 py-0.5 rounded-full">
+                          Max {maxLimitLabel}
+                        </span>
+                      </div>
                       <div className="relative">
                         <Globe className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
                         <input
@@ -345,7 +375,7 @@ export default function LibraryManagerModal({
                         />
                       </div>
                       <p className="text-[11px] text-slate-500">
-                        Supports direct download URLs, Dropbox links (<code className="text-sky-400">?dl=0/1</code>), and Google Drive share links.
+                        Supports direct download URLs, Dropbox links (<code className="text-sky-400">?dl=0/1</code>), and Google Drive share links (up to {maxLimitLabel}).
                       </p>
                     </div>
                   )}

@@ -16,9 +16,14 @@ export async function GET(req: NextRequest) {
     const includeHidden = searchParams.get('all') === 'true';
 
     const libraries = FlatBookRepository.listAvailableLibraries(DEFAULT_CALIBRE_BASE_DIR, includeHidden);
+    const maxUploadSizeMb = process.env.MAX_UPLOAD_SIZE_MB
+      ? parseInt(process.env.MAX_UPLOAD_SIZE_MB, 10)
+      : 1024;
+
     return NextResponse.json({
       success: true,
       data: libraries,
+      maxUploadSizeMb,
     });
   } catch (error: any) {
     console.error(error);
