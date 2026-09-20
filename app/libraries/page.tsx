@@ -178,7 +178,7 @@ export default function LibraryGateway() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#0e0e10] flex flex-col items-center justify-center">
+      <div className="min-h-screen bg-[#0e0e12] flex flex-col items-center justify-center">
         <div className="w-10 h-10 rounded-full border-2 border-neutral-800 border-t-neutral-400 animate-spin" />
         <p className="mt-4 text-neutral-500 text-sm">Loading libraries...</p>
       </div>
@@ -199,17 +199,17 @@ export default function LibraryGateway() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0e0e10] flex flex-col items-center justify-center p-8 sm:p-16 selection:bg-neutral-800">
-      <div className="w-full max-w-5xl">
-        {/* Header - Simple, clean like Plex Select User */}
-        <div className="mb-8">
-          <h1 className="text-2xl sm:text-3xl font-semibold text-neutral-100 tracking-tight">
+    <div className="min-h-screen bg-[#0e0e12] flex flex-col items-center justify-center p-6 sm:p-12 selection:bg-neutral-800">
+      <div className="w-full max-w-5xl flex flex-col items-center justify-center">
+        {/* Header - Centered */}
+        <div className="mb-10 text-center">
+          <h1 className="text-3xl sm:text-4xl font-bold text-white tracking-tight">
             Select Library
           </h1>
         </div>
 
-        {/* Card Grid with ample whitespace */}
-        <div className="flex flex-wrap items-start gap-6 sm:gap-7">
+        {/* Card Grid - Centered Horizontal & Vertical */}
+        <div className="flex flex-wrap items-center justify-center gap-7 sm:gap-8 w-full">
           {libraries.map((lib) => {
             const displayName = lib.displayName || cleanLibraryName(lib.name);
 
@@ -224,21 +224,21 @@ export default function LibraryGateway() {
                     handleSelect(lib.name);
                   }
                 }}
-                className="group flex flex-col w-44 sm:w-48 rounded-xl overflow-hidden cursor-pointer border border-neutral-800 hover:border-neutral-600 hover:ring-2 hover:ring-neutral-600/40 transition-all duration-200 shadow-md bg-[#282828]"
+                className="group flex flex-col w-48 sm:w-52 rounded-2xl overflow-hidden cursor-pointer border border-zinc-600/50 hover:border-zinc-400 hover:ring-2 hover:ring-zinc-400/30 transition-all duration-200 shadow-xl shadow-black/40"
               >
-                {/* Top Gray Square with Avatar Circle */}
-                <div className="h-44 sm:h-48 w-full bg-[#282828] flex items-center justify-center p-4">
-                  <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-full overflow-hidden border-2 border-[#383838] group-hover:border-neutral-500 transition-colors shadow-inner flex items-center justify-center bg-black/40">
+                {/* Top Section: Light Gray area around the circle */}
+                <div className="h-44 sm:h-48 w-full bg-[#484a51] flex items-center justify-center p-4">
+                  <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-full overflow-hidden border-2 border-white/30 group-hover:border-white/60 transition-colors shadow-lg flex items-center justify-center bg-black/40">
                     <GeometricWallpaperAvatarSVG seed={lib.name} />
                   </div>
                 </div>
 
-                {/* Bottom Darker Gray Area: Display Name at top, Book count at bottom */}
-                <div className="h-16 sm:h-18 px-3 py-2.5 flex flex-col justify-center items-center text-center bg-[#1c1c1c] border-t border-neutral-800/80">
-                  <span className="text-sm sm:text-base font-medium text-neutral-200 group-hover:text-white truncate w-full">
+                {/* Bottom Section: A bit darker gray, but distinctly lighter than page background (#0e0e12) */}
+                <div className="h-20 px-3 py-2 flex flex-col justify-center items-center text-center bg-[#2a2c33] border-t border-zinc-600/40">
+                  <span className="text-sm sm:text-base font-semibold text-white group-hover:text-amber-300 transition-colors truncate w-full">
                     {displayName}
                   </span>
-                  <span className="text-xs text-neutral-400 mt-0.5">
+                  <span className="text-xs text-zinc-300 font-medium mt-1">
                     {lib.bookCount ?? 0} books
                   </span>
                 </div>
@@ -246,7 +246,7 @@ export default function LibraryGateway() {
             );
           })}
 
-          {/* Add Library Card - Matching Avatar Style */}
+          {/* Add Library Card - Identical dimensions, structure, and bottom height */}
           <div
             role="button"
             tabIndex={0}
@@ -256,18 +256,18 @@ export default function LibraryGateway() {
                 setIsManagerOpen(true);
               }
             }}
-            className="group flex flex-col w-44 sm:w-48 rounded-xl overflow-hidden cursor-pointer border border-neutral-800 hover:border-neutral-600 hover:ring-2 hover:ring-neutral-600/40 transition-all duration-200 shadow-md bg-[#282828]"
+            className="group flex flex-col w-48 sm:w-52 rounded-2xl overflow-hidden cursor-pointer border border-zinc-600/50 hover:border-zinc-400 hover:ring-2 hover:ring-zinc-400/30 transition-all duration-200 shadow-xl shadow-black/40"
           >
-            {/* Top Gray Square with Avatar Circle & Orange Plus */}
-            <div className="h-44 sm:h-48 w-full bg-[#282828] flex items-center justify-center p-4">
-              <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-full overflow-hidden border border-neutral-700 bg-[#1c1c1c] group-hover:border-neutral-500 transition-colors shadow-inner flex items-center justify-center">
-                <Plus className="w-12 h-12 text-[#d97706] stroke-[3]" />
+            {/* Top Section: Same Light Gray with Avatar Circle & Large Plus */}
+            <div className="h-44 sm:h-48 w-full bg-[#484a51] flex items-center justify-center p-4">
+              <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-full overflow-hidden border-2 border-white/20 bg-[#2a2c33] group-hover:border-white/50 transition-colors shadow-inner flex items-center justify-center">
+                <Plus className="w-14 h-14 text-amber-500 stroke-[3] group-hover:scale-110 transition-transform" />
               </div>
             </div>
 
-            {/* Bottom Darker Gray Area: Add Library... */}
-            <div className="h-16 sm:h-18 px-3 py-2.5 flex items-center justify-center text-center bg-[#1c1c1c] border-t border-neutral-800/80">
-              <span className="text-sm font-medium text-neutral-400 group-hover:text-neutral-200">
+            {/* Bottom Section: Identical height (h-20) and background (#2a2c33) */}
+            <div className="h-20 px-3 py-2 flex items-center justify-center text-center bg-[#2a2c33] border-t border-zinc-600/40">
+              <span className="text-sm sm:text-base font-medium text-zinc-300 group-hover:text-white transition-colors">
                 Add Library...
               </span>
             </div>
@@ -275,7 +275,7 @@ export default function LibraryGateway() {
         </div>
       </div>
 
-      {/* Library Manager Modal (triggered by clicking "Add Library...") */}
+      {/* Library Manager Modal */}
       <LibraryManagerModal
         isOpen={isManagerOpen}
         onClose={() => {
