@@ -26,7 +26,10 @@ export class FlatBookRepository {
           const db = getDatabaseConnection(fullPath);
           const countRow = db.prepare('SELECT count(*) as count FROM books').get() as { count: number };
           const customColRow = db.prepare('SELECT count(*) as count FROM custom_columns').get() as { count: number };
-          const name = fallbackName || path.relative(process.cwd(), fullPath) || path.basename(fullPath);
+          const relToBase = path.resolve(fullPath).startsWith(path.resolve(baseDir) + path.sep)
+            ? path.relative(baseDir, fullPath)
+            : path.relative(process.cwd(), fullPath);
+          const name = fallbackName || relToBase || path.basename(fullPath);
           const displayName = settings.customNames[name] || settings.customNames[fullPath] || name;
           const isHidden = settings.hiddenLibraries.includes(name) || settings.hiddenLibraries.includes(fullPath);
 
@@ -63,26 +66,6 @@ export class FlatBookRepository {
           checkAndAdd(dir, entry.name);
 
           // Also check 1 level deeper
-          try {
-            const subEntries = fs.readdirSync(dir, { withFileTypes: true });
-            for (const sub of subEntries) {
-              if (sub.isDirectory() && sub.name !== 'node_modules') {
-                checkAndAdd(path.join(dir, sub.name), `${entry.name}/${sub.name}`);
-              }
-            }
-          } catch (e) {}
-        }
-      }
-    }
-
-    // 3. Fallback: also scan process.cwd() for dev/legacy libraries (e.g. boox or demo-library/demo)
-    if (path.resolve(baseDir) !== path.resolve(process.cwd()) && fs.existsSync(process.cwd())) {
-      const entries = fs.readdirSync(process.cwd(), { withFileTypes: true });
-      for (const entry of entries) {
-        if (entry.isDirectory() && entry.name !== 'node_modules' && entry.name !== '.next' && entry.name !== '.git' && entry.name !== 'libraries') {
-          const dir = path.join(process.cwd(), entry.name);
-          checkAndAdd(dir, entry.name);
-
           try {
             const subEntries = fs.readdirSync(dir, { withFileTypes: true });
             for (const sub of subEntries) {
