@@ -31,6 +31,7 @@ export interface LibraryInfo {
   hasCustomColumns: boolean;
   isHidden?: boolean;
   isDefault?: boolean;
+  isPublic?: boolean;
   avatarImage?: string | null;
   sizeBytes?: number;
   sizeFormatted?: string;
@@ -43,9 +44,37 @@ export interface LibraryRecord {
   path: string | null;
   isHidden: boolean;
   isDefault: boolean;
+  isPublic: boolean;
   avatarImage: string | null;
   createdAt: string;
   updatedAt: string;
+}
+
+export type UserStatus = 'pending' | 'active' | 'suspended';
+export type AclRole = 'admin' | 'curator' | 'reader' | 'none';
+export type ResourceType = 'global' | 'library' | 'shelf';
+
+export interface UserRecord {
+  id: number;
+  username: string;
+  email: string | null;
+  passwordHash: string;
+  displayName: string | null;
+  status: UserStatus;
+  isAdmin: boolean;
+  sessionEpoch: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AccessGrantRecord {
+  id: number;
+  userId: number;
+  resourceType: ResourceType;
+  resourceId: string;
+  role: AclRole;
+  grantedBy: number | null;
+  createdAt: string;
 }
 
 export type ReadingStatus = 'unread' | 'reading' | 'finished' | 'abandoned';

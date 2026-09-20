@@ -81,6 +81,7 @@ export class FlatBookRepository {
           const displayName = dbRecord.displayName || settings.customNames[name] || settings.customNames[fullPath] || name;
           const isHidden = dbRecord.isHidden;
           const isDefault = dbRecord.isDefault;
+          const isPublic = dbRecord.isPublic;
 
           const sizeBytes = calculateDirectorySize(fullPath);
           const sizeFormatted = formatBytes(sizeBytes);
@@ -94,6 +95,7 @@ export class FlatBookRepository {
               hasCustomColumns: customColRow.count > 0,
               isHidden,
               isDefault,
+              isPublic,
               avatarImage: dbRecord.avatarImage,
               sizeBytes,
               sizeFormatted,

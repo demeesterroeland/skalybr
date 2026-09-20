@@ -96,8 +96,11 @@ describe('SQLite Migrations Infrastructure', () => {
       // Check _migrations table
       const recorded = getAppliedMigrationFilenames(db);
       expect(recorded).toContain('0001_initial_schema.sql');
+      expect(recorded).toContain('0002_add_is_public_to_libraries.sql');
+      expect(recorded).toContain('0003_create_users.sql');
+      expect(recorded).toContain('0004_create_cascading_acl.sql');
 
-      // Verify all tables from 0001_initial_schema.sql were created
+      // Verify all tables were created
       const tables = db
         .prepare("SELECT name FROM sqlite_master WHERE type = 'table'")
         .all() as { name: string }[];
@@ -110,8 +113,14 @@ describe('SQLite Migrations Infrastructure', () => {
       expect(tableNames).toContain('book_shelf_link');
       expect(tableNames).toContain('smart_shelves');
       expect(tableNames).toContain('settings');
+      expect(tableNames).toContain('users');
+      expect(tableNames).toContain('access_grants');
 
-      // Verify indexes from 0001_initial_schema.sql were created
+      // Verify libraries has is_public column from 0002
+      const libCols = db.prepare('PRAGMA table_info(libraries)').all() as { name: string }[];
+      expect(libCols.map((c) => c.name)).toContain('is_public');
+
+      // Verify indexes were created
       const indexes = db
         .prepare("SELECT name FROM sqlite_master WHERE type = 'index'")
         .all() as { name: string }[];
@@ -121,6 +130,9 @@ describe('SQLite Migrations Infrastructure', () => {
       expect(indexNames).toContain('idx_libraries_is_default');
       expect(indexNames).toContain('idx_reading_progress_lookup');
       expect(indexNames).toContain('idx_reading_progress_status');
+      expect(indexNames).toContain('idx_users_username');
+      expect(indexNames).toContain('idx_users_status');
+      expect(indexNames).toContain('idx_acl_lookup');
     });
 
     it('is idempotent: subsequent runs do not re-apply already executed migrations', () => {
@@ -391,9 +403,14 @@ describe('SQLite Migrations Infrastructure', () => {
         expect(names).toContain('libraries');
         expect(names).toContain('reading_progress');
         expect(names).toContain('shelves');
+        expect(names).toContain('users');
+        expect(names).toContain('access_grants');
 
         const applied = getAppliedMigrationFilenames(instance);
         expect(applied).toContain('0001_initial_schema.sql');
+        expect(applied).toContain('0002_add_is_public_to_libraries.sql');
+        expect(applied).toContain('0003_create_users.sql');
+        expect(applied).toContain('0004_create_cascading_acl.sql');
       } finally {
         closeSkalybrDb();
         if (originalDataDir !== undefined) {

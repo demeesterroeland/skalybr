@@ -9,6 +9,11 @@ import {
   ShelfRecord,
   BookShelfRecord,
   SmartShelfRecord,
+  UserRecord,
+  UserStatus,
+  AclRole,
+  ResourceType,
+  AccessGrantRecord,
 } from '../types';
 
 import { runMigrations } from './migrate';
@@ -41,6 +46,7 @@ export function getSkalybrDb(): Database.Database {
   db.pragma('journal_mode = WAL');
   db.pragma('synchronous = NORMAL');
   db.pragma('busy_timeout = 5000');
+  db.pragma('foreign_keys = ON');
 
   runMigrations(db);
   migrateLegacyLibrariesJson(db);
@@ -106,6 +112,7 @@ function rowToLibraryRecord(row: any): LibraryRecord {
     path: row.path,
     isHidden: Boolean(row.is_hidden),
     isDefault: Boolean(row.is_default),
+    isPublic: Boolean(row.is_public),
     avatarImage: row.avatar_image,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
@@ -133,6 +140,7 @@ export function upsertLibraryRecord(data: {
   path?: string | null;
   isHidden?: boolean;
   isDefault?: boolean;
+  isPublic?: boolean;
   avatarImage?: string | null;
 }): LibraryRecord {
   const db = getSkalybrDb();
@@ -142,6 +150,7 @@ export function upsertLibraryRecord(data: {
   if (existing) {
     const isHiddenVal = data.isHidden !== undefined ? (data.isHidden ? 1 : 0) : existing.isHidden ? 1 : 0;
     const isDefaultVal = data.isDefault !== undefined ? (data.isDefault ? 1 : 0) : existing.isDefault ? 1 : 0;
+    const isPublicVal = data.isPublic !== undefined ? (data.isPublic ? 1 : 0) : existing.isPublic ? 1 : 0;
     const displayNameVal = data.displayName !== undefined ? data.displayName : existing.displayName;
     const pathVal = data.path !== undefined ? data.path : existing.path;
     const avatarVal = data.avatarImage !== undefined ? data.avatarImage : existing.avatarImage;
@@ -156,29 +165,42 @@ export function upsertLibraryRecord(data: {
         path = ?,
         is_hidden = ?,
         is_default = ?,
+        is_public = ?,
         avatar_image = ?,
         updated_at = CURRENT_TIMESTAMP
       WHERE name = ?
-    `).run(displayNameVal, pathVal, isHiddenVal, isDefaultVal, avatarVal, data.name);
+    `).run(displayNameVal, pathVal, isHiddenVal, isDefaultVal, isPublicVal, avatarVal, data.name);
   } else {
     if (data.isDefault) {
       db.prepare('UPDATE libraries SET is_default = 0').run();
     }
 
     db.prepare(`
-      INSERT INTO libraries (name, display_name, path, is_hidden, is_default, avatar_image)
-      VALUES (?, ?, ?, ?, ?, ?)
+      INSERT INTO libraries (name, display_name, path, is_hidden, is_default, is_public, avatar_image)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
     `).run(
       data.name,
       data.displayName ?? null,
       data.path ?? null,
       data.isHidden ? 1 : 0,
       data.isDefault ? 1 : 0,
+      data.isPublic ? 1 : 0,
       data.avatarImage ?? null
     );
   }
 
   return getLibraryByName(data.name)!;
+}
+
+export function setLibraryPublic(name: string, isPublic: boolean): void {
+  const db = getSkalybrDb();
+  db.prepare(`
+    INSERT INTO libraries (name, is_public, updated_at)
+    VALUES (?, ?, CURRENT_TIMESTAMP)
+    ON CONFLICT(name) DO UPDATE SET
+      is_public = excluded.is_public,
+      updated_at = CURRENT_TIMESTAMP
+  `).run(name, isPublic ? 1 : 0);
 }
 
 export function setDefaultLibraryRecord(name: string): void {
@@ -208,23 +230,28 @@ export function deleteLibraryRecord(name: string): boolean {
     wasDefault = true;
   }
 
-  const res = db.prepare('DELETE FROM libraries WHERE name = ?').run(name);
+  const tx = db.transaction(() => {
+    const res = db.prepare('DELETE FROM libraries WHERE name = ?').run(name);
 
-  // Clean up associated reading progress and shelf links for this library
-  db.prepare('DELETE FROM reading_progress WHERE library = ?').run(name);
-  db.prepare('DELETE FROM book_shelf_link WHERE library = ?').run(name);
+    // Clean up associated reading progress, shelf links, and access grants for this library
+    db.prepare('DELETE FROM reading_progress WHERE library = ?').run(name);
+    db.prepare('DELETE FROM book_shelf_link WHERE library = ?').run(name);
+    db.prepare("DELETE FROM access_grants WHERE resource_type = 'library' AND resource_id = ?").run(name);
 
-  // If deleted library was the active default, promote the first remaining non-hidden library
-  if (wasDefault) {
-    const nextDefault = db
-      .prepare('SELECT name FROM libraries WHERE is_hidden = 0 ORDER BY id ASC LIMIT 1')
-      .get() as { name: string } | undefined;
-    if (nextDefault) {
-      db.prepare('UPDATE libraries SET is_default = 1 WHERE name = ?').run(nextDefault.name);
+    // If deleted library was the active default, promote the first remaining non-hidden library
+    if (wasDefault) {
+      const nextDefault = db
+        .prepare('SELECT name FROM libraries WHERE is_hidden = 0 ORDER BY id ASC LIMIT 1')
+        .get() as { name: string } | undefined;
+      if (nextDefault) {
+        db.prepare('UPDATE libraries SET is_default = 1 WHERE name = ?').run(nextDefault.name);
+      }
     }
-  }
 
-  return res.changes > 0;
+    return res.changes > 0;
+  });
+
+  return tx();
 }
 
 // ---------------------------------------------------------------------------
@@ -351,3 +378,297 @@ export function setAppSetting(key: string, value: string): void {
       updated_at = CURRENT_TIMESTAMP
   `).run(key, value);
 }
+
+// ---------------------------------------------------------------------------
+// User Management DAO
+// ---------------------------------------------------------------------------
+
+function rowToUserRecord(row: any): UserRecord {
+  return {
+    id: row.id,
+    username: row.username,
+    email: row.email ?? null,
+    passwordHash: row.password_hash,
+    displayName: row.display_name ?? null,
+    status: row.status as UserStatus,
+    isAdmin: Boolean(row.is_admin),
+    sessionEpoch: row.session_epoch,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
+
+export function createUser(input: {
+  username: string;
+  email?: string | null;
+  passwordHash: string;
+  displayName?: string | null;
+  status?: UserStatus;
+  isAdmin?: boolean;
+}): UserRecord {
+  const username = input.username?.trim();
+  if (!username) {
+    throw new Error('Username is required and cannot be empty');
+  }
+  if (!input.passwordHash) {
+    throw new Error('passwordHash is required and cannot be empty');
+  }
+
+  const db = getSkalybrDb();
+  const status: UserStatus = input.status || 'pending';
+  const isAdmin = input.isAdmin ? 1 : 0;
+  const email = input.email && input.email.trim() !== '' ? input.email.trim() : null;
+  const displayName = input.displayName && input.displayName.trim() !== '' ? input.displayName.trim() : null;
+
+  const row = db.prepare(`
+    INSERT INTO users (username, email, password_hash, display_name, status, is_admin, session_epoch)
+    VALUES (?, ?, ?, ?, ?, ?, 1)
+    RETURNING *
+  `).get(username, email, input.passwordHash, displayName, status, isAdmin);
+
+  return rowToUserRecord(row);
+}
+
+export function getUserById(id: number): UserRecord | null {
+  if (!id || typeof id !== 'number' || id <= 0 || !Number.isInteger(id)) {
+    return null;
+  }
+  const db = getSkalybrDb();
+  const row = db.prepare('SELECT * FROM users WHERE id = ?').get(id);
+  return row ? rowToUserRecord(row) : null;
+}
+
+export function getUserByUsername(username: string): UserRecord | null {
+  if (!username || !username.trim()) {
+    return null;
+  }
+  const db = getSkalybrDb();
+  const row = db.prepare('SELECT * FROM users WHERE username = ?').get(username.trim());
+  return row ? rowToUserRecord(row) : null;
+}
+
+export function getUserByEmail(email: string): UserRecord | null {
+  if (!email || !email.trim()) {
+    return null;
+  }
+  const db = getSkalybrDb();
+  const row = db.prepare('SELECT * FROM users WHERE email = ?').get(email.trim());
+  return row ? rowToUserRecord(row) : null;
+}
+
+export function updateUser(id: number, data: Partial<UserRecord>): UserRecord {
+  if (!id || typeof id !== 'number' || id <= 0 || !Number.isInteger(id)) {
+    throw new Error(`User with id ${id} not found`);
+  }
+  const db = getSkalybrDb();
+
+  const updates: string[] = [];
+  const params: any[] = [];
+
+  if (data.username !== undefined) {
+    const trimmedUsername = data.username.trim();
+    if (!trimmedUsername) {
+      throw new Error('Username cannot be empty');
+    }
+    updates.push('username = ?');
+    params.push(trimmedUsername);
+  }
+  if (data.email !== undefined) {
+    updates.push('email = ?');
+    params.push(data.email && data.email.trim() !== '' ? data.email.trim() : null);
+  }
+  if (data.passwordHash !== undefined) {
+    if (!data.passwordHash) {
+      throw new Error('passwordHash cannot be empty');
+    }
+    updates.push('password_hash = ?');
+    params.push(data.passwordHash);
+  }
+  if (data.displayName !== undefined) {
+    updates.push('display_name = ?');
+    params.push(data.displayName && data.displayName.trim() !== '' ? data.displayName.trim() : null);
+  }
+  if (data.status !== undefined) {
+    updates.push('status = ?');
+    params.push(data.status);
+  }
+  if (data.isAdmin !== undefined) {
+    updates.push('is_admin = ?');
+    params.push(data.isAdmin ? 1 : 0);
+  }
+  if (data.sessionEpoch !== undefined) {
+    updates.push('session_epoch = ?');
+    params.push(data.sessionEpoch);
+  }
+
+  updates.push('updated_at = CURRENT_TIMESTAMP');
+  params.push(id);
+
+  const row = db.prepare(`UPDATE users SET ${updates.join(', ')} WHERE id = ? RETURNING *`).get(...params);
+  if (!row) {
+    throw new Error(`User with id ${id} not found`);
+  }
+
+  return rowToUserRecord(row);
+}
+
+export function incrementSessionEpoch(userId: number): number {
+  if (!userId || typeof userId !== 'number' || userId <= 0 || !Number.isInteger(userId)) {
+    throw new Error(`User with id ${userId} not found`);
+  }
+  const db = getSkalybrDb();
+  const row = db.prepare(`
+    UPDATE users SET
+      session_epoch = session_epoch + 1,
+      updated_at = CURRENT_TIMESTAMP
+    WHERE id = ?
+    RETURNING session_epoch
+  `).get(userId) as { session_epoch: number } | undefined;
+
+  if (!row) {
+    throw new Error(`User with id ${userId} not found`);
+  }
+
+  return row.session_epoch;
+}
+
+export function listUsers(filter?: { status?: UserStatus }): UserRecord[] {
+  const db = getSkalybrDb();
+  if (filter?.status) {
+    const rows = db.prepare('SELECT * FROM users WHERE status = ? ORDER BY id ASC').all(filter.status);
+    return rows.map(rowToUserRecord);
+  }
+  const rows = db.prepare('SELECT * FROM users ORDER BY id ASC').all();
+  return rows.map(rowToUserRecord);
+}
+
+export function deleteUser(id: number): boolean {
+  if (!id || typeof id !== 'number' || id <= 0 || !Number.isInteger(id)) {
+    return false;
+  }
+  const db = getSkalybrDb();
+  const tx = db.transaction(() => {
+    db.prepare('DELETE FROM reading_progress WHERE user_id = ?').run(id);
+    db.prepare('DELETE FROM smart_shelves WHERE user_id = ?').run(id);
+    db.prepare('DELETE FROM book_shelf_link WHERE shelf_id IN (SELECT id FROM shelves WHERE user_id = ?)').run(id);
+    db.prepare('DELETE FROM shelves WHERE user_id = ?').run(id);
+    const res = db.prepare('DELETE FROM users WHERE id = ?').run(id);
+    return res.changes > 0;
+  });
+  return tx();
+}
+
+export function countUsers(): number {
+  const db = getSkalybrDb();
+  const row = db.prepare('SELECT COUNT(*) as count FROM users').get() as { count: number } | undefined;
+  return row?.count ?? 0;
+}
+
+// ---------------------------------------------------------------------------
+// Cascading ACL Access Grants DAO
+// ---------------------------------------------------------------------------
+
+function rowToAccessGrantRecord(row: any): AccessGrantRecord {
+  return {
+    id: row.id,
+    userId: row.user_id,
+    resourceType: row.resource_type as ResourceType,
+    resourceId: row.resource_id,
+    role: row.role as AclRole,
+    grantedBy: row.granted_by ?? null,
+    createdAt: row.created_at,
+  };
+}
+
+export function setAccessGrant(grant: {
+  userId: number;
+  resourceType: ResourceType;
+  resourceId: string;
+  role: AclRole;
+  grantedBy?: number | null;
+}): AccessGrantRecord {
+  if (!grant.userId || typeof grant.userId !== 'number' || grant.userId <= 0) {
+    throw new Error('Valid userId is required');
+  }
+  const resourceId = grant.resourceId?.trim();
+  if (!resourceId) {
+    throw new Error('resourceId is required and cannot be empty');
+  }
+
+  const db = getSkalybrDb();
+  const grantedBy = grant.grantedBy ?? null;
+
+  const row = db.prepare(`
+    INSERT INTO access_grants (user_id, resource_type, resource_id, role, granted_by, created_at)
+    VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+    ON CONFLICT(user_id, resource_type, resource_id) DO UPDATE SET
+      role = excluded.role,
+      granted_by = excluded.granted_by,
+      created_at = CURRENT_TIMESTAMP
+    RETURNING *
+  `).get(grant.userId, grant.resourceType, resourceId, grant.role, grantedBy);
+
+  return rowToAccessGrantRecord(row);
+}
+
+export function getAccessGrant(
+  userId: number,
+  resourceType: ResourceType,
+  resourceId: string
+): AccessGrantRecord | null {
+  if (!userId || typeof userId !== 'number' || userId <= 0 || !resourceType || !resourceId) {
+    return null;
+  }
+  const db = getSkalybrDb();
+  const row = db.prepare(`
+    SELECT * FROM access_grants
+    WHERE user_id = ? AND resource_type = ? AND resource_id = ?
+  `).get(userId, resourceType, resourceId);
+  return row ? rowToAccessGrantRecord(row) : null;
+}
+
+export function listAccessGrantsForUser(userId: number): AccessGrantRecord[] {
+  if (!userId || typeof userId !== 'number' || userId <= 0) {
+    return [];
+  }
+  const db = getSkalybrDb();
+  const rows = db.prepare(`
+    SELECT * FROM access_grants
+    WHERE user_id = ?
+    ORDER BY id ASC
+  `).all(userId);
+  return rows.map(rowToAccessGrantRecord);
+}
+
+export function listAccessGrantsForResource(
+  resourceType: ResourceType,
+  resourceId: string
+): AccessGrantRecord[] {
+  if (!resourceType || !resourceId) {
+    return [];
+  }
+  const db = getSkalybrDb();
+  const rows = db.prepare(`
+    SELECT * FROM access_grants
+    WHERE resource_type = ? AND resource_id = ?
+    ORDER BY id ASC
+  `).all(resourceType, resourceId);
+  return rows.map(rowToAccessGrantRecord);
+}
+
+export function deleteAccessGrant(
+  userId: number,
+  resourceType: ResourceType,
+  resourceId: string
+): boolean {
+  if (!userId || typeof userId !== 'number' || userId <= 0 || !resourceType || !resourceId) {
+    return false;
+  }
+  const db = getSkalybrDb();
+  const res = db.prepare(`
+    DELETE FROM access_grants
+    WHERE user_id = ? AND resource_type = ? AND resource_id = ?
+  `).run(userId, resourceType, resourceId);
+  return res.changes > 0;
+}
+
