@@ -17,6 +17,7 @@ export default function HomePage() {
   const [selectedBook, setSelectedBook] = useState<BookFlattened | null>(null);
   const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState<boolean>(false);
   const [filterLayout, setFilterLayout] = useState<'sidebar' | 'commandBar'>('sidebar');
+  const [viewMode, setViewMode] = useState<'gallery' | 'table'>('gallery');
 
   const [filters, setFilters] = useState<BookQueryOptions>({
     sort: 'id',
@@ -130,6 +131,8 @@ export default function HomePage() {
               activeFilterCount={activeFilterCount}
               filterLayout={filterLayout}
               onToggleFilterLayout={setFilterLayout}
+              viewMode={viewMode}
+              onToggleViewMode={setViewMode}
             />
 
             {/* Pattern B: Modern Command-Bar Popovers */}
@@ -143,7 +146,7 @@ export default function HomePage() {
               </div>
             )}
 
-            {/* Book Grid */}
+            {/* Book Catalog (Gallery vs Table) */}
             <BookGrid
               books={data?.books || []}
               libraryName={currentLibrary}
@@ -151,6 +154,7 @@ export default function HomePage() {
               total={data?.total || 0}
               page={filters.page || 1}
               pageSize={filters.pageSize || 30}
+              viewMode={viewMode}
               onPageChange={(p) => handleFilterChange({ page: p })}
               onSelectBook={(book) => setSelectedBook(book)}
             />

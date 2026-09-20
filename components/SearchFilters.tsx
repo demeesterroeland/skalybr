@@ -16,6 +16,8 @@ import {
   PanelLeft,
   Command,
   Image as ImageIcon,
+  LayoutGrid,
+  Table as TableIcon,
 } from 'lucide-react';
 import { BookQueryOptions } from '@/lib/types';
 
@@ -28,6 +30,8 @@ interface SearchFiltersProps {
   activeFilterCount: number;
   filterLayout: 'sidebar' | 'commandBar';
   onToggleFilterLayout: (mode: 'sidebar' | 'commandBar') => void;
+  viewMode: 'gallery' | 'table';
+  onToggleViewMode: (mode: 'gallery' | 'table') => void;
 }
 
 export default function SearchFilters({
@@ -39,6 +43,8 @@ export default function SearchFilters({
   activeFilterCount,
   filterLayout,
   onToggleFilterLayout,
+  viewMode,
+  onToggleViewMode,
 }: SearchFiltersProps) {
   const removeChip = (
     key: 'authors' | 'tags' | 'seriesList' | 'collections' | 'publishers' | 'languages' | 'formats' | 'ratings',
@@ -103,6 +109,34 @@ export default function SearchFilters({
 
         {/* Layout Switcher & Sort Selector */}
         <div className="flex items-center gap-2">
+          {/* View Mode Switcher: Gallery Grid vs Table List */}
+          <div className="flex items-center bg-slate-900 border border-slate-800 p-0.5 rounded-xl">
+            <button
+              type="button"
+              onClick={() => onToggleViewMode('gallery')}
+              title="Gallery View (Book Covers)"
+              className={`p-1.5 rounded-lg transition-all cursor-pointer ${
+                viewMode === 'gallery'
+                  ? 'bg-sky-500 text-white shadow-sm'
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              <LayoutGrid className="w-4 h-4" />
+            </button>
+            <button
+              type="button"
+              onClick={() => onToggleViewMode('table')}
+              title="Table View (Spreadsheet Details)"
+              className={`p-1.5 rounded-lg transition-all cursor-pointer ${
+                viewMode === 'table'
+                  ? 'bg-sky-500 text-white shadow-sm'
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              <TableIcon className="w-4 h-4" />
+            </button>
+          </div>
+
           {/* Pattern Switcher: Sidebar vs Top Command Bar */}
           <div className="flex items-center bg-slate-900 border border-slate-800 p-0.5 rounded-xl">
             <button

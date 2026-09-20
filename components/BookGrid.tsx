@@ -3,6 +3,7 @@
 import React from 'react';
 import { BookFlattened } from '@/lib/types';
 import BookCard from './BookCard';
+import BookTable from './BookTable';
 import { ChevronLeft, ChevronRight, BookDashed } from 'lucide-react';
 
 interface BookGridProps {
@@ -12,6 +13,7 @@ interface BookGridProps {
   total: number;
   page: number;
   pageSize: number;
+  viewMode?: 'gallery' | 'table';
   onPageChange: (page: number) => void;
   onSelectBook: (book: BookFlattened) => void;
 }
@@ -23,6 +25,7 @@ export default function BookGrid({
   total,
   page,
   pageSize,
+  viewMode = 'gallery',
   onPageChange,
   onSelectBook,
 }: BookGridProps) {
@@ -63,17 +66,26 @@ export default function BookGrid({
 
   return (
     <div className="space-y-8">
-      {/* Book Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 sm:gap-6">
-        {books.map((book) => (
-          <BookCard
-            key={book.id}
-            book={book}
-            libraryName={libraryName}
-            onClick={() => onSelectBook(book)}
-          />
-        ))}
-      </div>
+      {/* Book Catalog (Gallery vs Table) */}
+      {viewMode === 'table' ? (
+        <BookTable
+          books={books}
+          libraryName={libraryName}
+          isLoading={isLoading}
+          onSelectBook={onSelectBook}
+        />
+      ) : (
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 sm:gap-6">
+          {books.map((book) => (
+            <BookCard
+              key={book.id}
+              book={book}
+              libraryName={libraryName}
+              onClick={() => onSelectBook(book)}
+            />
+          ))}
+        </div>
+      )}
 
       {/* Pagination Bar */}
       {totalPages > 1 && (
