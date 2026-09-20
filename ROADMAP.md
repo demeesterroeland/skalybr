@@ -1,130 +1,120 @@
 # 🗺️ Skalybr Project Roadmap
 
-This document outlines the phased development roadmap for **Skalybr**, tracking completed milestones, active work in progress, and planned future capabilities.
+This document outlines the phased development roadmap for **Skalybr**, tracking completed milestones, active work in progress, and planned future capabilities. Inspired by gold-standard self-hosted media projects like **Jellyfin**, **Navidrome**, and **Immich**, Skalybr is built in iterative, production-tested releases.
 
 ---
 
 ## 🧭 Milestone Overview
 
 ```mermaid
-flowchart LR
-    P1["Phase 1: Core MVP<br/>(✅ Completed)"] --> P2["Phase 2: E-Reader Sync<br/>(🔄 In Progress)"]
-    P2 --> P3["Phase 3: Shelves & Auth<br/>(📋 Planned)"]
-    P3 --> P4["Phase 4: In-Browser Readers<br/>(📋 Planned)"]
-    P4 --> P5["Phase 5: Ingest & Scrapers<br/>(📋 Planned)"]
-    P5 -.-> P6["Phase 6: Go Backend Swap<br/>(📋 Optional)"]
+flowchart TD
+    V01["v0.1.0: Core MVP Engine<br/>(✅ Released)"] --> V02["v0.2.0: RESTful Gateway & Security<br/>(✅ Released)"]
+    V02 --> V03["v0.3.0: Auth & Cascading ACL<br/>(🔄 In Progress - UI & Admin Panel)"]
+    V03 --> V04["v0.4.0: Hardware Sync & OPDS<br/>(📋 Planned)"]
+    V04 --> V05["v0.5.0: In-Browser Readers & PWA<br/>(📋 Planned)"]
+    V05 --> V06["v0.6.0: Ingestion & Scrapers<br/>(📋 Planned)"]
+    V06 -.-> V07["v1.0.0: Single-Binary Go Engine<br/>(💡 Long-Term Architecture)"]
 ```
 
 ---
 
-## ✅ Phase 1: Core MVP & Catalog Engine *(Completed)*
+## ✅ Released Milestones
 
-The foundation of Skalybr focuses on rock-solid, sub-millisecond SQLite queries, high-performance image processing, multi-library discovery, and clean OpenAPI 3.1 contracts.
+### 🚀 v0.1.0 — Core MVP & High-Performance Engine *(Released)*
+- [x] **Flattened Database Read Model (`v_books_flattened`)**: Consolidated SQLite view indexing Books, Authors, Series, Tags, Formats, and Custom `#collection`.
+- [x] **`better-sqlite3` Repository Layer**: WAL mode, zero locking overhead, sub-millisecond queries across Calibre libraries.
+- [x] **Multi-Library Discovery**: Auto-detection of Calibre libraries in the filesystem.
+- [x] **Cover Streaming**: High-throughput on-the-fly WebP thumbnail resizing via `sharp` (libvips).
+- [x] **Contract-First OpenAPI 3.1**: Full API specification and interactive Scalar documentation at `/api/reference`.
+- [x] **Responsive Web App**: Initial book card grid, debounced search, facet filtering, and book detail dialog.
 
-- [x] **Flattened Database View (`v_books_flattened`)**:
-  - Auto-generated SQLite view consolidating Books, Authors, Series, Tags, Publisher, Language, Rating, Formats, and Custom `#collection`.
-- [x] **`better-sqlite3` Repository Layer**:
-  - Connection pooling with SQLite WAL (Write-Ahead Logging) mode and zero locking overhead.
-  - Sub-millisecond prepared SQL queries across 491+ books.
-- [x] **Multi-Library Discovery & Switching**:
-  - Automatic detection and switching across all Calibre libraries in the configured base directory.
-- [x] **High-Performance Cover Streaming**:
-  - On-the-fly WebP thumbnail generation and streaming powered by `sharp` with HTTP cache headers.
-- [x] **Modern React 19 / Tailwind CSS v4 UI**:
-  - Responsive book card grid with covers, format badges, and rating stars.
-  - Instant debounced search and faceted filtering (by Author, Series, Tag, and Custom Collections).
-  - Book detail modal with synopsis and direct format downloads.
-- [x] **Book Metadata CRUD**:
-  - Full support for updating Title, Rating, and Synopsis in Calibre's native database.
-- [x] **OpenAPI 3.1 & Interactive Docs**:
-  - Fully typed REST routes with live Scalar documentation at `/api/reference`.
-- [x] **Automated Test Suite**:
-  - Vitest unit tests verifying repository queries and cover streaming against real Calibre libraries.
+### 🌐 v0.2.0 — RESTful Architecture, Netflix Gateway & Security *(Released)*
+- [x] **Fully RESTful Path Scoping**: Refactored API routes from query parameters (`?library=X`) to scoped paths (`/api/v1/libraries/[library]/books/...`).
+- [x] **Netflix-Style Library Gateway**: Root `/` redirector, interactive library switcher cards, and zero-library onboarding state.
+- [x] **Security Hardening**:
+  - Path confinement and directory traversal guards on book downloads and cover streaming.
+  - Zip-slip collision protection and safe upload size limits.
+  - Safe error masking preventing internal stack trace leakage.
+- [x] **Calibre-Web Migration Tool**: One-click import tool (`/api/v1/migration/calibre-web`) migrating existing user reading progress, custom shelves, and book links.
+- [x] **Remote Cloud Library Downloader**: Dropbox and Google Drive URL inspection and streaming importer.
 
 ---
 
-## 🔄 Phase 2: E-Reader Protocols & Wireless Sync *(In Progress)*
+## 🔄 Active Development
 
-Connecting Skalybr directly to hardware e-readers and mobile reading apps without needing cables.
+### 🔐 v0.3.0 — Authentication, Multi-Tenancy & Cascading ACL *(In Progress)*
 
+Comprehensive multi-user support with Google Drive-style inherited permissions (`Global` $\rightarrow$ `Library` $\rightarrow$ `Shelf`).
+
+- [x] **Phase 1: SQLite Migration Framework** (`commit 95cde75`):
+  - Robust migration runner (`lib/db/migrate.ts`) discovering files under `./data/migrations/`.
+  - Atomic transactions, concurrency guards, and baseline schema `0001_initial_schema.sql`.
+  - Automated CI migration test suite (`testing/unit/migrations.test.ts`).
+- [x] **Phase 2: Database Schema & DAOs** (`commit f922c66`):
+  - Added `0002_add_is_public_to_libraries.sql`, `0003_create_users.sql`, `0004_create_cascading_acl.sql`.
+  - Atomic user CRUD, session epoch increments, and cascading access grant DAOs.
+- [x] **Phase 3: Authentication Engine & Session Management** (`commit 4365148`):
+  - `bcryptjs` password hashing with constant-time verification.
+  - Encrypted HTTP-only cookie sessions via `iron-session` (`lib/auth/session.ts`).
+  - First-user bootstrap promotion to active `Admin`; subsequent signups queued as `Pending`.
+  - Endpoints: `POST /api/v1/auth/register`, `POST /api/v1/auth/login`, `POST /api/v1/auth/logout`, `GET /api/v1/auth/me`.
+- [x] **Phase 4: Cascading ACL Resolution & API Route Guards** (`commit 047fa59`):
+  - Ripple-down permission engine (`lib/auth/acl.ts`): Admin bypass $\rightarrow$ Shelf grant $\rightarrow$ Library grant $\rightarrow$ Global grant $\rightarrow$ Public fallback.
+  - Route guard helpers (`requireLibraryAccess`, `requireAdmin`, `requireAuth`).
+  - Protected API endpoints (`libraries`, `books`, `facets`, `download`, `cover`, `progress`).
+  - Admin management APIs: `/api/v1/admin/users` and `/api/v1/admin/users/[id]/grants`.
+- [ ] **Phase 5: Frontend UI & Admin Panel** *(Current Focus)*:
+  - User profile dropdown in header displaying active persona, library switcher, and auth buttons.
+  - Clean Sign In and Register modal with pending approval alert.
+  - Admin User & ACL Management modal:
+    - Tab 1: Pending user approvals.
+    - Tab 2: Google Drive-style permission drawer (Global, Library, and Shelf overrides).
+  - Dev `QuickSwitch` persona bar (`Guest` $\leftrightarrow$ `Reader` $\leftrightarrow$ `Curator` $\leftrightarrow$ `Admin`) for rapid local testing.
+- [ ] **Phase 6: E2E Verification & Release Tagging**:
+  - Full end-to-end verification, automated CI validation, documentation review, and `v0.3.0` release.
+
+---
+
+## 📋 Planned Capabilities
+
+### 📡 v0.4.0 — Hardware E-Reader Sync & Open Protocols
+Connecting Skalybr directly to hardware e-readers and mobile reading apps without cables:
 - [ ] **OPDS 1.2 Catalog Engine (`/opds`)**:
-  - Atom+XML catalog feeds for third-party e-reader apps (Moon+ Reader, FBReader, Thorium, KyBook).
-  - Hierarchical navigation: By Author, Series, Tags, Collections, and Recent.
-  - OpenSearch XML template for remote in-app search.
-- [ ] **Kobo Wireless Hardware Sync API (`/api/v1/kobo/...`)**:
-  - Emulation of Kobo Store sync protocol (`v1/initialization`, `v1/library/sync`, `v1/books/{id}/reading_state`).
-  - Reading progress, bookmarks, and time spent synchronization.
-  - Device token authentication and pairing.
+  - Atom+XML catalog feeds for Moon+ Reader, FBReader, Thorium, and KyBook.
+  - Hierarchical browsing: by Author, Series, Tags, Custom Shelves, and Recent.
+  - OpenSearch XML template for remote in-app catalog search.
+- [ ] **Kobo Wireless Sync (`/api/v1/kobo/...`)**:
+  - Native Kobo Store sync protocol emulation (`v1/initialization`, `v1/library/sync`, `v1/books/{id}/reading_state`).
+  - Bidirectional sync of reading progress, bookmarks, and read status.
+  - Per-user device pairing and token authentication.
 - [ ] **On-The-Fly KePub Transformation**:
-  - Transparent KePub conversion for enhanced Kobo reading features (page number calculation, fast flipping).
+  - Transparent KePub conversion for page-count precision and rapid flipping on Kobo hardware.
+
+### 📖 v0.5.0 — In-Browser E-Readers & Offline PWA
+Reading directly in modern browsers without installing third-party apps:
+- [ ] **Embedded EPUB Reader**: Fullscreen, responsive EpubJS reader with dark/sepia/light themes, font scaling, TOC navigation, and bookmark sync.
+- [ ] **PDF Reader**: High-performance PDF.js viewer with zoom, continuous scrolling, and text selection.
+- [ ] **Comic & Manga Reader**: Canvas-based CBZ/CBR image extractor and double-page manga/comic viewer.
+- [ ] **Audiobook Streaming**: HTML5 audio player with track position memory for M4B/MP3 audiobooks.
+- [ ] **Installable PWA & Offline Storage**: Progressive Web App service worker caching books for offline reading on trains and flights.
+
+### 📥 v0.6.0 — Book Ingestion & Metadata Scrapers
+Importing new books, automating metadata tagging, and remote device delivery:
+- [ ] **Book File Ingestion & Drag-and-Drop Uploader**: Multi-file upload for EPUB, MOBI, PDF, CBZ, and CBR with automatic cover and metadata extraction.
+- [ ] **Online Metadata Scraping Engine**: Multi-provider search against **Google Books**, **Goodreads**, **OpenLibrary**, and **ComicVine** for one-click metadata enhancement.
+- [ ] **Send-to-Kindle Delivery**: SMTP emailer delivering books directly to `@kindle.com` addresses.
+- [ ] **Safe Directory File Management**: Deterministic renaming of Calibre folders when book titles or authors change.
 
 ---
 
-## 📋 Phase 3: Shelves, Reading Status & User Authentication *(Planned)*
+## ⚡ Long-Term Architecture: Optional Go Backend Drop-in
 
-User profiles, multi-tenancy, and customized bookshelf organization.
-
-- [ ] **Application Database Schema (`app.db`)**:
-  - Standard SQL migrations for user accounts, read status, bookmarks, and custom shelves.
-- [ ] **Authentication & Security**:
-  - Stateless encrypted session cookies (`iron-session`).
-  - Reverse-proxy header authentication (`Remote-User`) for Authelia / Authentik setups.
-  - Granular RBAC permissions (Admin, Download, Upload, Edit, Viewer).
-- [ ] **Reading Progress Tracking**:
-  - Read / Unread / In-Progress status toggles with reading history timestamps.
-- [ ] **Custom Shelves & Collections**:
-  - User-defined public and private shelves.
-  - Drag-and-drop book reordering powered by `@dnd-kit`.
+For ultra-low-memory environments (< 30MB RAM) and single static binary distribution:
+- [ ] **Go HTTP Engine**: Re-implement the OpenAPI 3.1 contract in Go (`Chi` / `Echo` + `modernc.org/sqlite`).
+- [ ] **Embedded Static Frontend**: Embed the compiled Next.js static export directly into the Go binary with `//go:embed`.
+- [ ] **Cross-Platform Single Binary**: Ship standalone executables (`./skalybr`) for Linux, macOS, Windows, and Raspberry Pi ARM64 with zero runtime dependencies.
 
 ---
 
-## 📋 Phase 4: In-Browser E-Readers & PWA Offline Support *(Planned)*
-
-Read books directly inside any web browser on desktop, tablet, or phone without installing external apps.
-
-- [ ] **Embedded EPUB Reader**:
-  - Fullscreen, responsive EpubJS reader with dark/sepia/light themes, font scaling, and TOC navigation.
-  - Server-side bookmark synchronization.
-- [ ] **PDF Viewer**:
-  - High-performance PDF.js viewer with zoom, continuous scrolling, and text selection.
-- [ ] **Comic & Manga Reader**:
-  - Canvas-based CBZ/CBR image extractor and double-page manga/comic viewer.
-- [ ] **Audiobook Streaming**:
-  - HTML5 audio streaming player with track position remembering for M4B/MP3 audiobooks.
-- [ ] **Installable PWA & Offline Cache**:
-  - Progressive Web App service worker (`@ducanh2912/next-pwa`) allowing users to install Skalybr as a mobile app and cache current books for airplane/train reading.
-
----
-
-## 📋 Phase 5: Ingestion, Metadata Scrapers & Emailer *(Planned)*
-
-Importing new books, automating metadata tagging, and remote device delivery.
-
-- [ ] **Book File Ingestion & Uploader**:
-  - Multi-file drag-and-drop uploader for EPUB, MOBI, PDF, CBZ, and CBR.
-  - Metadata and cover image auto-extraction upon upload.
-- [ ] **Online Metadata Scraping Engine**:
-  - Multi-provider search against **Google Books**, **Goodreads**, **Amazon**, and **ComicVine**.
-  - One-click cover art and synopsis enhancement.
-- [ ] **Send-to-Kindle Mailer**:
-  - SMTP with TLS/SSL and Gmail OAuth delivery to `@kindle.com` e-reader addresses.
-- [ ] **Calibre Directory File Management**:
-  - Safe folder renaming (`Author/Title (id)/Title - Author.ext`) when book metadata is edited.
-
----
-
-## ⚡ Phase 6: Optional Go Backend Drop-in *(Future Architectural Evolution)*
-
-For ultra-low-memory environments (< 30MB RAM) and single static binary distribution.
-
-- [ ] **Go HTTP Server (Chi / Echo)**:
-  - Implement the exact OpenAPI 3.1 contract in Go using `oapi-codegen` and `modernc.org/sqlite`.
-- [ ] **Embedded React Static Build**:
-  - Embed the compiled Next.js static export directly into the Go binary using `//go:embed`.
-- [ ] **Single Binary Packaging**:
-  - Ship cross-platform standalone executables (`./skalybr`) for Linux, macOS, Windows, and Raspberry Pi ARM64.
-
----
-
-## 💡 Submitting Feature Requests
-Have an idea or priority preference? Open an issue or discussion on the [GitHub repository](https://github.com/demeesterroeland/skalybr).
+## 💡 Feedback & Feature Requests
+Have an idea or priority preference? Open an issue or start a discussion on the [GitHub repository](https://github.com/demeesterroeland/skalybr).
