@@ -67,6 +67,9 @@ export interface UserRecord {
   updatedAt: string;
 }
 
+export type SafeUserRecord = Omit<UserRecord, 'passwordHash'>;
+
+
 export interface AccessGrantRecord {
   id: number;
   userId: number;
