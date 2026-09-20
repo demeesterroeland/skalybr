@@ -13,6 +13,8 @@ import {
   Languages,
   Layers,
   Star,
+  PanelLeft,
+  Command,
 } from 'lucide-react';
 import { BookQueryOptions } from '@/lib/types';
 
@@ -23,6 +25,8 @@ interface SearchFiltersProps {
   onReset: () => void;
   onOpenMobileFilters: () => void;
   activeFilterCount: number;
+  filterLayout: 'sidebar' | 'commandBar';
+  onToggleFilterLayout: (mode: 'sidebar' | 'commandBar') => void;
 }
 
 export default function SearchFilters({
@@ -32,6 +36,8 @@ export default function SearchFilters({
   onReset,
   onOpenMobileFilters,
   activeFilterCount,
+  filterLayout,
+  onToggleFilterLayout,
 }: SearchFiltersProps) {
   const removeChip = (
     key: 'authors' | 'tags' | 'seriesList' | 'collections' | 'publishers' | 'languages' | 'formats' | 'ratings',
@@ -55,22 +61,24 @@ export default function SearchFilters({
 
   return (
     <div className="space-y-3 mb-6">
-      {/* Search and Sort Toolbar */}
+      {/* Search, Layout Switcher, and Sort Toolbar */}
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-        {/* Mobile Filter Button */}
-        <button
-          type="button"
-          onClick={onOpenMobileFilters}
-          className="lg:hidden flex items-center justify-center gap-2 px-3.5 py-2 bg-slate-900 border border-slate-800 rounded-xl text-xs font-semibold text-slate-200 hover:border-slate-700 cursor-pointer transition-colors shadow-sm"
-        >
-          <SlidersHorizontal className="w-4 h-4 text-sky-400" />
-          <span>Filters</span>
-          {activeFilterCount > 0 && (
-            <span className="px-1.5 py-0.5 text-[10px] font-bold bg-sky-500 text-white rounded-full">
-              {activeFilterCount}
-            </span>
-          )}
-        </button>
+        {/* Mobile Filter Button (only relevant when in sidebar mode) */}
+        {filterLayout === 'sidebar' && (
+          <button
+            type="button"
+            onClick={onOpenMobileFilters}
+            className="lg:hidden flex items-center justify-center gap-2 px-3.5 py-2 bg-slate-900 border border-slate-800 rounded-xl text-xs font-semibold text-slate-200 hover:border-slate-700 cursor-pointer transition-colors shadow-sm"
+          >
+            <SlidersHorizontal className="w-4 h-4 text-sky-400" />
+            <span>Filters</span>
+            {activeFilterCount > 0 && (
+              <span className="px-1.5 py-0.5 text-[10px] font-bold bg-sky-500 text-white rounded-full">
+                {activeFilterCount}
+              </span>
+            )}
+          </button>
+        )}
 
         {/* Search Input */}
         <div className="relative flex-1">
@@ -92,8 +100,37 @@ export default function SearchFilters({
           )}
         </div>
 
-        {/* Sort selector */}
+        {/* Layout Switcher & Sort Selector */}
         <div className="flex items-center gap-2">
+          {/* Pattern Switcher: Sidebar vs Top Command Bar */}
+          <div className="flex items-center bg-slate-900 border border-slate-800 p-0.5 rounded-xl">
+            <button
+              type="button"
+              onClick={() => onToggleFilterLayout('sidebar')}
+              title="Pattern A: Calibre Sidebar Layout"
+              className={`p-1.5 rounded-lg transition-all cursor-pointer ${
+                filterLayout === 'sidebar'
+                  ? 'bg-sky-500 text-white shadow-sm'
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              <PanelLeft className="w-4 h-4" />
+            </button>
+            <button
+              type="button"
+              onClick={() => onToggleFilterLayout('commandBar')}
+              title="Pattern B: Command-Bar & Popovers Layout"
+              className={`p-1.5 rounded-lg transition-all cursor-pointer ${
+                filterLayout === 'commandBar'
+                  ? 'bg-sky-500 text-white shadow-sm'
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              <Command className="w-4 h-4" />
+            </button>
+          </div>
+
+          {/* Sort Selector */}
           <div className="relative">
             <select
               value={`${filters.sort || 'id'}-${filters.order || 'desc'}`}

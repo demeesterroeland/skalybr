@@ -5,6 +5,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import Header from '@/components/Header';
 import SearchFilters from '@/components/SearchFilters';
 import FilterSidebar from '@/components/FilterSidebar';
+import CommandBarFilters from '@/components/CommandBarFilters';
 import BookGrid from '@/components/BookGrid';
 import BookDetailModal from '@/components/BookDetailModal';
 import { BookFlattened, BookListResponse, BookQueryOptions } from '@/lib/types';
@@ -15,6 +16,7 @@ export default function HomePage() {
   const [currentLibrary, setCurrentLibrary] = useState<string>(DEFAULT_LIBRARY_NAME);
   const [selectedBook, setSelectedBook] = useState<BookFlattened | null>(null);
   const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState<boolean>(false);
+  const [filterLayout, setFilterLayout] = useState<'sidebar' | 'commandBar'>('sidebar');
 
   const [filters, setFilters] = useState<BookQueryOptions>({
     sort: 'id',
@@ -102,19 +104,21 @@ export default function HomePage() {
       {/* Main Content Area: Responsive Flex Layout */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="flex items-start gap-6">
-          {/* Collapsible Left Facet Sidebar (Desktop & Mobile Drawer) */}
-          <FilterSidebar
-            facets={facets || {}}
-            filters={filters}
-            onFilterChange={handleFilterChange}
-            onReset={handleResetFilters}
-            isOpenMobile={isMobileFiltersOpen}
-            onCloseMobile={() => setIsMobileFiltersOpen(false)}
-          />
+          {/* Pattern A: Collapsible Left Facet Sidebar (Desktop & Mobile Drawer) */}
+          {filterLayout === 'sidebar' && (
+            <FilterSidebar
+              facets={facets || {}}
+              filters={filters}
+              onFilterChange={handleFilterChange}
+              onReset={handleResetFilters}
+              isOpenMobile={isMobileFiltersOpen}
+              onCloseMobile={() => setIsMobileFiltersOpen(false)}
+            />
+          )}
 
           {/* Book Catalog Feed */}
           <div className="flex-1 min-w-0">
-            {/* Search and Filters Bar */}
+            {/* Search and Filters Bar with Layout Switcher */}
             <SearchFilters
               currentLibrary={currentLibrary}
               filters={filters}
@@ -122,7 +126,20 @@ export default function HomePage() {
               onReset={handleResetFilters}
               onOpenMobileFilters={() => setIsMobileFiltersOpen(true)}
               activeFilterCount={activeFilterCount}
+              filterLayout={filterLayout}
+              onToggleFilterLayout={setFilterLayout}
             />
+
+            {/* Pattern B: Modern Command-Bar Popovers */}
+            {filterLayout === 'commandBar' && (
+              <div className="mb-4 p-2 bg-slate-900/50 border border-slate-800/80 rounded-2xl">
+                <CommandBarFilters
+                  facets={facets || {}}
+                  filters={filters}
+                  onFilterChange={handleFilterChange}
+                />
+              </div>
+            )}
 
             {/* Book Grid */}
             <BookGrid
