@@ -2,102 +2,107 @@
 
 # 🗡️ Skalybr
 
-### *The modern, ultra-fast self-hosted e-book server and reader for Calibre libraries.*
+### Modern self-hosted book server for Calibre libraries
 
-[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![Next.js](https://img.shields.io/badge/Next.js_16-black?style=flat-square&logo=next.js&logoColor=white)](https://nextjs.org/)
-[![React 19](https://img.shields.io/badge/React_19-20232A?style=flat-square&logo=react&logoColor=61DAFB)](https://react.dev/)
-[![Tailwind CSS v4](https://img.shields.io/badge/Tailwind_v4-38B2AC?style=flat-square&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
+[![GitHub Release](https://img.shields.io/github/v/release/demeesterroeland/skalybr?style=flat-square&color=blue)](https://github.com/demeesterroeland/skalybr/releases)
+[![CI Status](https://img.shields.io/github/actions/workflow/status/demeesterroeland/skalybr/ci.yml?branch=main&style=flat-square&label=CI)](https://github.com/demeesterroeland/skalybr/actions/workflows/ci.yml)
+[![Docker Image](https://img.shields.io/badge/docker-GHCR-blue?style=flat-square&logo=docker&logoColor=white)](https://github.com/demeesterroeland/skalybr/pkgs/container/skalybr)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-007ACC?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Next.js](https://img.shields.io/badge/Next.js-16-black?style=flat-square&logo=next.js&logoColor=white)](https://nextjs.org/)
 [![better-sqlite3](https://img.shields.io/badge/better--sqlite3-003B57?style=flat-square&logo=sqlite&logoColor=white)](https://github.com/WiseLibs/better-sqlite3)
-[![License](https://img.shields.io/badge/license-GPLv3-blue.svg?style=flat-square)](LICENSE)
+[![License](https://img.shields.io/badge/license-GPLv3-green.svg?style=flat-square)](LICENSE)
 
-[Features](#-features) • [The Story & Legacy](#-the-story--legacy) • [The Name](#-the-name) • [Architecture](#-architecture) • [Getting Started](#-getting-started) • [Roadmap](ROADMAP.md)
+**[Features](#-key-features)** • **[Quick Start](#-quick-start)** • **[Access Control](#-cascading-access-control)** • **[Architecture](#-architecture)** • **[API Reference](#-api--integration)** • **[The Story](#-the-story--legacy)** • **[Roadmap](ROADMAP.md)**
 
 </div>
 
 ---
 
-## 📖 The Story & Legacy
-
-In **October 2006**, Kovid Goyal, a quantum physics graduate student at Caltech, purchased one of the world's first commercial E-Ink devices: the Sony Reader PRS-500. Frustrated that Sony provided only Windows software and locked books behind closed formats, Kovid reverse-engineered the device protocol on Linux and released `libprs500`.
-
-Over the next 17 years, that humble tool evolved into **`calibre`**—the undisputed champion of digital reading sovereignty. While big tech built walled gardens, Calibre gave millions of readers total ownership of their libraries with an open, indestructible SQLite database (`metadata.db`) that has remained backward-compatible for nearly two decades.
-
-**Skalybr** is the modern continuation of this journey. Built for the era of personal home servers, NAS devices, and mobile reading, Skalybr connects directly to your existing Calibre library to provide a lightning-fast, beautiful web app, PWA, and e-reader sync hub.
+**Skalybr** is an open-source, high-performance web server and reading portal designed for Calibre e-book libraries. Inspired by modern self-hosted media servers like **Jellyfin**, **Navidrome**, and **Immich**, Skalybr connects directly to your existing Calibre libraries to provide instant search, multi-library switching, Google Drive-style cascading permissions, and seamless digital reading without vendor lock-in.
 
 ---
 
 ## 🏛️ The Self-Hosted Media Pantheon
 
-Skalybr is designed to be the definitive, gold-standard e-book experience in modern self-hosting:
+Skalybr is built to complete the modern self-hosted home media suite:
 
-| Media Domain | Gold Standard App | Core Tech | Status |
+| Media Domain | Gold Standard Server | Technology | Community |
 | :--- | :--- | :--- | :--- |
-| 🎬 **Movies & TV** | **Jellyfin** | .NET / C# | Active Community |
-| 🎵 **Music** | **Navidrome** | Go + React | Active Community |
-| 📸 **Photos** | **Immich** | TypeScript / Node | Active Community |
-| 📚 **E-Books & Calibre** | **Skalybr** | Next.js / TypeScript (Go-Ready) | 🚀 MVP Released |
+| 🎬 **Movies & TV** | **[Jellyfin](https://jellyfin.org/)** | .NET / C# | Active Community |
+| 🎵 **Music** | **[Navidrome](https://www.navidrome.org/)** | Go + React | Active Community |
+| 📸 **Photos** | **[Immich](https://immich.app/)** | TypeScript / Node | Active Community |
+| 📚 **Books & Calibre** | **Skalybr** | Next.js / TypeScript | 🚀 Active Development |
 
 ---
 
-## 🗡️ What Does "Skalybr" Mean?
+## ✨ Key Features
 
-The name **Skalybr** is a fusion of three legendary concepts:
-
-1. **The Skald**: In Old Norse culture, a *Skald* was the revered bard and poet whose sacred duty was to preserve sagas, knowledge, and history in written verse.
-2. **Excalibur**: The mythical sword drawn from stone—a symbol of supreme craftsmanship, elegance, and liberation.
-3. **Calibre**: The 17-year gold standard for digital book management.
-
-Styled with modern European phonetic simplicity, **`Skalybr`** is your personal saga keeper.
-
----
-
-## ✨ Features & Status
-
-### 🚀 Core Engine & Performance
-- ✅ **Sub-Millisecond SQLite Engine**: Powered by `better-sqlite3` and a flattened read-model (`v_books_flattened`) for instant search, filtering, and paging.
-- ✅ **On-the-Fly WebP Cover Streaming**: Powered by `sharp` (libvips) for high-resolution, low-memory thumbnail resizing.
-- ✅ **Multi-Library Switching**: Seamlessly toggle between multiple Calibre libraries from a single UI.
-
-### 📚 Modern Web Experience & CRUD
-- ✅ **Responsive Book Grid**: Instant search by Title, Author, Series, and Tags with dynamic custom column support (e.g. `#collection`).
-- ✅ **Book Details & Metadata Management**: Clean modal view for reading blurbs, updating metadata, managing formats, and downloading e-books.
-- ✅ **Contract-First OpenAPI 3.1**: Fully documented REST endpoints with interactive Scalar documentation at `/api/reference`.
-
-### 🔄 Multi-Protocol & E-Reader Sync *(In Progress)*
-- 🔄 **OPDS 1.2 Catalog**: Standard XML feed (`/opds`) for Moon+ Reader, FBReader, Thorium, and KyBook.
-- 🔄 **Kobo Wireless Sync**: Direct hardware sync for Kobo e-readers (reading progress, bookmarks, shelves).
-- 📋 **In-Browser E-Readers**: Fullscreen EPUB, PDF.js, and Comic canvas viewers with offline PWA caching.
-- 📋 **User Shelves & Auth**: Multi-user accounts, private/public shelves, and read status tracking (`app.db`).
-- 📋 **Book Ingestion & Scraping**: Multi-file upload, metadata fetching (Google Books / Goodreads), and Send-to-Kindle emailer.
-
-*(For detailed timelines, see [ROADMAP.md](ROADMAP.md))*
+- ⚡ **Sub-Millisecond Engine**: Query millions of records in under 1ms via a flattened SQLite read model (`better-sqlite3`) and zero-lag indexing.
+- 📚 **Multi-Library by Design**: Host unlimited Calibre libraries side-by-side with a Netflix-style library gateway and instant live switching.
+- 🖼️ **On-the-Fly WebP Cover Streaming**: Low-memory, high-fidelity cover generation and resizing powered by `sharp` (libvips).
+- 🛡️ **Cascading ACL ("Ripple-Down")**: Google Drive-style hierarchical permissions (`Global` $\rightarrow$ `Library` $\rightarrow$ `Shelf`) with `Guest`, `Reader`, `Curator`, and `Admin` roles.
+- 👥 **Open Signups with Admin Approval**: Self-service user registration with pending queues and administrative approval flows.
+- 🔍 **Instant Faceted Search**: Multi-field filtering by title, author, series, tags, formats, and custom Calibre columns (`#collection`, etc.).
+- 🔒 **Safe & Non-Destructive**: Reads directly from standard Calibre `metadata.db` files without altering your files, directories, or metadata structures.
+- 🔌 **API-First & Extensible**: Fully typed OpenAPI 3.1 specification with an embedded, interactive Scalar documentation suite at `/api/reference`.
+- 📖 **Modern Reading & Sync (In Progress)**: OPDS 1.2 catalog feeds, Kobo wireless hardware sync, and in-browser reading with per-user progress.
 
 ---
 
-## 🏗️ Architecture
+## 🚀 Quick Start
 
-Skalybr uses a **Modular Monolith** and **API-First (Ports & Adapters)** architecture:
+### Option A: Docker Compose (Recommended)
 
-```
-[ Clients ]                 [ API Ingress Adapters ]            [ Shared Core Engine ]
-Web App / PWA       ----->  /api/v1/* (Modern OpenAPI 3.1)  ──┐
-E-Reader Apps       ----->  /opds/* (OPDS 1.2 XML Feed)     ──┼─>  FlatBookRepository + better-sqlite3
-Kobo Hardware       ----->  /api/v1/kobo/* (Kobo JSON)      ──┤    (Single source of truth)
-Calibre Desktop     ----->  /cdb/* (Calibre Desktop REST)   ──┘
+Create a `docker-compose.yml` file:
+
+```yaml
+services:
+  skalybr:
+    image: ghcr.io/demeesterroeland/skalybr:v0.2.0
+    container_name: skalybr
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - HOSTNAME=0.0.0.0
+      - NODE_ENV=production
+      - DATA_DIR=/app/data
+      - CALIBRE_BASE_DIR=/app/libraries
+      - SESSION_SECRET=replace_with_a_secure_random_string_at_least_32_chars
+    volumes:
+      # Persistent app data (users, ACL grants, reading progress, settings)
+      - ./data:/app/data
+      # Your existing Calibre library folder(s)
+      - /path/to/calibre/libraries:/app/libraries
 ```
 
-> **Go-Ready Architecture**: Because all client interfaces communicate through the OpenAPI 3.1 contract, the backend engine can seamlessly be replaced by a compiled Go binary at any future stage with zero frontend rewrites.
+Start the container:
+
+```bash
+docker compose up -d
+```
+
+Open [http://localhost:3000](http://localhost:3000) in your browser. The first registered user automatically becomes the system administrator!
 
 ---
 
-## 🚀 Getting Started
+### Option B: Docker Run
 
-### Prerequisites
-- Node.js 20+
-- An existing Calibre Library directory containing `metadata.db`
+```bash
+docker run -d \
+  --name skalybr \
+  -p 3000:3000 \
+  -v ./data:/app/data \
+  -v /path/to/calibre/libraries:/app/libraries \
+  -e SESSION_SECRET="your-secure-random-string-min-32-chars" \
+  ghcr.io/demeesterroeland/skalybr:v0.2.0
+```
 
-### Quick Start
+---
+
+### Option C: Local Development
+
 ```bash
 # Clone repository
 git clone https://github.com/demeesterroeland/skalybr.git
@@ -106,29 +111,116 @@ cd skalybr
 # Install dependencies
 npm install
 
-# Run unit tests against your Calibre library
-npm run test
+# Run automated tests
+npm test
 
 # Start development server
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) to view your library, or [http://localhost:3000/api/reference](http://localhost:3000/api/reference) for the interactive API reference.
+---
+
+## 🔐 Cascading Access Control
+
+Skalybr implements an intuitive cascading permissions model:
+
+```
+[ Global Scope: * ]
+        │
+        ▼
+[ Library Scope: library:<name> ]
+        │
+        ▼
+[ Shelf Scope: shelf:<uuid> ]
+```
+
+### Roles & Hierarchy
+
+| Role | Weight | Rights |
+| :--- | :---: | :--- |
+| **Admin** | `3` | Full instance control, user approval, library creation/deletion, global overrides. |
+| **Curator** | `2` | Update book metadata, organize shelves, manage reading lists within granted scope. |
+| **Reader** | `1` | Browse catalog, read books online, and download book files. |
+| **None** | `0` | Explicit denial (overrides higher-level grants to restrict specific resources). |
+| **Guest** | `-` | Unauthenticated access limited exclusively to libraries marked `is_public = 1`. |
+
+- **Inheritance**: A user granted `Reader` globally inherits read access to all libraries and shelves, unless an explicit `None` grant is assigned to a specific child resource.
+- **Elevation**: A user with `Reader` globally can be elevated to `Curator` on a specific library.
 
 ---
 
-## 🗺️ Project Roadmap
+## 🏗️ Architecture
 
-- [x] **Phase 1 (Core MVP)**: Multi-library selector, `v_books_flattened` query engine, responsive grid, `sharp` cover streaming, book metadata CRUD, OpenAPI 3.1 reference.
-- [ ] **Phase 2 (E-Reader Sync)**: OPDS 1.2 XML feed & Kobo wireless sync JSON endpoints.
-- [ ] **Phase 3 (Shelves & Auth)**: User authentication, shelves, and reading progress tracking (`app.db`).
-- [ ] **Phase 4 (In-Browser Readers & PWA)**: Embedded EPUB, PDF.js, Comic viewers, and offline PWA support.
-- [ ] **Phase 5 (Ingestion & Scraping)**: Book uploader, metadata scrapers (Google Books / Goodreads), and Send-to-Kindle emailer.
-- [ ] **Phase 6 (Optional)**: Drop-in Go binary distribution.
+Skalybr is built as a **Modular Monolith** adhering to Ports & Adapters (Hexagonal Architecture):
 
-👉 *See full task breakdown in [ROADMAP.md](ROADMAP.md).*
+```
+┌───────────────────────────────────────────────────────────────┐
+│                      Clients & Protocols                      │
+│   Web App (Next.js)  │  OPDS 1.2 Clients  │  Kobo e-Readers   │
+└───────────────┬──────────────────────┬────────────────────────┘
+                │                      │
+                ▼                      ▼
+┌───────────────────────────────────────────────────────────────┐
+│                     Ingress Adapters                          │
+│   REST API (/api/v1/*)  │  OPDS Feed (/opds)  │  Kobo Sync    │
+└───────────────────────────────┬───────────────────────────────┘
+                                │
+                                ▼
+┌───────────────────────────────────────────────────────────────┐
+│                     Core Engine & Storage                     │
+│  FlatBookRepository (better-sqlite3) │ Sharp Image Pipeline   │
+│  metadata.db (Calibre)               │ skalybr.db (App State) │
+└───────────────────────────────────────────────────────────────┘
+```
+
+- **Calibre Isolation**: Calibre's `metadata.db` remains intact and safe from proprietary schema mutations.
+- **Central Application State**: User accounts, cascading ACL grants, shelves, and reading progress reside in an independent, auto-migrated SQLite database (`skalybr.db`).
+- **Engine Swappability**: Because client adapters communicate through the OpenAPI 3.1 specification, backend engine modules can easily transition to a compiled binary (e.g., Go) in the future without frontend modifications.
+
+---
+
+## 🔌 API & Integration
+
+Skalybr is contract-first. An interactive API playground powered by **Scalar** is hosted directly within every running instance:
+
+- **Interactive Reference**: `http://localhost:3000/api/reference`
+- **OpenAPI 3.1 Specification**: `http://localhost:3000/api/openapi.json`
+
+---
+
+## 📖 The Story & Legacy
+
+In **October 2006**, Kovid Goyal, a quantum physics graduate student at Caltech, purchased one of the world's first commercial E-Ink devices: the Sony Reader PRS-500. Frustrated that Sony provided only Windows software and locked books behind closed formats, Kovid reverse-engineered the device protocol on Linux and released `libprs500`.
+
+Over the next nearly two decades, that project evolved into **Calibre**—the gold standard of digital reading sovereignty. While major tech companies built walled gardens, Calibre gave readers total ownership of their digital libraries with an open SQLite database (`metadata.db`) that has remained backward-compatible across generations.
+
+**Skalybr** is the modern continuation of this philosophy: honoring the durability of Calibre while delivering the polish, speed, and cloud-native self-hosting experience expected of modern software.
+
+---
+
+## 🗡️ The Name
+
+The name **Skalybr** draws inspiration from three elements:
+
+1. **The Skald**: In Old Norse culture, the *Skald* was the revered bard and poet whose duty was to preserve history, sagas, and wisdom in verse.
+2. **Excalibur**: The legendary sword drawn from stone—a symbol of precision craftsmanship and liberation from walled gardens.
+3. **Calibre**: The enduring cornerstone of open digital book management.
+
+---
+
+## 🗺️ Roadmap
+
+- [x] **Phase 1: High-Performance MVP** (`v0.1.0`): FlatBookRepository, sub-millisecond SQLite queries, `sharp` WebP cover streaming, multi-library switcher, OpenAPI 3.1 specification.
+- [x] **Phase 2: RESTful Refactor & Onboarding** (`v0.2.0`): RESTful path routing (`/api/v1/libraries/[library]/...`), Netflix-style library gateway, demo library onboarding, Calibre-Web migration tool.
+- [x] **Phase 3: Database Migrations & Auth Backend**: Zero-downtime atomic migration engine, `iron-session` authentication, bcrypt password hashing, and user DAOs.
+- [x] **Phase 4: Cascading ACL & Route Guards**: Google Drive-style permission hierarchy, protected API route guards, admin user and grant management APIs.
+- [ ] **Phase 5: Frontend Authentication & Admin Panel**: User profile dropdown, login/register modal, admin user approval drawer, cascading permission drawer, and dev `QuickSwitch` persona bar.
+- [ ] **Phase 6: E-Reader Sync & Readers**: OPDS 1.2 catalog feed, Kobo wireless hardware sync, fullscreen browser EPUB/PDF reader, and offline PWA support.
+
+See [ROADMAP.md](ROADMAP.md) for detailed task breakdowns and progress.
 
 ---
 
 ## 📜 License
-GPL-3.0 License. Dedicated to the open-source reading community and the legacy of Calibre.
+
+Distributed under the **GNU General Public License v3.0** (`GPL-3.0`). Dedicated to the open-source reading community and the legacy of Calibre.
