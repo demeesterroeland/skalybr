@@ -5,6 +5,7 @@ import LibrarySelector from './LibrarySelector';
 import LibraryManagerModal from './LibraryManagerModal';
 import { Code2, FolderArchive, Settings } from 'lucide-react';
 import Link from 'next/link';
+import { APP_VERSION } from '@/lib/constants';
 
 interface HeaderProps {
   currentLibrary: string;
@@ -28,8 +29,8 @@ export default function Header({ currentLibrary, onSelectLibrary }: HeaderProps)
                 <span className="text-lg font-bold tracking-tight text-white group-hover:text-sky-300 transition-colors">
                   Skalybr
                 </span>
-                <span className="text-[10px] uppercase font-bold tracking-widest px-1.5 py-0.5 rounded bg-sky-500/10 text-sky-400 border border-sky-500/20">
-                  MVP
+                <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-sky-500/10 text-sky-400 border border-sky-500/20">
+                  v{APP_VERSION}
                 </span>
               </div>
               <p className="text-[11px] text-slate-500 hidden sm:block">Calibre E-Book Platform</p>

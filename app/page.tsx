@@ -9,7 +9,7 @@ import CommandBarFilters from '@/components/CommandBarFilters';
 import BookGrid from '@/components/BookGrid';
 import BookDetailModal from '@/components/BookDetailModal';
 import { BookFlattened, BookListResponse, BookQueryOptions } from '@/lib/types';
-import { DEFAULT_LIBRARY_NAME } from '@/lib/constants';
+import { DEFAULT_LIBRARY_NAME, APP_VERSION } from '@/lib/constants';
 
 // Helper: Parse URL query string into application state
 function parseUrlState(searchStr: string) {
@@ -319,6 +319,24 @@ export default function HomePage() {
           </div>
         </div>
       </main>
+
+      {/* App Footer */}
+      <footer className="border-t border-slate-900/80 py-6 text-xs text-slate-500 mt-auto">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-2">
+          <span>
+            Skalybr <span className="font-mono text-slate-400 font-semibold">v{APP_VERSION}</span> • Self-Hosted Calibre Platform
+          </span>
+          <div className="flex items-center gap-4 text-slate-500 text-[11px]">
+            <a href="/api/reference" className="hover:text-sky-400 transition-colors">
+              API Docs
+            </a>
+            <span>•</span>
+            <a href="/api/openapi.json" className="hover:text-sky-400 transition-colors">
+              OpenAPI JSON
+            </a>
+          </div>
+        </div>
+      </footer>
 
       {/* Book Detail & Edit Modal */}
       <BookDetailModal
