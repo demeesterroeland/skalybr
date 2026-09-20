@@ -62,9 +62,21 @@ export class FlatBookRepository {
       params.push(`%${options.author}%`);
     }
 
+    if (options.authors && options.authors.length > 0) {
+      const orClauses = options.authors.map(() => 'authors LIKE ?');
+      conditions.push(`(${orClauses.join(' OR ')})`);
+      options.authors.forEach((a) => params.push(`%${a}%`));
+    }
+
     if (options.tag) {
       conditions.push('tags LIKE ?');
       params.push(`%${options.tag}%`);
+    }
+
+    if (options.tags && options.tags.length > 0) {
+      const orClauses = options.tags.map(() => 'tags LIKE ?');
+      conditions.push(`(${orClauses.join(' OR ')})`);
+      options.tags.forEach((t) => params.push(`%${t}%`));
     }
 
     if (options.series) {
@@ -72,14 +84,65 @@ export class FlatBookRepository {
       params.push(options.series);
     }
 
+    if (options.seriesList && options.seriesList.length > 0) {
+      const placeholders = options.seriesList.map(() => '?').join(', ');
+      conditions.push(`series_name IN (${placeholders})`);
+      params.push(...options.seriesList);
+    }
+
     if (options.collection) {
       conditions.push('collection = ?');
       params.push(options.collection);
     }
 
+    if (options.collections && options.collections.length > 0) {
+      const placeholders = options.collections.map(() => '?').join(', ');
+      conditions.push(`collection IN (${placeholders})`);
+      params.push(...options.collections);
+    }
+
+    if (options.publisher) {
+      conditions.push('publisher LIKE ?');
+      params.push(`%${options.publisher}%`);
+    }
+
+    if (options.publishers && options.publishers.length > 0) {
+      const orClauses = options.publishers.map(() => 'publisher LIKE ?');
+      conditions.push(`(${orClauses.join(' OR ')})`);
+      options.publishers.forEach((p) => params.push(`%${p}%`));
+    }
+
+    if (options.language) {
+      conditions.push('language = ?');
+      params.push(options.language);
+    }
+
+    if (options.languages && options.languages.length > 0) {
+      const placeholders = options.languages.map(() => '?').join(', ');
+      conditions.push(`language IN (${placeholders})`);
+      params.push(...options.languages);
+    }
+
     if (options.format) {
       conditions.push('formats LIKE ?');
       params.push(`%${options.format}%`);
+    }
+
+    if (options.formats && options.formats.length > 0) {
+      const orClauses = options.formats.map(() => 'formats LIKE ?');
+      conditions.push(`(${orClauses.join(' OR ')})`);
+      options.formats.forEach((f) => params.push(`%${f}%`));
+    }
+
+    if (options.rating !== undefined) {
+      conditions.push('rating >= ?');
+      params.push(options.rating);
+    }
+
+    if (options.ratings && options.ratings.length > 0) {
+      const placeholders = options.ratings.map(() => '?').join(', ');
+      conditions.push(`rating IN (${placeholders})`);
+      params.push(...options.ratings);
     }
 
     const whereClause = conditions.join(' AND ');
@@ -195,10 +258,13 @@ export class FlatBookRepository {
 
   public getFilterFacets(): {
     authors: { name: string; count: number }[];
-    tags: { name: string; count: number }[];
+    languages: { name: string; count: number }[];
     series: { name: string; count: number }[];
-    collections: { name: string; count: number }[];
     formats: { name: string; count: number }[];
+    publishers: { name: string; count: number }[];
+    ratings: { name: string; rating: number; count: number }[];
+    tags: { name: string; count: number }[];
+    collections: { name: string; count: number }[];
   } {
     const db = getDatabaseConnection(this.libraryPath);
 
@@ -209,18 +275,16 @@ export class FlatBookRepository {
         JOIN books_authors_link bal ON bal.author = a.id
         GROUP BY a.id
         ORDER BY count DESC, a.name ASC
-        LIMIT 50
       `)
       .all() as any[];
 
-    const tags = db
+    const languages = db
       .prepare(`
-        SELECT t.name, count(btl.book) as count
-        FROM tags t
-        JOIN books_tags_link btl ON btl.tag = t.id
-        GROUP BY t.id
-        ORDER BY count DESC, t.name ASC
-        LIMIT 50
+        SELECT l.lang_code as name, count(bll.book) as count
+        FROM languages l
+        JOIN books_languages_link bll ON bll.lang_code = l.id
+        GROUP BY l.id
+        ORDER BY count DESC, l.lang_code ASC
       `)
       .all() as any[];
 
@@ -231,7 +295,51 @@ export class FlatBookRepository {
         JOIN books_series_link bsl ON bsl.series = s.id
         GROUP BY s.id
         ORDER BY count DESC, s.name ASC
-        LIMIT 50
+      `)
+      .all() as any[];
+
+    const formats = db
+      .prepare(`
+        SELECT d.format as name, count(d.book) as count
+        FROM data d
+        GROUP BY d.format
+        ORDER BY count DESC
+      `)
+      .all() as any[];
+
+    const publishers = db
+      .prepare(`
+        SELECT p.name, count(bpl.book) as count
+        FROM publishers p
+        JOIN books_publishers_link bpl ON bpl.publisher = p.id
+        GROUP BY p.id
+        ORDER BY count DESC, p.name ASC
+      `)
+      .all() as any[];
+
+    const ratingsRaw = db
+      .prepare(`
+        SELECT r.rating as rawRating, count(brl.book) as count
+        FROM ratings r
+        JOIN books_ratings_link brl ON brl.rating = r.id
+        GROUP BY r.id
+        ORDER BY r.rating DESC
+      `)
+      .all() as any[];
+
+    const ratings = ratingsRaw.map((r) => ({
+      name: `${(r.rawRating / 2).toFixed(1)} Stars`,
+      rating: r.rawRating / 2,
+      count: r.count,
+    }));
+
+    const tags = db
+      .prepare(`
+        SELECT t.name, count(btl.book) as count
+        FROM tags t
+        JOIN books_tags_link btl ON btl.tag = t.id
+        GROUP BY t.id
+        ORDER BY count DESC, t.name ASC
       `)
       .all() as any[];
 
@@ -252,16 +360,7 @@ export class FlatBookRepository {
         .all() as any[];
     }
 
-    const formats = db
-      .prepare(`
-        SELECT d.format as name, count(d.book) as count
-        FROM data d
-        GROUP BY d.format
-        ORDER BY count DESC
-      `)
-      .all() as any[];
-
-    return { authors, tags, series, collections, formats };
+    return { authors, languages, series, formats, publishers, ratings, tags, collections };
   }
 
   public updateBookMetadata(id: number, input: UpdateBookInput): BookFlattened | null {

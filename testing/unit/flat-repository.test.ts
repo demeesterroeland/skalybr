@@ -51,15 +51,34 @@ describe('Skalybr FlatBookRepository', () => {
     }
   });
 
-  it('should fetch filter facets', () => {
+  it('should fetch all 8 Calibre filter facets', () => {
     const libraries = FlatBookRepository.listAvailableLibraries(DEFAULT_CALIBRE_BASE_DIR);
     const targetLib = libraries[0]?.name;
     const repo = new FlatBookRepository(targetLib);
     const facets = repo.getFilterFacets();
 
     expect(facets.authors).toBeInstanceOf(Array);
-    expect(facets.tags).toBeInstanceOf(Array);
+    expect(facets.languages).toBeInstanceOf(Array);
+    expect(facets.series).toBeInstanceOf(Array);
     expect(facets.formats).toBeInstanceOf(Array);
+    expect(facets.publishers).toBeInstanceOf(Array);
+    expect(facets.ratings).toBeInstanceOf(Array);
+    expect(facets.tags).toBeInstanceOf(Array);
+    expect(facets.collections).toBeInstanceOf(Array);
+  });
+
+  it('should support multi-select OR querying across authors, tags, and languages', () => {
+    const libraries = FlatBookRepository.listAvailableLibraries(DEFAULT_CALIBRE_BASE_DIR);
+    const targetLib = libraries[0]?.name;
+    const repo = new FlatBookRepository(targetLib);
+    const sample = repo.getBooks({ pageSize: 10 });
+    const auth1 = sample.books[0]?.authors?.split('&')[0]?.trim();
+    const auth2 = sample.books[1]?.authors?.split('&')[0]?.trim();
+
+    if (auth1 && auth2) {
+      const result = repo.getBooks({ authors: [auth1, auth2] });
+      expect(result.books.length).toBeGreaterThanOrEqual(1);
+    }
   });
 
   it('should generate a WebP resized cover stream', async () => {

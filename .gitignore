@@ -19,5 +19,5 @@ coverage/
 *.sqlite-shm
 demo-library/
 boox/
-books/
+/books/
 
