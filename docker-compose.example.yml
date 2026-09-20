@@ -1,0 +1,16 @@
+services:
+  skalybr:
+    image: ghcr.io/demeesterroeland/skalybr:v0.1.0
+    container_name: skalybr
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - CALIBRE_BASE_DIR=/libraries
+    volumes:
+      # Mount your Calibre libraries root folder containing your libraries
+      - ./libraries:/libraries
+      # Optional: persist app library settings
+      - ./data/.skalybr-libraries.json:/app/.skalybr-libraries.json

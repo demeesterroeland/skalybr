@@ -1,0 +1,12 @@
+node_modules
+.next
+.git
+*.log
+.env.local
+.env*.local
+.env
+boox
+DRM
+demo-library
+*.zip
+*.tar.gz

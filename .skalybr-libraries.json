@@ -1,6 +1,7 @@
 {
   "hiddenLibraries": [],
   "customNames": {
-    "DRM": "DRM"
+    "DRM": "DRM",
+    "demo-library/demo": "demo-library"
   }
 }
