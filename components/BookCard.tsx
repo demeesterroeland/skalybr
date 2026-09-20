@@ -17,7 +17,7 @@ export default function BookCard({ book, libraryName, onClick }: BookCardProps) 
   const timestamp = book.timestamp ? new Date(book.timestamp).getTime() : Date.now();
   const coverUrl = `/api/v1/books/${book.id}/cover?library=${encodeURIComponent(
     libraryName
-  )}&width=360&format=webp&v=${encodeURIComponent(book.uuid || String(book.id))}`;
+  )}&width=360&format=webp&v=${encodeURIComponent(book.uuid || String(book.id))}_${book.hasCover ? 1 : 0}_${timestamp}`;
 
   const formatList = book.formats ? book.formats.split(',').filter(Boolean) : [];
 
