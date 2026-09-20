@@ -52,6 +52,30 @@ export function normalizeCloudDownloadUrl(inputUrl: string): string {
       }
     }
 
+    // 3. OneDrive short links (1drv.ms) -> Microsoft Graph shares API
+    if (u.hostname === '1drv.ms' || u.hostname.endsWith('.1drv.ms')) {
+      const base64 = Buffer.from(inputUrl.trim()).toString('base64')
+        .replace(/\+/g, '-')
+        .replace(/\//g, '_')
+        .replace(/=+$/, '');
+      return `https://api.onedrive.com/v1.0/shares/u!${base64}/root/content`;
+    }
+
+    // 4. OneDrive Live (onedrive.live.com)
+    if (u.hostname.includes('onedrive.live.com')) {
+      if (u.pathname.includes('/redir')) {
+        u.pathname = u.pathname.replace('/redir', '/download');
+      }
+      u.searchParams.set('download', '1');
+      return u.toString();
+    }
+
+    // 5. SharePoint / OneDrive for Business (*.sharepoint.com)
+    if (u.hostname.includes('sharepoint.com')) {
+      u.searchParams.set('download', '1');
+      return u.toString();
+    }
+
     return inputUrl.trim();
   } catch {
     return inputUrl.trim();
@@ -85,18 +109,52 @@ export async function downloadRemoteZip(
     return { error: 'Invalid URL target.' };
   }
 
+  // Pre-flight check: Try a lightweight HEAD request first to inspect Content-Length without downloading
+  try {
+    const headRes = await fetch(normalized, {
+      method: 'HEAD',
+      headers: { 'User-Agent': 'Skalybr/0.1.0 (Calibre Library Importer)' },
+      redirect: 'follow',
+      signal: AbortSignal.timeout(8000),
+    });
+    if (headRes.ok) {
+      const cl = headRes.headers.get('content-length');
+      if (cl) {
+        const size = parseInt(cl, 10);
+        if (!isNaN(size) && size > maxBytes) {
+          const sizeMb = (size / (1024 * 1024)).toFixed(1);
+          const maxMb = Math.round(maxBytes / (1024 * 1024));
+          return {
+            error: `Remote file size (${sizeMb} MB) exceeds maximum limit of ${maxMb} MB. Aborted before download.`,
+          };
+        }
+      }
+    }
+  } catch {
+    // Proceed to GET if server rejects HEAD or times out
+  }
+
   const response = await fetch(normalized, {
     headers: { 'User-Agent': 'Skalybr/0.1.0 (Calibre Library Importer)' },
     redirect: 'follow',
+    signal: AbortSignal.timeout(180000),
   });
 
   if (!response.ok) {
     return { error: `Failed to download remote file: HTTP ${response.status} ${response.statusText}` };
   }
 
+  // Check Content-Length on GET response before reading body stream
   const contentLength = response.headers.get('content-length');
-  if (contentLength && parseInt(contentLength, 10) > maxBytes) {
-    return { error: `Remote file size exceeds maximum limit of ${Math.round(maxBytes / 1024 / 1024)}MB.` };
+  if (contentLength) {
+    const size = parseInt(contentLength, 10);
+    if (!isNaN(size) && size > maxBytes) {
+      const sizeMb = (size / (1024 * 1024)).toFixed(1);
+      const maxMb = Math.round(maxBytes / (1024 * 1024));
+      return {
+        error: `Remote file size (${sizeMb} MB) exceeds maximum limit of ${maxMb} MB. Aborted before download.`,
+      };
+    }
   }
 
   if (!response.body) {

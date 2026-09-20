@@ -32,6 +32,8 @@ export interface LibraryInfo {
   isHidden?: boolean;
   isDefault?: boolean;
   avatarImage?: string | null;
+  sizeBytes?: number;
+  sizeFormatted?: string;
 }
 
 export interface LibraryRecord {

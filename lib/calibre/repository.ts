@@ -6,6 +6,37 @@ import { getLibrarySettings } from '../library-settings';
 import { getLibraryByName, upsertLibraryRecord } from '../db/skalybr-db';
 import { BookFlattened, BookListResponse, BookQueryOptions, LibraryInfo, UpdateBookInput } from '../types';
 
+export function calculateDirectorySize(dirPath: string): number {
+  let total = 0;
+  function walk(current: string) {
+    try {
+      const entries = fs.readdirSync(current, { withFileTypes: true });
+      for (const entry of entries) {
+        if (entry.isSymbolicLink()) continue;
+        const full = path.join(current, entry.name);
+        if (entry.isDirectory()) {
+          walk(full);
+        } else if (entry.isFile()) {
+          try {
+            total += fs.statSync(full).size;
+          } catch {}
+        }
+      }
+    } catch {}
+  }
+  walk(dirPath);
+  return total;
+}
+
+export function formatBytes(bytes: number): string {
+  if (!bytes || bytes <= 0) return '0 B';
+  const k = 1024;
+  const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  const val = parseFloat((bytes / Math.pow(k, i)).toFixed(1));
+  return `${val} ${sizes[i]}`;
+}
+
 export class FlatBookRepository {
   private libraryPath: string;
 
@@ -51,6 +82,9 @@ export class FlatBookRepository {
           const isHidden = dbRecord.isHidden;
           const isDefault = dbRecord.isDefault;
 
+          const sizeBytes = calculateDirectorySize(fullPath);
+          const sizeFormatted = formatBytes(sizeBytes);
+
           if (!isHidden || includeHidden) {
             libraries.push({
               name,
@@ -61,6 +95,8 @@ export class FlatBookRepository {
               isHidden,
               isDefault,
               avatarImage: dbRecord.avatarImage,
+              sizeBytes,
+              sizeFormatted,
             });
           }
         } catch (e) {

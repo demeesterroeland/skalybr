@@ -20,6 +20,19 @@ describe('Remote Library Download & Cloud URL Normalization', () => {
     expect(normalized).toBe(raw);
   });
 
+  it('should normalize OneDrive short links (1drv.ms) using Microsoft Graph shares API', () => {
+    const raw = 'https://1drv.ms/u/s!Alq0j_test123';
+    const normalized = normalizeCloudDownloadUrl(raw);
+    expect(normalized).toContain('https://api.onedrive.com/v1.0/shares/u!');
+    expect(normalized).toContain('/root/content');
+  });
+
+  it('should normalize OneDrive live links to download=1', () => {
+    const raw = 'https://onedrive.live.com/?cid=12345&id=67890';
+    const normalized = normalizeCloudDownloadUrl(raw);
+    expect(normalized).toContain('download=1');
+  });
+
   it('should reject non-http/https protocols for SSRF prevention', async () => {
     const res = await downloadRemoteZip('file:///etc/passwd', 1000);
     expect(res.error).toBe('Only HTTP and HTTPS URLs are supported.');
@@ -34,5 +47,23 @@ describe('Remote Library Download & Cloud URL Normalization', () => {
 
     const res3 = await downloadRemoteZip('http://169.254.169.254/latest/meta-data/', 1000);
     expect(res3.error).toBe('Invalid URL target.');
+  });
+});
+
+import { calculateDirectorySize, formatBytes } from '../../lib/calibre/repository';
+
+describe('Library Disk Size Utilities', () => {
+  it('should format bytes accurately', () => {
+    expect(formatBytes(0)).toBe('0 B');
+    expect(formatBytes(1024)).toBe('1 KB');
+    expect(formatBytes(1024 * 1024 * 14.5)).toBe('14.5 MB');
+    expect(formatBytes(1024 * 1024 * 1024 * 2.3)).toBe('2.3 GB');
+  });
+
+  it('should calculate directory size correctly for demo library', () => {
+    const size = calculateDirectorySize('./libraries/demo');
+    expect(size).toBeGreaterThan(0);
+    const formatted = formatBytes(size);
+    expect(formatted).toMatch(/(MB|KB|GB)/);
   });
 });

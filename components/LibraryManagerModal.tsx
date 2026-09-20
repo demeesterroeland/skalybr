@@ -375,7 +375,7 @@ export default function LibraryManagerModal({
                         />
                       </div>
                       <p className="text-[11px] text-slate-500">
-                        Supports direct download URLs, Dropbox links (<code className="text-sky-400">?dl=0/1</code>), and Google Drive share links (up to {maxLimitLabel}).
+                        Supports direct download URLs, Dropbox links (<code className="text-sky-400">?dl=0/1</code>), Google Drive, and OneDrive share links (up to {maxLimitLabel}).
                       </p>
                     </div>
                   )}
@@ -439,8 +439,9 @@ export default function LibraryManagerModal({
                       <thead className="bg-slate-900/90 text-slate-400 uppercase text-[10px] font-semibold border-b border-slate-800">
                         <tr>
                           <th className="py-2.5 px-3.5">Library</th>
-                          <th className="py-2.5 px-3 w-24 text-center">Books</th>
-                          <th className="py-2.5 px-3 w-24 text-center">Status</th>
+                          <th className="py-2.5 px-3 w-20 text-center">Books</th>
+                          <th className="py-2.5 px-3 w-24 text-center">Disk Size</th>
+                          <th className="py-2.5 px-3 w-20 text-center">Status</th>
                           <th className="py-2.5 px-3.5 text-right w-44">Actions</th>
                         </tr>
                       </thead>
@@ -510,6 +511,13 @@ export default function LibraryManagerModal({
                               <td className="py-3 px-3 text-center font-mono">
                                 <span className="bg-slate-900 border border-slate-800 px-2 py-0.5 rounded text-[11px]">
                                   {lib.bookCount}
+                                </span>
+                              </td>
+
+                              {/* Disk Size */}
+                              <td className="py-3 px-3 text-center font-mono">
+                                <span className="text-slate-400 bg-slate-900/80 border border-slate-800 px-2 py-0.5 rounded text-[11px]">
+                                  {lib.sizeFormatted || '—'}
                                 </span>
                               </td>
 
