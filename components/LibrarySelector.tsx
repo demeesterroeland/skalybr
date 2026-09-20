@@ -26,26 +26,27 @@ export default function LibrarySelector({
     },
   });
 
-  const active =
-    libraries.find((l) => l.name === currentLibrary) || {
-      name: currentLibrary,
-      displayName: currentLibrary,
-      bookCount: 0,
-      path: '',
-      hasCustomColumns: false,
-    };
+  const active = libraries.find((l) => l.name === currentLibrary);
 
   return (
     <DropdownMenu.Root>
       <DropdownMenu.Trigger asChild>
         <button className="flex items-center gap-2.5 px-3.5 py-1.5 rounded-lg bg-slate-900 border border-slate-800 hover:border-slate-700 text-sm font-medium transition-all text-slate-200 hover:text-white shadow-sm cursor-pointer">
           <BookOpen className="w-4 h-4 text-sky-400" />
-          <span className="max-w-[140px] sm:max-w-[200px] truncate">
-            {active.displayName || active.name}
-          </span>
-          {active.bookCount > 0 && (
-            <span className="text-xs bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded-md font-mono">
-              {active.bookCount}
+          {active ? (
+            <>
+              <span className="max-w-[140px] sm:max-w-[200px] truncate">
+                {active.displayName || active.name}
+              </span>
+              {active.bookCount > 0 && (
+                <span className="text-xs bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded-md font-mono">
+                  {active.bookCount}
+                </span>
+              )}
+            </>
+          ) : (
+            <span className="max-w-[140px] sm:max-w-[200px] truncate text-sky-300 font-medium">
+              &lt; select a library &gt;
             </span>
           )}
           <ChevronDown className="w-3.5 h-3.5 text-slate-500 ml-1" />

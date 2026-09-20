@@ -84,6 +84,21 @@ export default function BookGrid({
     );
   }
 
+  // No Library Selected State
+  if (!libraryName) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 text-center bg-slate-900/30 border border-slate-800/60 rounded-2xl p-8 shadow-sm">
+        <div className="w-16 h-16 rounded-2xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center mb-4">
+          <BookDashed className="w-8 h-8 text-sky-400" />
+        </div>
+        <h3 className="text-lg font-bold text-slate-200">&lt; Select a Library &gt;</h3>
+        <p className="text-sm text-slate-400 max-w-sm mt-1">
+          Choose a Calibre library from the dropdown in the header to browse and search your books.
+        </p>
+      </div>
+    );
+  }
+
   // Empty State
   if (books.length === 0) {
     return (

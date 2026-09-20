@@ -162,22 +162,27 @@ export default function HomePage() {
   const { data: facets } = useQuery({
     queryKey: ['facets', currentLibrary],
     queryFn: async () => {
+      if (!currentLibrary) return {};
       const res = await fetch(`/api/v1/facets?library=${encodeURIComponent(currentLibrary)}`);
       const json = await res.json();
       return json.data || {};
     },
+    enabled: Boolean(currentLibrary),
   });
 
   // Infinite Query for seamless scrolling / lazy loading
   const {
     data,
-    isLoading,
+    isLoading: isBooksLoading,
     isFetchingNextPage,
     hasNextPage,
     fetchNextPage,
   } = useInfiniteQuery<BookListResponse>({
     queryKey: ['books', currentLibrary, filters],
     queryFn: async ({ pageParam = 1 }) => {
+      if (!currentLibrary) {
+        return { books: [], total: 0, page: 1, pageSize: 30, totalPages: 1 };
+      }
       const queryParams = new URLSearchParams();
       queryParams.set('library', currentLibrary);
       if (filters.search) queryParams.set('search', filters.search);
@@ -207,6 +212,7 @@ export default function HomePage() {
       const json = await res.json();
       return json.data || { books: [], total: 0, page: Number(pageParam), pageSize: 30, totalPages: 1 };
     },
+    enabled: Boolean(currentLibrary),
     initialPageParam: 1,
     getNextPageParam: (lastPage) => {
       if (lastPage.page < lastPage.totalPages) {
@@ -216,6 +222,7 @@ export default function HomePage() {
     },
   });
 
+  const isLoading = Boolean(currentLibrary) && isBooksLoading;
   const books = data?.pages.flatMap((page) => page.books) || [];
   const total = data?.pages[0]?.total || 0;
 
