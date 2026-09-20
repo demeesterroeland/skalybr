@@ -18,3 +18,6 @@ coverage/
 *.sqlite-wal
 *.sqlite-shm
 demo-library/
+boox/
+books/
+
