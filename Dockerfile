@@ -25,17 +25,19 @@ ENV NODE_ENV=production \
     PORT=3000 \
     HOSTNAME=0.0.0.0 \
     NEXT_TELEMETRY_DISABLED=1 \
-    CALIBRE_BASE_DIR=/app/libraries
+    CALIBRE_BASE_DIR=/app/libraries \
+    MIGRATIONS_DIR=/app/migrations
 
 RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 nextjs
 
-RUN mkdir -p /app/libraries && chown -R nextjs:nodejs /app
+RUN mkdir -p /app/data /app/libraries && chown -R nextjs:nodejs /app
 
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/demo-library ./demo-library
+COPY --from=builder --chown=nextjs:nodejs /app/data/migrations ./migrations
 
 USER nextjs
 EXPOSE 3000

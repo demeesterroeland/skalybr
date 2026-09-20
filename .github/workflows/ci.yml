@@ -24,6 +24,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Validate Migration Filenames and SQL Syntax
+        run: npx vitest run testing/unit/migrations.test.ts
+
       - name: Run Unit Tests
         run: npm test
 
