@@ -82,11 +82,42 @@ export function normalizeCloudDownloadUrl(inputUrl: string): string {
   }
 }
 
+export async function resolveDirectDownloadUrl(inputUrl: string): Promise<string> {
+  const normalized = normalizeCloudDownloadUrl(inputUrl);
+  try {
+    const u = new URL(normalized);
+    if (u.hostname.includes('drive.google.com') || u.hostname.includes('drive.usercontent.google.com')) {
+      const res = await fetch(normalized, {
+        headers: { 'User-Agent': 'Skalybr/0.1.0 (Calibre Library Importer)' },
+        redirect: 'follow',
+        signal: AbortSignal.timeout(8000),
+      });
+
+      const contentType = res.headers.get('content-type') || '';
+      if (contentType.includes('text/html')) {
+        const html = await res.text();
+        if (html.includes('uc-warning-caption') || html.includes('download-form')) {
+          const formActionMatch = html.match(/<form id="download-form" action="([^"]+)"/);
+          const uuidMatch = html.match(/<input type="hidden" name="uuid" value="([^"]+)"/);
+          const idMatch = normalized.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+          const id = idMatch ? idMatch[1] : '';
+          const formAction = formActionMatch ? formActionMatch[1] : 'https://drive.usercontent.google.com/download';
+          const uuid = uuidMatch ? uuidMatch[1] : '';
+          if (id && uuid) {
+            return `${formAction}?id=${id}&export=download&confirm=t&uuid=${uuid}`;
+          }
+        }
+      }
+    }
+  } catch {}
+  return normalized;
+}
+
 export async function downloadRemoteZip(
   urlStr: string,
   maxBytes: number
 ): Promise<{ buffer?: Buffer; error?: string }> {
-  const normalized = normalizeCloudDownloadUrl(urlStr);
+  const normalized = await resolveDirectDownloadUrl(urlStr);
   let parsed: URL;
   try {
     parsed = new URL(normalized);

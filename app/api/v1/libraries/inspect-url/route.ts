@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { normalizeCloudDownloadUrl } from '../route';
+import { normalizeCloudDownloadUrl, resolveDirectDownloadUrl } from '../route';
 import { formatBytes } from '@/lib/calibre/repository';
 import path from 'path';
 
@@ -67,7 +67,7 @@ export async function POST(req: NextRequest) {
       ? parseInt(process.env.MAX_UPLOAD_SIZE_MB, 10) * 1024 * 1024
       : 1024 * 1024 * 1024;
 
-    const normalized = normalizeCloudDownloadUrl(rawUrl);
+    const normalized = await resolveDirectDownloadUrl(rawUrl);
 
     let statusCode = 200;
     let filename: string | null = null;
