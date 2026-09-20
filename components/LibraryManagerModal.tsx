@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { LibraryInfo } from '@/lib/types';
 import * as Dialog from '@radix-ui/react-dialog';
@@ -19,8 +19,18 @@ import {
   Loader2,
   Plus,
   Globe,
+  CheckCircle2,
+  AlertCircle,
 } from 'lucide-react';
 import { toast } from 'sonner';
+
+interface UrlInspection {
+  status: 'idle' | 'checking' | 'reachable' | 'error';
+  filename?: string | null;
+  sizeFormatted?: string | null;
+  isOverLimit?: boolean;
+  error?: string | null;
+}
 
 interface LibraryManagerModalProps {
   isOpen: boolean;
@@ -44,6 +54,7 @@ export default function LibraryManagerModal({
   const [customLibName, setCustomLibName] = useState('');
   const [customDisplayName, setCustomDisplayName] = useState('');
   const [isUploading, setIsUploading] = useState(false);
+  const [urlInspection, setUrlInspection] = useState<UrlInspection>({ status: 'idle' });
 
   // Rename editing state
   const [editingLib, setEditingLib] = useState<string | null>(null);
@@ -73,6 +84,62 @@ export default function LibraryManagerModal({
   const maxLimitLabel = maxUploadSizeMb >= 1024
     ? `${(maxUploadSizeMb / 1024).toFixed(maxUploadSizeMb % 1024 === 0 ? 0 : 1)} GB`
     : `${maxUploadSizeMb} MB`;
+
+  // Probe Remote URL on change to detect reachability, filename & size
+  useEffect(() => {
+    if (uploadMode !== 'url' || !remoteUrl.trim()) {
+      setUrlInspection({ status: 'idle' });
+      return;
+    }
+
+    const trimmed = remoteUrl.trim();
+    if (!trimmed.startsWith('http://') && !trimmed.startsWith('https://')) {
+      setUrlInspection({ status: 'idle' });
+      return;
+    }
+
+    setUrlInspection({ status: 'checking' });
+
+    const timer = setTimeout(async () => {
+      try {
+        const res = await fetch('/api/v1/libraries/inspect-url', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url: trimmed }),
+        });
+        const json = await res.json();
+
+        if (json.reachable) {
+          setUrlInspection({
+            status: 'reachable',
+            filename: json.filename,
+            sizeFormatted: json.sizeFormatted,
+            isOverLimit: json.isOverLimit,
+          });
+
+          // Auto-populate custom names if empty
+          if (json.suggestedDisplayName) {
+            setCustomDisplayName((prev) => (!prev ? json.suggestedDisplayName : prev));
+          }
+          if (json.suggestedName) {
+            setCustomLibName((prev) => (!prev ? json.suggestedName : prev));
+          }
+        } else {
+          setUrlInspection({
+            status: 'error',
+            error: json.error || 'URL could not be reached.',
+          });
+        }
+      } catch (err: any) {
+        setUrlInspection({
+          status: 'error',
+          error: err.message || 'Inspection request failed.',
+        });
+      }
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [remoteUrl, uploadMode]);
 
   // Handle Upload or Remote URL Import
   const handleUploadSubmit = async (e: React.FormEvent) => {
@@ -374,6 +441,48 @@ export default function LibraryManagerModal({
                           className="w-full pl-9 pr-3 py-2 bg-slate-900 border border-slate-800 rounded-lg text-xs text-slate-200 placeholder:text-slate-600 focus:outline-none focus:border-sky-500"
                         />
                       </div>
+
+                      {/* URL Inspection Status Card */}
+                      {urlInspection.status === 'checking' && (
+                        <div className="flex items-center gap-2 text-xs text-sky-400 bg-sky-500/10 border border-sky-500/20 px-3 py-2 rounded-xl">
+                          <Loader2 className="w-3.5 h-3.5 animate-spin text-sky-400 shrink-0" />
+                          <span>Checking link reachability, filename & size...</span>
+                        </div>
+                      )}
+
+                      {urlInspection.status === 'reachable' && (
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs bg-emerald-500/10 border border-emerald-500/25 px-3 py-2 rounded-xl text-emerald-300">
+                          <div className="flex items-center gap-2 truncate">
+                            <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                            <span className="font-semibold text-emerald-400">Reachable</span>
+                            {urlInspection.filename && (
+                              <span className="font-mono text-emerald-200 truncate" title={urlInspection.filename}>
+                                &bull; {urlInspection.filename}
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-2 shrink-0">
+                            {urlInspection.sizeFormatted && (
+                              <span className="font-mono font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                                {urlInspection.sizeFormatted}
+                              </span>
+                            )}
+                            {urlInspection.isOverLimit ? (
+                              <span className="text-rose-400 font-bold">⚠️ Exceeds {maxLimitLabel} limit!</span>
+                            ) : (
+                              <span className="text-[11px] text-emerald-400/90 font-medium">✓ Ready to import</span>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
+                      {urlInspection.status === 'error' && (
+                        <div className="flex items-start gap-2 text-xs bg-rose-500/10 border border-rose-500/25 px-3 py-2 rounded-xl text-rose-300">
+                          <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
+                          <span className="leading-relaxed">{urlInspection.error}</span>
+                        </div>
+                      )}
+
                       <p className="text-[11px] text-slate-500">
                         Supports direct download URLs, Dropbox links (<code className="text-sky-400">?dl=0/1</code>), Google Drive, and OneDrive share links (up to {maxLimitLabel}).
                       </p>
@@ -409,7 +518,12 @@ export default function LibraryManagerModal({
 
                   <button
                     type="submit"
-                    disabled={isUploading || (uploadMode === 'file' ? !uploadFile : !remoteUrl.trim())}
+                    disabled={
+                      isUploading ||
+                      (uploadMode === 'file'
+                        ? !uploadFile || uploadFile.size > maxUploadSizeMb * 1024 * 1024
+                        : !remoteUrl.trim() || urlInspection.status === 'checking' || urlInspection.isOverLimit)
+                    }
                     className="flex items-center justify-center gap-2 w-full sm:w-auto px-5 py-2 bg-sky-500 hover:bg-sky-400 text-white rounded-xl text-xs font-bold transition-all disabled:opacity-50 cursor-pointer shadow-sm shadow-sky-500/20"
                   >
                     {isUploading ? (

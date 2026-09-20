@@ -140,6 +140,12 @@ export async function downloadRemoteZip(
     signal: AbortSignal.timeout(180000),
   });
 
+  if (response.url && response.url.includes('accounts.google.com')) {
+    return {
+      error: 'Google Drive requires sign-in. This file is private. Please set link sharing to "Anyone with the link can view".',
+    };
+  }
+
   if (!response.ok) {
     return { error: `Failed to download remote file: HTTP ${response.status} ${response.statusText}` };
   }

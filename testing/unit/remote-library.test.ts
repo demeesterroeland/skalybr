@@ -67,3 +67,24 @@ describe('Library Disk Size Utilities', () => {
     expect(formatted).toMatch(/(MB|KB|GB)/);
   });
 });
+
+import { parseContentDisposition } from '../../app/api/v1/libraries/inspect-url/route';
+
+describe('Content-Disposition Parsing', () => {
+  it('should parse plain filename', () => {
+    expect(parseContentDisposition('attachment; filename=library.zip')).toBe('library.zip');
+  });
+
+  it('should parse quoted filename with spaces', () => {
+    expect(parseContentDisposition('attachment; filename="My Calibre Library.zip"')).toBe('My Calibre Library.zip');
+  });
+
+  it('should parse UTF-8 encoded filename', () => {
+    expect(parseContentDisposition("attachment; filename*=UTF-8''Sci%20Fi%20Vault.zip")).toBe('Sci Fi Vault.zip');
+  });
+
+  it('should handle null/empty header gracefully', () => {
+    expect(parseContentDisposition(null)).toBeNull();
+    expect(parseContentDisposition('')).toBeNull();
+  });
+});
