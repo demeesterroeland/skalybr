@@ -270,30 +270,33 @@ export default function HomePage() {
 
           {/* Book Catalog Feed */}
           <div className="flex-1 min-w-0">
-            {/* Search and Filters Bar with Layout Switcher */}
-            <SearchFilters
-              currentLibrary={currentLibrary}
-              filters={filters}
-              onFilterChange={handleFilterChange}
-              onReset={handleResetFilters}
-              onOpenMobileFilters={() => setIsMobileFiltersOpen(true)}
-              activeFilterCount={activeFilterCount}
-              filterLayout={filterLayout}
-              onToggleFilterLayout={setFilterLayout}
-              viewMode={viewMode}
-              onToggleViewMode={setViewMode}
-            />
+            {/* Sticky Search, Controls & Filter Toolbar */}
+            <div className="sticky top-16 z-30 bg-slate-950/95 backdrop-blur-md pt-1 pb-3.5 mb-5 border-b border-slate-800/60 shadow-md shadow-slate-950/40">
+              {/* Search and Filters Bar with Layout Switcher */}
+              <SearchFilters
+                currentLibrary={currentLibrary}
+                filters={filters}
+                onFilterChange={handleFilterChange}
+                onReset={handleResetFilters}
+                onOpenMobileFilters={() => setIsMobileFiltersOpen(true)}
+                activeFilterCount={activeFilterCount}
+                filterLayout={filterLayout}
+                onToggleFilterLayout={setFilterLayout}
+                viewMode={viewMode}
+                onToggleViewMode={setViewMode}
+              />
 
-            {/* Pattern B: Modern Command-Bar Popovers */}
-            {filterLayout === 'commandBar' && (
-              <div className="mb-4 p-2 bg-slate-900/50 border border-slate-800/80 rounded-2xl">
-                <CommandBarFilters
-                  facets={facets || {}}
-                  filters={filters}
-                  onFilterChange={handleFilterChange}
-                />
-              </div>
-            )}
+              {/* Pattern B: Modern Command-Bar Popovers (Horizontal Filters) */}
+              {filterLayout === 'commandBar' && (
+                <div className="mt-2.5 p-2 bg-slate-900/60 border border-slate-800/80 rounded-2xl backdrop-blur-sm">
+                  <CommandBarFilters
+                    facets={facets || {}}
+                    filters={filters}
+                    onFilterChange={handleFilterChange}
+                  />
+                </div>
+              )}
+            </div>
 
             {/* Book Catalog (Gallery vs Table with Infinite Scroll / Lazy Load) */}
             <BookGrid

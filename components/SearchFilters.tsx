@@ -67,7 +67,7 @@ export default function SearchFilters({
     Boolean(filters.author || filters.tag || filters.series || filters.collection || filters.format);
 
   return (
-    <div className="space-y-3 mb-6">
+    <div className="space-y-3">
       {/* Search, Layout Switcher, and Sort Toolbar */}
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
         {/* Mobile Filter Button (only relevant when in sidebar mode) */}
