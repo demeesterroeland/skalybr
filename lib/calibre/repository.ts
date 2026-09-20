@@ -54,7 +54,7 @@ export class FlatBookRepository {
       }
     }
 
-    // 2. Check top-level directories in baseDir
+    // 2. Check top-level directories in baseDir (e.g. ./libraries)
     if (fs.existsSync(baseDir)) {
       const entries = fs.readdirSync(baseDir, { withFileTypes: true });
       for (const entry of entries) {
@@ -62,7 +62,27 @@ export class FlatBookRepository {
           const dir = path.join(baseDir, entry.name);
           checkAndAdd(dir, entry.name);
 
-          // Also check 1 level deeper (e.g. demo-library/demo or libraries/my-lib)
+          // Also check 1 level deeper
+          try {
+            const subEntries = fs.readdirSync(dir, { withFileTypes: true });
+            for (const sub of subEntries) {
+              if (sub.isDirectory() && sub.name !== 'node_modules') {
+                checkAndAdd(path.join(dir, sub.name), `${entry.name}/${sub.name}`);
+              }
+            }
+          } catch (e) {}
+        }
+      }
+    }
+
+    // 3. Fallback: also scan process.cwd() for dev/legacy libraries (e.g. boox or demo-library/demo)
+    if (path.resolve(baseDir) !== path.resolve(process.cwd()) && fs.existsSync(process.cwd())) {
+      const entries = fs.readdirSync(process.cwd(), { withFileTypes: true });
+      for (const entry of entries) {
+        if (entry.isDirectory() && entry.name !== 'node_modules' && entry.name !== '.next' && entry.name !== '.git' && entry.name !== 'libraries') {
+          const dir = path.join(process.cwd(), entry.name);
+          checkAndAdd(dir, entry.name);
+
           try {
             const subEntries = fs.readdirSync(dir, { withFileTypes: true });
             for (const sub of subEntries) {

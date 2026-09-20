@@ -14,7 +14,14 @@ export function getLibraryPath(libraryName: string = DEFAULT_LIBRARY_NAME): stri
     throw new Error('Invalid library name');
   }
 
-  // Allow resolving in cwd if it matches our basic metadata.db heuristic
+  // 1. Check in DEFAULT_CALIBRE_BASE_DIR (e.g. ./libraries)
+  const basePath = path.join(DEFAULT_CALIBRE_BASE_DIR, sanitizedName);
+  const resolvedBasePath = path.resolve(basePath);
+  if (resolvedBasePath.startsWith(path.resolve(DEFAULT_CALIBRE_BASE_DIR) + path.sep) && fs.existsSync(path.join(resolvedBasePath, 'metadata.db'))) {
+    return resolvedBasePath;
+  }
+
+  // 2. Fallback: Allow resolving in cwd if it matches metadata.db (e.g. demo-library/demo or boox in root)
   const relPath = path.join(process.cwd(), sanitizedName);
   const resolvedRelPath = path.resolve(relPath);
   if (resolvedRelPath.startsWith(path.resolve(process.cwd()) + path.sep) && fs.existsSync(path.join(resolvedRelPath, 'metadata.db'))) {
@@ -22,8 +29,6 @@ export function getLibraryPath(libraryName: string = DEFAULT_LIBRARY_NAME): stri
   }
   
   // Standard base dir resolution
-  const basePath = path.join(DEFAULT_CALIBRE_BASE_DIR, sanitizedName);
-  const resolvedBasePath = path.resolve(basePath);
   if (!resolvedBasePath.startsWith(path.resolve(DEFAULT_CALIBRE_BASE_DIR) + path.sep)) {
     throw new Error('Path escape detected');
   }

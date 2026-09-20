@@ -48,7 +48,12 @@ export async function POST(req: NextRequest) {
 
       // Sanitize library folder name
       libraryName = libraryName.replace(/[^a-zA-Z0-9_\-]/g, '_');
-      const targetDir = path.join(process.cwd(), libraryName);
+      
+      if (!fs.existsSync(DEFAULT_CALIBRE_BASE_DIR)) {
+        fs.mkdirSync(DEFAULT_CALIBRE_BASE_DIR, { recursive: true });
+      }
+
+      const targetDir = path.join(DEFAULT_CALIBRE_BASE_DIR, libraryName);
 
       if (fs.existsSync(targetDir)) {
         return NextResponse.json(
