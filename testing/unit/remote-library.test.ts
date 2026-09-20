@@ -20,11 +20,10 @@ describe('Remote Library Download & Cloud URL Normalization', () => {
     expect(normalized).toBe(raw);
   });
 
-  it('should normalize OneDrive short links (1drv.ms) using Microsoft Graph shares API', () => {
+  it('should preserve OneDrive short links (1drv.ms) for session-based resolution', () => {
     const raw = 'https://1drv.ms/u/s!Alq0j_test123';
     const normalized = normalizeCloudDownloadUrl(raw);
-    expect(normalized).toContain('https://api.onedrive.com/v1.0/shares/u!');
-    expect(normalized).toContain('/root/content');
+    expect(normalized).toBe(raw);
   });
 
   it('should normalize OneDrive live links to download=1', () => {

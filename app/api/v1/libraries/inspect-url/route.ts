@@ -67,78 +67,85 @@ export async function POST(req: NextRequest) {
       ? parseInt(process.env.MAX_UPLOAD_SIZE_MB, 10) * 1024 * 1024
       : 1024 * 1024 * 1024;
 
-    const normalized = await resolveDirectDownloadUrl(rawUrl);
+    const resolved = await resolveDirectDownloadUrl(rawUrl);
+    const normalized = resolved.url;
+    const customHeaders = resolved.headers || {};
 
     let statusCode = 200;
     let filename: string | null = null;
     let contentLength: number | null = null;
     let contentType: string | null = null;
 
-    // 1. Try a lightweight HEAD request first (timeout 6s)
+    // 1. Try a lightweight HEAD request first (timeout 6s) - skip for OneDrive session links which reject HEAD with 302
     let headSucceeded = false;
-    try {
-      const headRes = await fetch(normalized, {
-        method: 'HEAD',
-        headers: { 'User-Agent': 'Skalybr/0.1.0 (Calibre Library Inspector)' },
-        redirect: 'follow',
-        signal: AbortSignal.timeout(6000),
-      });
-
-      statusCode = headRes.status;
-
-      // Check if redirected to Google sign-in (private file)
-      if (headRes.url && headRes.url.includes('accounts.google.com')) {
-        return NextResponse.json({
-          success: false,
-          reachable: false,
-          statusCode: 401,
-          error: 'Google Drive requires sign-in. This file is private. Please set link sharing to "Anyone with the link can view".',
+    if (!customHeaders.Cookie) {
+      try {
+        const headRes = await fetch(normalized, {
+          method: 'HEAD',
+          headers: {
+            'User-Agent': 'Skalybr/0.1.0 (Calibre Library Inspector)',
+            ...customHeaders,
+          },
+          redirect: 'follow',
+          signal: AbortSignal.timeout(6000),
         });
-      }
 
-      if (headRes.status === 401 || headRes.status === 403) {
-        return NextResponse.json({
-          success: false,
-          reachable: false,
-          statusCode: headRes.status,
-          error: `Access denied (HTTP ${headRes.status}). If using Google Drive, OneDrive, or Dropbox, ensure file sharing is set to "Anyone with the link".`,
-        });
-      }
+        statusCode = headRes.status;
 
-      if (headRes.status === 404) {
-        return NextResponse.json({
-          success: false,
-          reachable: false,
-          statusCode: 404,
-          error: 'File not found (HTTP 404). Please verify the link.',
-        });
-      }
+        // Check if redirected to Google sign-in (private file)
+        if (headRes.url && headRes.url.includes('accounts.google.com')) {
+          return NextResponse.json({
+            success: false,
+            reachable: false,
+            statusCode: 401,
+            error: 'Google Drive requires sign-in. This file is private. Please set link sharing to "Anyone with the link can view".',
+          });
+        }
 
-      if (headRes.ok) {
-        headSucceeded = true;
-        filename = parseContentDisposition(headRes.headers.get('content-disposition'));
-        contentType = headRes.headers.get('content-type');
-        const cl = headRes.headers.get('content-length');
-        if (cl) {
-          const parsedCl = parseInt(cl, 10);
-          if (!isNaN(parsedCl) && parsedCl > 0) {
-            contentLength = parsedCl;
+        if (headRes.status === 401 || headRes.status === 403) {
+          return NextResponse.json({
+            success: false,
+            reachable: false,
+            statusCode: headRes.status,
+            error: `Access denied (HTTP ${headRes.status}). If using Google Drive, OneDrive, or Dropbox, ensure file sharing is set to "Anyone with the link".`,
+          });
+        }
+
+        if (headRes.status === 404) {
+          return NextResponse.json({
+            success: false,
+            reachable: false,
+            statusCode: 404,
+            error: 'File not found (HTTP 404). Please verify the link.',
+          });
+        }
+
+        if (headRes.ok) {
+          headSucceeded = true;
+          filename = parseContentDisposition(headRes.headers.get('content-disposition'));
+          contentType = headRes.headers.get('content-type');
+          const cl = headRes.headers.get('content-length');
+          if (cl) {
+            const parsedCl = parseInt(cl, 10);
+            if (!isNaN(parsedCl) && parsedCl > 0) {
+              contentLength = parsedCl;
+            }
+          }
+
+          // Try extracting filename from final URL pathname if not in headers
+          if (!filename && headRes.url) {
+            try {
+              const finalPath = new URL(headRes.url).pathname;
+              const base = path.basename(finalPath);
+              if (base && base.endsWith('.zip')) {
+                filename = decodeURIComponent(base);
+              }
+            } catch {}
           }
         }
-
-        // Try extracting filename from final URL pathname if not in headers
-        if (!filename && headRes.url) {
-          try {
-            const finalPath = new URL(headRes.url).pathname;
-            const base = path.basename(finalPath);
-            if (base && base.endsWith('.zip')) {
-              filename = decodeURIComponent(base);
-            }
-          } catch {}
-        }
+      } catch {
+        // HEAD failed or timed out; will fallback to GET probe
       }
-    } catch {
-      // HEAD failed or timed out; will fallback to GET probe
     }
 
     // 2. If HEAD did not succeed or didn't find filename/size, probe with a minimal GET (Range: bytes=0-1024)
@@ -149,6 +156,7 @@ export async function POST(req: NextRequest) {
           headers: {
             'User-Agent': 'Skalybr/0.1.0 (Calibre Library Inspector)',
             'Range': 'bytes=0-1024',
+            ...customHeaders,
           },
           redirect: 'follow',
           signal: AbortSignal.timeout(8000),
@@ -156,14 +164,14 @@ export async function POST(req: NextRequest) {
 
         statusCode = getRes.status;
 
-        // Check if redirected to Google sign-in (private file)
-        if (getRes.url && getRes.url.includes('accounts.google.com')) {
+        // Check if redirected to Google or Microsoft sign-in (private file)
+        if (getRes.url && (getRes.url.includes('accounts.google.com') || getRes.url.includes('login.live.com') || getRes.url.includes('Authenticate.aspx'))) {
           if (getRes.body) await getRes.body.cancel();
           return NextResponse.json({
             success: false,
             reachable: false,
             statusCode: 401,
-            error: 'Google Drive requires sign-in. This file is private. Please set link sharing to "Anyone with the link can view".',
+            error: 'Access denied: Sign-in required. This file is private. Please set link sharing to "Anyone with the link".',
           });
         }
 

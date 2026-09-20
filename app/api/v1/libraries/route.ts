@@ -52,16 +52,7 @@ export function normalizeCloudDownloadUrl(inputUrl: string): string {
       }
     }
 
-    // 3. OneDrive short links (1drv.ms) -> Microsoft Graph shares API
-    if (u.hostname === '1drv.ms' || u.hostname.endsWith('.1drv.ms')) {
-      const base64 = Buffer.from(inputUrl.trim()).toString('base64')
-        .replace(/\+/g, '-')
-        .replace(/\//g, '_')
-        .replace(/=+$/, '');
-      return `https://api.onedrive.com/v1.0/shares/u!${base64}/root/content`;
-    }
-
-    // 4. OneDrive Live (onedrive.live.com)
+    // 3. OneDrive Live (onedrive.live.com)
     if (u.hostname.includes('onedrive.live.com')) {
       if (u.pathname.includes('/redir')) {
         u.pathname = u.pathname.replace('/redir', '/download');
@@ -70,7 +61,7 @@ export function normalizeCloudDownloadUrl(inputUrl: string): string {
       return u.toString();
     }
 
-    // 5. SharePoint / OneDrive for Business (*.sharepoint.com)
+    // 4. SharePoint / OneDrive for Business (*.sharepoint.com)
     if (u.hostname.includes('sharepoint.com')) {
       u.searchParams.set('download', '1');
       return u.toString();
@@ -82,10 +73,17 @@ export function normalizeCloudDownloadUrl(inputUrl: string): string {
   }
 }
 
-export async function resolveDirectDownloadUrl(inputUrl: string): Promise<string> {
+export interface ResolvedDownload {
+  url: string;
+  headers?: Record<string, string>;
+}
+
+export async function resolveDirectDownloadUrl(inputUrl: string): Promise<ResolvedDownload> {
   const normalized = normalizeCloudDownloadUrl(inputUrl);
   try {
     const u = new URL(normalized);
+
+    // 1. Google Drive confirmation form handling
     if (u.hostname.includes('drive.google.com') || u.hostname.includes('drive.usercontent.google.com')) {
       const res = await fetch(normalized, {
         headers: { 'User-Agent': 'Skalybr/0.1.0 (Calibre Library Importer)' },
@@ -104,20 +102,84 @@ export async function resolveDirectDownloadUrl(inputUrl: string): Promise<string
           const formAction = formActionMatch ? formActionMatch[1] : 'https://drive.usercontent.google.com/download';
           const uuid = uuidMatch ? uuidMatch[1] : '';
           if (id && uuid) {
-            return `${formAction}?id=${id}&export=download&confirm=t&uuid=${uuid}`;
+            return { url: `${formAction}?id=${id}&export=download&confirm=t&uuid=${uuid}` };
           }
         }
       }
     }
+
+    // 2. OneDrive links (1drv.ms or onedrive.live.com)
+    if (u.hostname === '1drv.ms' || u.hostname.endsWith('.1drv.ms') || u.hostname.includes('onedrive.live.com')) {
+      const cookieJar = new Map<string, string>();
+      let curr = inputUrl.trim();
+      let spopath: string | null = null;
+      let personalRoot: string | null = null;
+      let landingUrl = inputUrl.trim();
+
+      for (let hop = 0; hop < 6; hop++) {
+        const cookieHeader = Array.from(cookieJar.entries()).map(([k, v]) => `${k}=${v}`).join('; ');
+        const r = await fetch(curr, {
+          method: 'GET',
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+            ...(cookieHeader ? { 'Cookie': cookieHeader } : {}),
+          },
+          redirect: 'manual',
+          signal: AbortSignal.timeout(8000),
+        });
+
+        // Collect cookies across redirect hops
+        const setCookies = (r.headers as any).getSetCookie
+          ? (r.headers as any).getSetCookie()
+          : [r.headers.get('set-cookie')].filter(Boolean);
+        for (const sc of setCookies) {
+          const match = sc.match(/^([^=]+)=([^;]+)/);
+          if (match) {
+            cookieJar.set(match[1].trim(), match[2].trim());
+          }
+        }
+
+        const loc = r.headers.get('location');
+        if (!loc) {
+          landingUrl = curr;
+          break;
+        }
+
+        const nextUrl = new URL(loc, curr);
+        const spo = nextUrl.searchParams.get('spopath');
+        if (spo && !spopath && spo.startsWith('/personal/')) {
+          spopath = spo;
+          const match = spopath.match(/^\/personal\/([^/]+)/);
+          if (match) personalRoot = `/personal/${match[1]}`;
+        }
+        landingUrl = nextUrl.toString();
+        curr = nextUrl.toString();
+      }
+
+      if (spopath && personalRoot) {
+        const downloadUrl = `https://onedrive.live.com${personalRoot}/_layouts/15/download.aspx?SourceUrl=${encodeURIComponent(spopath)}`;
+        const cookieHeader = Array.from(cookieJar.entries()).map(([k, v]) => `${k}=${v}`).join('; ');
+        return {
+          url: downloadUrl,
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+            'Referer': landingUrl,
+            'Cookie': cookieHeader,
+          },
+        };
+      }
+    }
   } catch {}
-  return normalized;
+  return { url: normalized };
 }
 
 export async function downloadRemoteZip(
   urlStr: string,
   maxBytes: number
 ): Promise<{ buffer?: Buffer; error?: string }> {
-  const normalized = await resolveDirectDownloadUrl(urlStr);
+  const resolved = await resolveDirectDownloadUrl(urlStr);
+  const normalized = resolved.url;
+  const customHeaders = resolved.headers || {};
   let parsed: URL;
   try {
     parsed = new URL(normalized);
@@ -140,33 +202,41 @@ export async function downloadRemoteZip(
     return { error: 'Invalid URL target.' };
   }
 
-  // Pre-flight check: Try a lightweight HEAD request first to inspect Content-Length without downloading
-  try {
-    const headRes = await fetch(normalized, {
-      method: 'HEAD',
-      headers: { 'User-Agent': 'Skalybr/0.1.0 (Calibre Library Importer)' },
-      redirect: 'follow',
-      signal: AbortSignal.timeout(8000),
-    });
-    if (headRes.ok) {
-      const cl = headRes.headers.get('content-length');
-      if (cl) {
-        const size = parseInt(cl, 10);
-        if (!isNaN(size) && size > maxBytes) {
-          const sizeMb = (size / (1024 * 1024)).toFixed(1);
-          const maxMb = Math.round(maxBytes / (1024 * 1024));
-          return {
-            error: `Remote file size (${sizeMb} MB) exceeds maximum limit of ${maxMb} MB. Aborted before download.`,
-          };
+  // Pre-flight check: Try a lightweight HEAD request first (skip for OneDrive which rejects HEAD with 302)
+  if (!customHeaders.Cookie) {
+    try {
+      const headRes = await fetch(normalized, {
+        method: 'HEAD',
+        headers: {
+          'User-Agent': 'Skalybr/0.1.0 (Calibre Library Importer)',
+          ...customHeaders,
+        },
+        redirect: 'follow',
+        signal: AbortSignal.timeout(8000),
+      });
+      if (headRes.ok) {
+        const cl = headRes.headers.get('content-length');
+        if (cl) {
+          const size = parseInt(cl, 10);
+          if (!isNaN(size) && size > maxBytes) {
+            const sizeMb = (size / (1024 * 1024)).toFixed(1);
+            const maxMb = Math.round(maxBytes / (1024 * 1024));
+            return {
+              error: `Remote file size (${sizeMb} MB) exceeds maximum limit of ${maxMb} MB. Aborted before download.`,
+            };
+          }
         }
       }
+    } catch {
+      // Proceed to GET if server rejects HEAD or times out
     }
-  } catch {
-    // Proceed to GET if server rejects HEAD or times out
   }
 
   const response = await fetch(normalized, {
-    headers: { 'User-Agent': 'Skalybr/0.1.0 (Calibre Library Importer)' },
+    headers: {
+      'User-Agent': 'Skalybr/0.1.0 (Calibre Library Importer)',
+      ...customHeaders,
+    },
     redirect: 'follow',
     signal: AbortSignal.timeout(180000),
   });
