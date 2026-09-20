@@ -234,8 +234,11 @@ export default function LibraryManagerModal({
                       onChange={(e) => {
                         const file = e.target.files?.[0] || null;
                         setUploadFile(file);
-                        if (file && !customDisplayName) {
-                          setCustomDisplayName(file.name.replace(/\.zip$/i, ''));
+                        if (file) {
+                          const base = file.name.replace(/\.zip$/i, '');
+                          const sanitizedFolder = base.replace(/[^a-zA-Z0-9_\-\.\/]/g, '_');
+                          setCustomLibName(sanitizedFolder);
+                          setCustomDisplayName(base);
                         }
                       }}
                       className="hidden"
