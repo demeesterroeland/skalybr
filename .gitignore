@@ -17,10 +17,12 @@ coverage/
 *.sqlite-journal
 *.sqlite-wal
 *.sqlite-shm
+*.db-wal
+*.db-shm
 
 
 boox/
 /books/
 
 
-libraries/
+/libraries/

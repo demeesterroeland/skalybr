@@ -162,6 +162,69 @@ function cleanLibraryName(name: string): string {
     .replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
+/**
+ * Unified Card Component used for both Library Cards and the Add Library Card.
+ * Guarantees identical form, dimensions, avatar circle, and bottom section height.
+ */
+interface LibraryCardProps {
+  title: string;
+  subtitle?: string;
+  seed?: string;
+  isAddButton?: boolean;
+  onClick: () => void;
+}
+
+function LibraryCard({
+  title,
+  subtitle,
+  seed = 'default',
+  isAddButton = false,
+  onClick,
+}: LibraryCardProps) {
+  return (
+    <div
+      role="button"
+      tabIndex={0}
+      onClick={onClick}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          onClick();
+        }
+      }}
+      className="group flex flex-col w-48 sm:w-52 rounded-2xl overflow-hidden cursor-pointer border border-zinc-600/50 hover:border-zinc-300 hover:ring-2 hover:ring-zinc-400/40 transition-all duration-200 shadow-xl shadow-black/50 select-none shrink-0"
+    >
+      {/* Top Section: Light Gray area around the circle */}
+      <div className="h-44 sm:h-48 w-full bg-[#484a51] flex items-center justify-center p-4">
+        <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-full overflow-hidden border-2 border-white/30 group-hover:border-white/70 transition-colors shadow-lg flex items-center justify-center shrink-0 aspect-square relative bg-[#2a2c33]">
+          {isAddButton ? (
+            <>
+              {/* Wallpaper image with a soft dark glass tint behind the large orange plus */}
+              <GeometricWallpaperAvatarSVG seed="add-library-seed" />
+              <div className="absolute inset-0 bg-black/45 backdrop-blur-[1px] flex items-center justify-center">
+                <Plus className="w-14 h-14 text-amber-400 drop-shadow-md stroke-[3] group-hover:scale-110 transition-transform" />
+              </div>
+            </>
+          ) : (
+            <GeometricWallpaperAvatarSVG seed={seed} />
+          )}
+        </div>
+      </div>
+
+      {/* Bottom Section: Medium Darker Gray area with identical height (h-20) */}
+      <div className="h-20 w-full px-3 py-2 flex flex-col justify-center items-center text-center bg-[#2a2c33] border-t border-zinc-600/40">
+        <span className="text-sm sm:text-base font-semibold text-white group-hover:text-amber-300 transition-colors truncate w-full">
+          {title}
+        </span>
+        {subtitle ? (
+          <span className="text-xs text-zinc-300 font-medium mt-1">
+            {subtitle}
+          </span>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
 export default function LibraryGateway() {
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -208,70 +271,29 @@ export default function LibraryGateway() {
           </h1>
         </div>
 
-        {/* Card Grid - Centered Horizontal & Vertical */}
+        {/* Card Grid - All cards use the exact same LibraryCard component */}
         <div className="flex flex-wrap items-center justify-center gap-7 sm:gap-8 w-full">
           {libraries.map((lib) => {
             const displayName = lib.displayName || cleanLibraryName(lib.name);
 
             return (
-              <div
+              <LibraryCard
                 key={lib.name}
-                role="button"
-                tabIndex={0}
+                title={displayName}
+                subtitle={`${lib.bookCount ?? 0} books`}
+                seed={lib.name}
                 onClick={() => handleSelect(lib.name)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    handleSelect(lib.name);
-                  }
-                }}
-                className="group flex flex-col w-48 sm:w-52 rounded-2xl overflow-hidden cursor-pointer border border-zinc-600/50 hover:border-zinc-400 hover:ring-2 hover:ring-zinc-400/30 transition-all duration-200 shadow-xl shadow-black/40"
-              >
-                {/* Top Section: Light Gray area around the circle */}
-                <div className="h-44 sm:h-48 w-full bg-[#484a51] flex items-center justify-center p-4">
-                  <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-full overflow-hidden border-2 border-white/30 group-hover:border-white/60 transition-colors shadow-lg flex items-center justify-center bg-black/40">
-                    <GeometricWallpaperAvatarSVG seed={lib.name} />
-                  </div>
-                </div>
-
-                {/* Bottom Section: A bit darker gray, but distinctly lighter than page background (#0e0e12) */}
-                <div className="h-20 px-3 py-2 flex flex-col justify-center items-center text-center bg-[#2a2c33] border-t border-zinc-600/40">
-                  <span className="text-sm sm:text-base font-semibold text-white group-hover:text-amber-300 transition-colors truncate w-full">
-                    {displayName}
-                  </span>
-                  <span className="text-xs text-zinc-300 font-medium mt-1">
-                    {lib.bookCount ?? 0} books
-                  </span>
-                </div>
-              </div>
+              />
             );
           })}
 
-          {/* Add Library Card - Identical dimensions, structure, and bottom height */}
-          <div
-            role="button"
-            tabIndex={0}
+          {/* Add Library Card - Exact same LibraryCard component with isAddButton */}
+          <LibraryCard
+            isAddButton
+            title="Add Library..."
+            seed="add-library-button"
             onClick={() => setIsManagerOpen(true)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                setIsManagerOpen(true);
-              }
-            }}
-            className="group flex flex-col w-48 sm:w-52 rounded-2xl overflow-hidden cursor-pointer border border-zinc-600/50 hover:border-zinc-400 hover:ring-2 hover:ring-zinc-400/30 transition-all duration-200 shadow-xl shadow-black/40"
-          >
-            {/* Top Section: Same Light Gray with Avatar Circle & Large Plus */}
-            <div className="h-44 sm:h-48 w-full bg-[#484a51] flex items-center justify-center p-4">
-              <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-full overflow-hidden border-2 border-white/20 bg-[#2a2c33] group-hover:border-white/50 transition-colors shadow-inner flex items-center justify-center">
-                <Plus className="w-14 h-14 text-amber-500 stroke-[3] group-hover:scale-110 transition-transform" />
-              </div>
-            </div>
-
-            {/* Bottom Section: Identical height (h-20) and background (#2a2c33) */}
-            <div className="h-20 px-3 py-2 flex items-center justify-center text-center bg-[#2a2c33] border-t border-zinc-600/40">
-              <span className="text-sm sm:text-base font-medium text-zinc-300 group-hover:text-white transition-colors">
-                Add Library...
-              </span>
-            </div>
-          </div>
+          />
         </div>
       </div>
 
