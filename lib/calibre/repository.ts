@@ -1,8 +1,9 @@
 import fs from 'fs';
 import path from 'path';
 import { getDatabaseConnection } from './db';
-import { DEFAULT_CALIBRE_BASE_DIR, getLibraryPath } from '../config';
+import { DEFAULT_CALIBRE_BASE_DIR, getLibraryPath, getDefaultLibraryName } from '../config';
 import { getLibrarySettings } from '../library-settings';
+import { getLibraryByName, upsertLibraryRecord } from '../db/skalybr-db';
 import { BookFlattened, BookListResponse, BookQueryOptions, LibraryInfo, UpdateBookInput } from '../types';
 
 export class FlatBookRepository {
@@ -16,6 +17,7 @@ export class FlatBookRepository {
     const libraries: LibraryInfo[] = [];
     const seenPaths = new Set<string>();
     const settings = getLibrarySettings();
+    const defaultLibName = getDefaultLibraryName();
 
     const checkAndAdd = (dirPath: string, fallbackName?: string) => {
       const fullPath = path.isAbsolute(dirPath) ? dirPath : path.join(process.cwd(), dirPath);
@@ -30,8 +32,24 @@ export class FlatBookRepository {
             ? path.relative(baseDir, fullPath)
             : path.relative(process.cwd(), fullPath);
           const name = fallbackName || relToBase || path.basename(fullPath);
-          const displayName = settings.customNames[name] || settings.customNames[fullPath] || name;
-          const isHidden = settings.hiddenLibraries.includes(name) || settings.hiddenLibraries.includes(fullPath);
+          
+          // Check skalybr.db record
+          let dbRecord = getLibraryByName(name);
+          if (!dbRecord) {
+            // Auto-register newly discovered library folder
+            const isInitialDefault = name === defaultLibName;
+            dbRecord = upsertLibraryRecord({
+              name,
+              path: fullPath,
+              displayName: settings.customNames[name] || settings.customNames[fullPath] || name,
+              isHidden: settings.hiddenLibraries.includes(name) || settings.hiddenLibraries.includes(fullPath),
+              isDefault: isInitialDefault,
+            });
+          }
+
+          const displayName = dbRecord.displayName || settings.customNames[name] || settings.customNames[fullPath] || name;
+          const isHidden = dbRecord.isHidden;
+          const isDefault = dbRecord.isDefault;
 
           if (!isHidden || includeHidden) {
             libraries.push({
@@ -41,6 +59,8 @@ export class FlatBookRepository {
               bookCount: countRow.count,
               hasCustomColumns: customColRow.count > 0,
               isHidden,
+              isDefault,
+              avatarImage: dbRecord.avatarImage,
             });
           }
         } catch (e) {

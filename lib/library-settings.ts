@@ -1,32 +1,55 @@
-import fs from 'fs';
-import path from 'path';
+import { getAllLibraries, upsertLibraryRecord } from './db/skalybr-db';
 
 export interface LibrarySettings {
   hiddenLibraries: string[];
-  customNames: Record<string, string>; // originalPath -> customDisplayName
+  customNames: Record<string, string>; // originalPath / name -> customDisplayName
 }
 
-const SETTINGS_FILE = path.join(process.cwd(), '.skalybr-libraries.json');
-
+/**
+ * Retrieves library display names and visibility settings from skalybr.db
+ */
 export function getLibrarySettings(): LibrarySettings {
   try {
-    if (fs.existsSync(SETTINGS_FILE)) {
-      const data = JSON.parse(fs.readFileSync(SETTINGS_FILE, 'utf-8'));
-      return {
-        hiddenLibraries: Array.isArray(data.hiddenLibraries) ? data.hiddenLibraries : [],
-        customNames: typeof data.customNames === 'object' && data.customNames !== null ? data.customNames : {},
-      };
+    const allLibs = getAllLibraries(true);
+    const hiddenLibraries: string[] = [];
+    const customNames: Record<string, string> = {};
+
+    for (const lib of allLibs) {
+      if (lib.isHidden) {
+        hiddenLibraries.push(lib.name);
+      }
+      if (lib.displayName && lib.displayName.trim() !== '') {
+        customNames[lib.name] = lib.displayName;
+      }
     }
+
+    return { hiddenLibraries, customNames };
   } catch (e) {
-    console.error('Error reading library settings:', e);
+    console.error('Error reading library settings from skalybr.db:', e);
+    return { hiddenLibraries: [], customNames: {} };
   }
-  return { hiddenLibraries: [], customNames: {} };
 }
 
+/**
+ * Persists library display names and visibility settings to skalybr.db
+ */
 export function saveLibrarySettings(settings: LibrarySettings): void {
   try {
-    fs.writeFileSync(SETTINGS_FILE, JSON.stringify(settings, null, 2), 'utf-8');
+    const allKeys = new Set([
+      ...Object.keys(settings.customNames || {}),
+      ...(settings.hiddenLibraries || []),
+    ]);
+
+    for (const name of allKeys) {
+      const displayName = settings.customNames[name] || null;
+      const isHidden = settings.hiddenLibraries?.includes(name) ?? false;
+      upsertLibraryRecord({
+        name,
+        displayName,
+        isHidden,
+      });
+    }
   } catch (e) {
-    console.error('Error saving library settings:', e);
+    console.error('Error saving library settings to skalybr.db:', e);
   }
 }

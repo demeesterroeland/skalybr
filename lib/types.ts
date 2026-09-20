@@ -30,6 +30,84 @@ export interface LibraryInfo {
   bookCount: number;
   hasCustomColumns: boolean;
   isHidden?: boolean;
+  isDefault?: boolean;
+  avatarImage?: string | null;
+}
+
+export interface LibraryRecord {
+  id: number;
+  name: string;
+  displayName: string | null;
+  path: string | null;
+  isHidden: boolean;
+  isDefault: boolean;
+  avatarImage: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type ReadingStatus = 'unread' | 'reading' | 'finished' | 'abandoned';
+
+export interface ReadingProgressRecord {
+  id: number;
+  library: string;
+  bookId: number;
+  userId: number;
+  status: ReadingStatus;
+  progressPercent: number;
+  currentPage: number | null;
+  totalPages: number | null;
+  format: string | null;
+  locator: string | null;
+  timeSpentSeconds: number;
+  startedAt: string | null;
+  finishedAt: string | null;
+  lastReadAt: string;
+}
+
+export interface ReadingProgressInput {
+  library: string;
+  bookId: number;
+  userId?: number;
+  status?: ReadingStatus;
+  progressPercent?: number;
+  currentPage?: number | null;
+  totalPages?: number | null;
+  format?: string | null;
+  locator?: string | null;
+  timeSpentSeconds?: number;
+}
+
+export interface ShelfRecord {
+  id: number;
+  uuid: string;
+  name: string;
+  description: string | null;
+  userId: number;
+  isPublic: boolean;
+  koboSync: boolean;
+  createdAt: string;
+}
+
+export interface BookShelfRecord {
+  id: number;
+  library: string;
+  shelfId: number;
+  bookId: number;
+  orderIndex: number;
+  dateAdded: string;
+}
+
+export interface SmartShelfRecord {
+  id: number;
+  uuid: string;
+  name: string;
+  description: string | null;
+  library: string;
+  filterJson: string;
+  userId: number;
+  isPublic: boolean;
+  createdAt: string;
 }
 
 export interface BookQueryOptions {

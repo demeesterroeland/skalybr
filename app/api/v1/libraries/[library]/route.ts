@@ -3,6 +3,7 @@ import { FlatBookRepository } from '@/lib/calibre/repository';
 import { getLibrarySettings, saveLibrarySettings } from '@/lib/library-settings';
 import { closeDatabaseConnection } from '@/lib/calibre/db';
 import { getLibraryPath, DEFAULT_CALIBRE_BASE_DIR } from '@/lib/config';
+import { upsertLibraryRecord, setDefaultLibraryRecord, deleteLibraryRecord } from '@/lib/db/skalybr-db';
 import fs from 'fs';
 import path from 'path';
 
@@ -32,7 +33,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ li
   try {
     const { library } = await params;
     const body = await req.json();
-    const { displayName, isHidden } = body;
+    const { displayName, isHidden, isDefault, avatarImage } = body;
 
     const settings = getLibrarySettings();
 
@@ -55,6 +56,17 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ li
     }
 
     saveLibrarySettings(settings);
+
+    if (isDefault) {
+      setDefaultLibraryRecord(library);
+    }
+
+    if (avatarImage !== undefined) {
+      upsertLibraryRecord({
+        name: library,
+        avatarImage,
+      });
+    }
 
     return NextResponse.json({
       success: true,
@@ -91,6 +103,7 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ l
     delete settings.customNames[library];
     settings.hiddenLibraries = settings.hiddenLibraries.filter((l) => l !== library);
     saveLibrarySettings(settings);
+    deleteLibraryRecord(library);
 
     return NextResponse.json({
       success: true,

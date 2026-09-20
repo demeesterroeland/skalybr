@@ -13,7 +13,7 @@ export default function OnboardingZeroState() {
   const handleLoadDemo = async () => {
     setIsLoading(true);
     try {
-      const res = await fetch('/api/v1/libraries/demo', { method: 'POST' });
+      const res = await fetch('/api/v1/libraries/install-demo', { method: 'POST' });
       if (res.ok) {
         toast.success('Demo library loaded successfully!');
         await queryClient.invalidateQueries({ queryKey: ['libraries'] });

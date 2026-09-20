@@ -4,11 +4,29 @@ import fs from 'fs';
 export const DEFAULT_CALIBRE_BASE_DIR =
   process.env.CALIBRE_BASE_DIR || path.join(process.cwd(), 'libraries');
 
+export const DATA_DIR = process.env.DATA_DIR || path.join(process.cwd(), 'data');
+export const SKALYBR_DB_PATH = path.join(DATA_DIR, 'skalybr.db');
+
+export function getDefaultLibraryName(): string {
+  try {
+    // Dynamic import / inline require to avoid circular dependencies if any
+    const { getDefaultLibraryRecord } = require('./db/skalybr-db');
+    const defaultLib = getDefaultLibraryRecord();
+    if (defaultLib && defaultLib.name) {
+      return defaultLib.name;
+    }
+  } catch (e) {
+    // DB not yet initialized or during early build
+  }
+  return process.env.DEFAULT_LIBRARY || 'boox';
+}
+
 export const DEFAULT_LIBRARY_NAME = process.env.DEFAULT_LIBRARY || 'boox';
 
-export function getLibraryPath(libraryName: string = DEFAULT_LIBRARY_NAME): string {
+export function getLibraryPath(libraryName?: string): string {
+  const targetName = libraryName || getDefaultLibraryName();
   // Strip .. components to prevent traversal, but keep path separators for nested libraries
-  const sanitizedName = libraryName.replace(/\.\./g, '');
+  const sanitizedName = targetName.replace(/\.\./g, '');
   
   if (!sanitizedName) {
     throw new Error('Invalid library name');

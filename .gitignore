@@ -17,12 +17,16 @@ coverage/
 *.sqlite-journal
 *.sqlite-wal
 *.sqlite-shm
+*.db
 *.db-wal
 *.db-shm
-
+*.db-journal
+.skalybr-libraries.json*
 
 boox/
 /books/
 
 
 /libraries/
+/data/*
+!/data/.gitkeep
