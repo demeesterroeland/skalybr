@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import Header from '@/components/Header';
 import SearchFilters from '@/components/SearchFilters';
 import FilterSidebar from '@/components/FilterSidebar';
@@ -22,7 +22,6 @@ export default function HomePage() {
   const [filters, setFilters] = useState<BookQueryOptions>({
     sort: 'id',
     order: 'desc',
-    page: 1,
     pageSize: 30,
   });
 
@@ -36,39 +35,56 @@ export default function HomePage() {
     },
   });
 
-  const queryParams = new URLSearchParams();
-  queryParams.set('library', currentLibrary);
-  if (filters.search) queryParams.set('search', filters.search);
-  if (filters.author) queryParams.set('author', filters.author);
-  if (filters.authors && filters.authors.length > 0) queryParams.set('authors', filters.authors.join(','));
-  if (filters.tag) queryParams.set('tag', filters.tag);
-  if (filters.tags && filters.tags.length > 0) queryParams.set('tags', filters.tags.join(','));
-  if (filters.series) queryParams.set('series', filters.series);
-  if (filters.seriesList && filters.seriesList.length > 0) queryParams.set('seriesList', filters.seriesList.join(','));
-  if (filters.collection) queryParams.set('collection', filters.collection);
-  if (filters.collections && filters.collections.length > 0) queryParams.set('collections', filters.collections.join(','));
-  if (filters.publisher) queryParams.set('publisher', filters.publisher);
-  if (filters.publishers && filters.publishers.length > 0) queryParams.set('publishers', filters.publishers.join(','));
-  if (filters.language) queryParams.set('language', filters.language);
-  if (filters.languages && filters.languages.length > 0) queryParams.set('languages', filters.languages.join(','));
-  if (filters.format) queryParams.set('format', filters.format);
-  if (filters.formats && filters.formats.length > 0) queryParams.set('formats', filters.formats.join(','));
-  if (filters.rating !== undefined) queryParams.set('rating', String(filters.rating));
-  if (filters.ratings && filters.ratings.length > 0) queryParams.set('ratings', filters.ratings.join(','));
-  if (filters.hasCover !== undefined) queryParams.set('hasCover', String(filters.hasCover));
-  if (filters.sort) queryParams.set('sort', filters.sort);
-  if (filters.order) queryParams.set('order', filters.order);
-  queryParams.set('page', String(filters.page || 1));
-  queryParams.set('pageSize', String(filters.pageSize || 30));
-
-  const { data, isLoading } = useQuery<BookListResponse>({
+  // Infinite Query for seamless scrolling / lazy loading
+  const {
+    data,
+    isLoading,
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage,
+  } = useInfiniteQuery<BookListResponse>({
     queryKey: ['books', currentLibrary, filters],
-    queryFn: async () => {
+    queryFn: async ({ pageParam = 1 }) => {
+      const queryParams = new URLSearchParams();
+      queryParams.set('library', currentLibrary);
+      if (filters.search) queryParams.set('search', filters.search);
+      if (filters.author) queryParams.set('author', filters.author);
+      if (filters.authors && filters.authors.length > 0) queryParams.set('authors', filters.authors.join(','));
+      if (filters.tag) queryParams.set('tag', filters.tag);
+      if (filters.tags && filters.tags.length > 0) queryParams.set('tags', filters.tags.join(','));
+      if (filters.series) queryParams.set('series', filters.series);
+      if (filters.seriesList && filters.seriesList.length > 0) queryParams.set('seriesList', filters.seriesList.join(','));
+      if (filters.collection) queryParams.set('collection', filters.collection);
+      if (filters.collections && filters.collections.length > 0) queryParams.set('collections', filters.collections.join(','));
+      if (filters.publisher) queryParams.set('publisher', filters.publisher);
+      if (filters.publishers && filters.publishers.length > 0) queryParams.set('publishers', filters.publishers.join(','));
+      if (filters.language) queryParams.set('language', filters.language);
+      if (filters.languages && filters.languages.length > 0) queryParams.set('languages', filters.languages.join(','));
+      if (filters.format) queryParams.set('format', filters.format);
+      if (filters.formats && filters.formats.length > 0) queryParams.set('formats', filters.formats.join(','));
+      if (filters.rating !== undefined) queryParams.set('rating', String(filters.rating));
+      if (filters.ratings && filters.ratings.length > 0) queryParams.set('ratings', filters.ratings.join(','));
+      if (filters.hasCover !== undefined) queryParams.set('hasCover', String(filters.hasCover));
+      if (filters.sort) queryParams.set('sort', filters.sort);
+      if (filters.order) queryParams.set('order', filters.order);
+      queryParams.set('page', String(pageParam));
+      queryParams.set('pageSize', String(filters.pageSize || 30));
+
       const res = await fetch(`/api/v1/books?${queryParams.toString()}`);
       const json = await res.json();
-      return json.data || { books: [], total: 0, page: 1, pageSize: 30, totalPages: 1 };
+      return json.data || { books: [], total: 0, page: Number(pageParam), pageSize: 30, totalPages: 1 };
+    },
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) => {
+      if (lastPage.page < lastPage.totalPages) {
+        return lastPage.page + 1;
+      }
+      return undefined;
     },
   });
+
+  const books = data?.pages.flatMap((page) => page.books) || [];
+  const total = data?.pages[0]?.total || 0;
 
   const handleFilterChange = (newFilters: Partial<BookQueryOptions>) => {
     setFilters((prev) => ({ ...prev, ...newFilters }));
@@ -78,7 +94,6 @@ export default function HomePage() {
     setFilters({
       sort: 'id',
       order: 'desc',
-      page: 1,
       pageSize: 30,
     });
   };
@@ -146,20 +161,20 @@ export default function HomePage() {
               </div>
             )}
 
-            {/* Book Catalog (Gallery vs Table) */}
+            {/* Book Catalog (Gallery vs Table with Infinite Scroll / Lazy Load) */}
             <BookGrid
-              books={data?.books || []}
+              books={books}
               libraryName={currentLibrary}
               isLoading={isLoading}
-              total={data?.total || 0}
-              page={filters.page || 1}
-              pageSize={filters.pageSize || 30}
+              total={total}
               viewMode={viewMode}
               sort={filters.sort}
               order={filters.order}
-              onSortChange={(sort, order) => handleFilterChange({ sort, order, page: 1 })}
-              onPageChange={(p) => handleFilterChange({ page: p })}
+              onSortChange={(sort, order) => handleFilterChange({ sort, order })}
               onSelectBook={(book) => setSelectedBook(book)}
+              hasNextPage={hasNextPage}
+              isFetchingNextPage={isFetchingNextPage}
+              fetchNextPage={fetchNextPage}
             />
           </div>
         </div>
