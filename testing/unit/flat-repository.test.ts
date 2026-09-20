@@ -93,4 +93,19 @@ describe('Skalybr FlatBookRepository', () => {
       expect(buffer!.length).toBeGreaterThan(100);
     }
   });
+
+  it('should support sorting by various fields', () => {
+    const libraries = FlatBookRepository.listAvailableLibraries(DEFAULT_CALIBRE_BASE_DIR);
+    const targetLib = libraries[0]?.name;
+    const repo = new FlatBookRepository(targetLib);
+
+    const sortFields = ['title', 'authors', 'pubdate', 'rating', 'series', 'collection', 'tags', 'formats', 'id'] as const;
+    for (const field of sortFields) {
+      const ascResult = repo.getBooks({ sort: field, order: 'asc', pageSize: 5 });
+      expect(ascResult.books).toBeInstanceOf(Array);
+
+      const descResult = repo.getBooks({ sort: field, order: 'desc', pageSize: 5 });
+      expect(descResult.books).toBeInstanceOf(Array);
+    }
+  });
 });

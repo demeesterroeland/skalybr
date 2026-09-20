@@ -1,14 +1,17 @@
 'use client';
 
 import React from 'react';
-import { BookFlattened } from '@/lib/types';
-import { Star, Download, Bookmark, FileText } from 'lucide-react';
+import { BookFlattened, BookQueryOptions } from '@/lib/types';
+import { Star, Download, Bookmark, FileText, ArrowUp, ArrowDown, ArrowUpDown } from 'lucide-react';
 
 interface BookTableProps {
   books: BookFlattened[];
   libraryName: string;
   isLoading: boolean;
   onSelectBook: (book: BookFlattened) => void;
+  sort?: BookQueryOptions['sort'];
+  order?: 'asc' | 'desc';
+  onSortChange?: (sort: BookQueryOptions['sort'], order: 'asc' | 'desc') => void;
 }
 
 export default function BookTable({
@@ -16,7 +19,78 @@ export default function BookTable({
   libraryName,
   isLoading,
   onSelectBook,
+  sort,
+  order = 'desc',
+  onSortChange,
 }: BookTableProps) {
+  const handleHeaderClick = (
+    sortKey: NonNullable<BookQueryOptions['sort']>,
+    defaultOrder: 'asc' | 'desc' = 'asc'
+  ) => {
+    if (!onSortChange) return;
+    if (sort === sortKey) {
+      // Toggle order
+      const newOrder = order === 'asc' ? 'desc' : 'asc';
+      onSortChange(sortKey, newOrder);
+    } else {
+      onSortChange(sortKey, defaultOrder);
+    }
+  };
+
+  const renderSortableHeader = (
+    label: string,
+    sortKey: NonNullable<BookQueryOptions['sort']>,
+    className: string = '',
+    align: 'left' | 'center' | 'right' = 'left',
+    defaultOrder: 'asc' | 'desc' = 'asc'
+  ) => {
+    const isActive = sort === sortKey;
+    const isAsc = isActive && order === 'asc';
+    const isDesc = isActive && order === 'desc';
+
+    return (
+      <th
+        scope="col"
+        onClick={() => handleHeaderClick(sortKey, defaultOrder)}
+        className={`py-3 px-4 select-none cursor-pointer transition-colors group/th ${
+          isActive
+            ? 'text-sky-300 font-bold bg-slate-800/60'
+            : 'text-slate-400 hover:text-slate-100 hover:bg-slate-800/30'
+        } ${className}`}
+        title={`Sort by ${label} (${
+          isActive
+            ? isAsc
+              ? 'Click for descending'
+              : 'Click for ascending'
+            : `Click to sort ${defaultOrder === 'asc' ? 'ascending' : 'descending'}`
+        })`}
+      >
+        <div
+          className={`flex items-center gap-1.5 ${
+            align === 'center'
+              ? 'justify-center'
+              : align === 'right'
+              ? 'justify-end'
+              : 'justify-start'
+          }`}
+        >
+          <span>{label}</span>
+          <span className="inline-flex items-center">
+            {isActive ? (
+              isAsc ? (
+                <ArrowUp className="w-3.5 h-3.5 text-sky-400 transition-transform" />
+              ) : (
+                <ArrowDown className="w-3.5 h-3.5 text-sky-400 transition-transform" />
+              )
+            ) : (
+              <ArrowUpDown className="w-3.5 h-3.5 text-slate-600 opacity-0 group-hover/th:opacity-100 transition-opacity" />
+            )}
+          </span>
+        </div>
+      </th>
+    );
+  };
+
   if (isLoading) {
     return (
       <div className="w-full bg-slate-900/60 border border-slate-800 rounded-2xl overflow-hidden animate-pulse">
@@ -45,30 +119,16 @@ export default function BookTable({
         <table className="w-full text-left text-xs text-slate-300">
           <thead className="bg-slate-900/90 text-slate-400 uppercase text-[11px] font-semibold border-b border-slate-800 tracking-wider">
             <tr>
-              <th scope="col" className="py-3 px-4 w-16 text-center">
+              <th scope="col" className="py-3 px-4 w-16 text-center text-slate-500 font-semibold">
                 Cover
               </th>
-              <th scope="col" className="py-3 px-4 min-w-[200px]">
-                Title & Series
-              </th>
-              <th scope="col" className="py-3 px-4 min-w-[140px]">
-                Authors
-              </th>
-              <th scope="col" className="py-3 px-4 min-w-[120px] hidden md:table-cell">
-                Collection
-              </th>
-              <th scope="col" className="py-3 px-4 min-w-[140px] hidden lg:table-cell">
-                Tags
-              </th>
-              <th scope="col" className="py-3 px-3 w-20 text-center">
-                Rating
-              </th>
-              <th scope="col" className="py-3 px-4 w-28 text-center hidden sm:table-cell">
-                Formats
-              </th>
-              <th scope="col" className="py-3 px-3 w-16 text-right hidden xl:table-cell">
-                Year
-              </th>
+              {renderSortableHeader('Title & Series', 'title', 'min-w-[200px]', 'left', 'asc')}
+              {renderSortableHeader('Authors', 'authors', 'min-w-[140px]', 'left', 'asc')}
+              {renderSortableHeader('Collection', 'collection', 'min-w-[120px] hidden md:table-cell', 'left', 'asc')}
+              {renderSortableHeader('Tags', 'tags', 'min-w-[140px] hidden lg:table-cell', 'left', 'asc')}
+              {renderSortableHeader('Rating', 'rating', 'py-3 px-3 w-20', 'center', 'desc')}
+              {renderSortableHeader('Formats', 'formats', 'w-28 hidden sm:table-cell', 'center', 'asc')}
+              {renderSortableHeader('Year', 'pubdate', 'py-3 px-3 w-16 hidden xl:table-cell', 'right', 'desc')}
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-800/60">

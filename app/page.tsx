@@ -155,6 +155,9 @@ export default function HomePage() {
               page={filters.page || 1}
               pageSize={filters.pageSize || 30}
               viewMode={viewMode}
+              sort={filters.sort}
+              order={filters.order}
+              onSortChange={(sort, order) => handleFilterChange({ sort, order, page: 1 })}
               onPageChange={(p) => handleFilterChange({ page: p })}
               onSelectBook={(book) => setSelectedBook(book)}
             />

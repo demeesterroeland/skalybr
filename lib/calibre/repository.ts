@@ -200,6 +200,14 @@ export class FlatBookRepository {
       orderBy = `pubdate ${order}`;
     } else if (options.sort === 'rating') {
       orderBy = `rating ${order}`;
+    } else if (options.sort === 'series' || options.sort === 'seriesName') {
+      orderBy = `series_name ${order}, series_index ${order}`;
+    } else if (options.sort === 'collection') {
+      orderBy = `collection ${order}`;
+    } else if (options.sort === 'tags') {
+      orderBy = `tags ${order}`;
+    } else if (options.sort === 'formats') {
+      orderBy = `formats ${order}`;
     } else {
       orderBy = `id ${order}`;
     }

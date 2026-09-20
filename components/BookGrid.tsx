@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { BookFlattened } from '@/lib/types';
+import { BookFlattened, BookQueryOptions } from '@/lib/types';
 import BookCard from './BookCard';
 import BookTable from './BookTable';
 import { ChevronLeft, ChevronRight, BookDashed } from 'lucide-react';
@@ -14,6 +14,9 @@ interface BookGridProps {
   page: number;
   pageSize: number;
   viewMode?: 'gallery' | 'table';
+  sort?: BookQueryOptions['sort'];
+  order?: 'asc' | 'desc';
+  onSortChange?: (sort: BookQueryOptions['sort'], order: 'asc' | 'desc') => void;
   onPageChange: (page: number) => void;
   onSelectBook: (book: BookFlattened) => void;
 }
@@ -26,6 +29,9 @@ export default function BookGrid({
   page,
   pageSize,
   viewMode = 'gallery',
+  sort,
+  order,
+  onSortChange,
   onPageChange,
   onSelectBook,
 }: BookGridProps) {
@@ -73,6 +79,9 @@ export default function BookGrid({
           libraryName={libraryName}
           isLoading={isLoading}
           onSelectBook={onSelectBook}
+          sort={sort}
+          order={order}
+          onSortChange={onSortChange}
         />
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 sm:gap-6">

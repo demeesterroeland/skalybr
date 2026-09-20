@@ -176,12 +176,18 @@ export default function SearchFilters({
               className="appearance-none pl-3 pr-8 py-2 bg-slate-900 border border-slate-800 rounded-xl text-xs font-medium text-slate-300 hover:border-slate-700 focus:outline-none focus:border-sky-500 transition-colors cursor-pointer"
             >
               <option value="id-desc">Recently Added</option>
+              <option value="id-asc">Oldest Added</option>
               <option value="title-asc">Title (A-Z)</option>
               <option value="title-desc">Title (Z-A)</option>
               <option value="authors-asc">Author (A-Z)</option>
               <option value="authors-desc">Author (Z-A)</option>
-              <option value="pubdate-desc">Publication Date (Newest)</option>
+              <option value="collection-asc">Collection (A-Z)</option>
+              <option value="tags-asc">Tags (A-Z)</option>
               <option value="rating-desc">Highest Rated</option>
+              <option value="rating-asc">Lowest Rated</option>
+              <option value="pubdate-desc">Publication Date (Newest)</option>
+              <option value="pubdate-asc">Publication Date (Oldest)</option>
+              <option value="formats-asc">Formats (A-Z)</option>
             </select>
             <ArrowUpDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-500 pointer-events-none" />
           </div>

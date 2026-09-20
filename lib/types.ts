@@ -52,7 +52,7 @@ export interface BookQueryOptions {
   rating?: number;
   ratings?: number[];
   hasCover?: boolean;
-  sort?: 'title' | 'authors' | 'pubdate' | 'rating' | 'id';
+  sort?: 'title' | 'authors' | 'pubdate' | 'rating' | 'id' | 'series' | 'seriesName' | 'collection' | 'tags' | 'formats';
   order?: 'asc' | 'desc';
   page?: number;
   pageSize?: number;

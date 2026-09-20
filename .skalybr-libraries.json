@@ -1,6 +1,6 @@
 {
-  "hiddenLibraries": [
-    "boox"
-  ],
-  "customNames": {}
+  "hiddenLibraries": [],
+  "customNames": {
+    "DRM": "DRM"
+  }
 }
