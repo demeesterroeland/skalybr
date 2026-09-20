@@ -415,14 +415,15 @@ export default function LibraryManagerModal({
 
   return (
     <>
-      <Dialog.Root open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <Dialog.Root open={isOpen} onOpenChange={(open) => !open && !isUploading && onClose()}>
         <Dialog.Portal>
           <Dialog.Overlay className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 animate-in fade-in-0" />
           <Dialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[95vw] max-w-4xl max-h-[90vh] overflow-y-auto bg-slate-900 border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-2xl z-50 text-slate-100 animate-in zoom-in-95 fade-in-0">
             {/* Close Button */}
             <Dialog.Close asChild>
               <button
-                className="absolute top-4 right-4 p-2 text-slate-400 hover:text-white rounded-full bg-slate-800/60 hover:bg-slate-800 transition-colors"
+                disabled={isUploading}
+                className="absolute top-4 right-4 p-2 text-slate-400 hover:text-white rounded-full bg-slate-800/60 hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 aria-label="Close"
               >
                 <X className="w-5 h-5" />
@@ -454,8 +455,11 @@ export default function LibraryManagerModal({
                   <div className="flex items-center bg-slate-900 border border-slate-800 rounded-lg p-0.5 text-xs self-start sm:self-auto">
                     <button
                       type="button"
+                      disabled={isUploading}
                       onClick={() => setUploadMode('file')}
                       className={`flex items-center gap-1.5 px-3 py-1 rounded-md font-medium transition-colors ${
+                        isUploading ? 'opacity-50 cursor-not-allowed' : ''
+                      } ${
                         uploadMode === 'file'
                           ? 'bg-sky-600 text-white shadow-sm'
                           : 'text-slate-400 hover:text-slate-200'
@@ -466,8 +470,11 @@ export default function LibraryManagerModal({
                     </button>
                     <button
                       type="button"
+                      disabled={isUploading}
                       onClick={() => setUploadMode('url')}
                       className={`flex items-center gap-1.5 px-3 py-1 rounded-md font-medium transition-colors ${
+                        isUploading ? 'opacity-50 cursor-not-allowed' : ''
+                      } ${
                         uploadMode === 'url'
                           ? 'bg-sky-600 text-white shadow-sm'
                           : 'text-slate-400 hover:text-slate-200'
@@ -481,11 +488,14 @@ export default function LibraryManagerModal({
 
                 <form onSubmit={handleUploadSubmit} className="space-y-4">
                   {uploadMode === 'file' ? (
-                    <div className="border-2 border-dashed border-slate-800 hover:border-sky-500/50 rounded-xl p-4 text-center cursor-pointer transition-colors bg-slate-900/30">
+                    <div className={`border-2 border-dashed border-slate-800 rounded-xl p-4 text-center transition-colors bg-slate-900/30 ${
+                      isUploading ? 'opacity-50 cursor-not-allowed' : 'hover:border-sky-500/50 cursor-pointer'
+                    }`}>
                       <input
                         ref={fileInputRef}
                         type="file"
                         accept=".zip"
+                        disabled={isUploading}
                         onChange={(e) => {
                           const file = e.target.files?.[0] || null;
                           setUploadFile(file);
@@ -499,7 +509,7 @@ export default function LibraryManagerModal({
                         className="hidden"
                         id="library-zip-input"
                       />
-                      <label htmlFor="library-zip-input" className="cursor-pointer block">
+                      <label htmlFor="library-zip-input" className={isUploading ? 'cursor-not-allowed block' : 'cursor-pointer block'}>
                         <FolderArchive className="w-8 h-8 text-slate-500 mx-auto mb-2" />
                         {uploadFile ? (
                           <div>
@@ -540,6 +550,7 @@ export default function LibraryManagerModal({
                         <Globe className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
                         <input
                           type="url"
+                          disabled={isUploading}
                           placeholder="https://example.com/library.zip or Dropbox / Google Drive link"
                           value={remoteUrl}
                           onChange={(e) => {
@@ -557,7 +568,7 @@ export default function LibraryManagerModal({
                               } catch (_) {}
                             }
                           }}
-                          className="w-full pl-9 pr-3 py-2 bg-slate-900 border border-slate-800 rounded-lg text-xs text-slate-200 placeholder:text-slate-600 focus:outline-none focus:border-sky-500"
+                          className="w-full pl-9 pr-3 py-2 bg-slate-900 border border-slate-800 rounded-lg text-xs text-slate-200 placeholder:text-slate-600 focus:outline-none focus:border-sky-500 disabled:opacity-50 disabled:cursor-not-allowed"
                         />
                       </div>
 
@@ -615,10 +626,11 @@ export default function LibraryManagerModal({
                       </label>
                       <input
                         type="text"
+                        disabled={isUploading}
                         placeholder="e.g. sci-fi-vault"
                         value={customLibName}
                         onChange={(e) => setCustomLibName(e.target.value)}
-                        className="w-full px-3 py-1.5 bg-slate-900 border border-slate-800 rounded-lg text-xs text-slate-200 focus:outline-none focus:border-sky-500 font-mono"
+                        className="w-full px-3 py-1.5 bg-slate-900 border border-slate-800 rounded-lg text-xs text-slate-200 focus:outline-none focus:border-sky-500 font-mono disabled:opacity-50 disabled:cursor-not-allowed"
                       />
                     </div>
                     <div>
@@ -627,10 +639,11 @@ export default function LibraryManagerModal({
                       </label>
                       <input
                         type="text"
+                        disabled={isUploading}
                         placeholder="e.g. Sci-Fi & Fantasy Vault"
                         value={customDisplayName}
                         onChange={(e) => setCustomDisplayName(e.target.value)}
-                        className="w-full px-3 py-1.5 bg-slate-900 border border-slate-800 rounded-lg text-xs text-slate-200 focus:outline-none focus:border-sky-500"
+                        className="w-full px-3 py-1.5 bg-slate-900 border border-slate-800 rounded-lg text-xs text-slate-200 focus:outline-none focus:border-sky-500 disabled:opacity-50 disabled:cursor-not-allowed"
                       />
                     </div>
                   </div>
@@ -643,7 +656,7 @@ export default function LibraryManagerModal({
                         ? !uploadFile || uploadFile.size > maxUploadSizeMb * 1024 * 1024
                         : !remoteUrl.trim() || urlInspection.status === 'checking' || urlInspection.isOverLimit)
                     }
-                    className="flex items-center justify-center gap-2 w-full sm:w-auto px-5 py-2 bg-sky-500 hover:bg-sky-400 text-white rounded-xl text-xs font-bold transition-all disabled:opacity-50 cursor-pointer shadow-sm shadow-sky-500/20"
+                    className="flex items-center justify-center gap-2 w-full sm:w-auto px-5 py-2 bg-sky-500 hover:bg-sky-400 text-white rounded-xl text-xs font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer shadow-sm shadow-sky-500/20"
                   >
                     {isUploading ? (
                       <>
@@ -805,11 +818,12 @@ export default function LibraryManagerModal({
                                   {/* Select Library */}
                                   {!isCurrent && !lib.isHidden && (
                                     <button
+                                      disabled={isUploading}
                                       onClick={() => {
                                         onSelectLibrary(lib.name);
                                         onClose();
                                       }}
-                                      className="px-2 py-1 text-[11px] font-medium rounded bg-slate-800 hover:bg-sky-500 hover:text-white text-slate-300 transition-colors"
+                                      className="px-2 py-1 text-[11px] font-medium rounded bg-slate-800 hover:bg-sky-500 hover:text-white text-slate-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
                                       Switch
                                     </button>
@@ -817,11 +831,12 @@ export default function LibraryManagerModal({
 
                                   {/* Edit Display Name */}
                                   <button
+                                    disabled={isUploading}
                                     onClick={() => {
                                       setEditingLib(lib.name);
                                       setEditNameValue(lib.displayName || lib.name);
                                     }}
-                                    className="p-1.5 rounded hover:bg-slate-800 text-slate-400 hover:text-sky-400 transition-colors"
+                                    className="p-1.5 rounded hover:bg-slate-800 text-slate-400 hover:text-sky-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                     title="Rename library title"
                                   >
                                     <Edit2 className="w-3.5 h-3.5" />
@@ -829,8 +844,9 @@ export default function LibraryManagerModal({
 
                                   {/* Toggle Hide/Show */}
                                   <button
+                                    disabled={isUploading}
                                     onClick={() => handleToggleHide(lib)}
-                                    className={`p-1.5 rounded hover:bg-slate-800 transition-colors ${
+                                    className={`p-1.5 rounded hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
                                       lib.isHidden
                                         ? 'text-slate-500 hover:text-emerald-400'
                                         : 'text-slate-400 hover:text-amber-400'
@@ -842,9 +858,11 @@ export default function LibraryManagerModal({
 
                                   {/* Download ZIP */}
                                   <a
-                                    href={`/api/v1/libraries/${encodeURIComponent(lib.name)}/download`}
+                                    href={isUploading ? undefined : `/api/v1/libraries/${encodeURIComponent(lib.name)}/download`}
                                     download
-                                    className="p-1.5 rounded hover:bg-slate-800 text-slate-400 hover:text-sky-400 transition-colors inline-block"
+                                    className={`p-1.5 rounded hover:bg-slate-800 text-slate-400 hover:text-sky-400 transition-colors inline-block ${
+                                      isUploading ? 'pointer-events-none opacity-50 cursor-not-allowed' : ''
+                                    }`}
                                     title="Download library ZIP"
                                   >
                                     <Download className="w-3.5 h-3.5" />
@@ -852,11 +870,12 @@ export default function LibraryManagerModal({
 
                                   {/* Delete Library */}
                                   <button
+                                    disabled={isUploading}
                                     onClick={() => {
                                       setDeletingLib(lib);
                                       setDeleteConfirmText('');
                                     }}
-                                    className="p-1.5 rounded hover:bg-rose-500/20 text-slate-500 hover:text-rose-400 transition-colors"
+                                    className="p-1.5 rounded hover:bg-rose-500/20 text-slate-500 hover:text-rose-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                     title="Delete library permanently"
                                   >
                                     <Trash2 className="w-3.5 h-3.5" />
