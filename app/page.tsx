@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useQuery, useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import Header from '@/components/Header';
 import SearchFilters from '@/components/SearchFilters';
@@ -10,6 +10,87 @@ import BookGrid from '@/components/BookGrid';
 import BookDetailModal from '@/components/BookDetailModal';
 import { BookFlattened, BookListResponse, BookQueryOptions } from '@/lib/types';
 import { DEFAULT_LIBRARY_NAME } from '@/lib/constants';
+
+// Helper: Parse URL query string into application state
+function parseUrlState(searchStr: string) {
+  const sp = new URLSearchParams(searchStr);
+  const library = sp.get('library') || DEFAULT_LIBRARY_NAME;
+  const viewMode: 'gallery' | 'table' = sp.get('view') === 'table' ? 'table' : 'gallery';
+  const filterLayout: 'sidebar' | 'commandBar' = sp.get('layout') === 'commandBar' ? 'commandBar' : 'sidebar';
+
+  const filters: BookQueryOptions = {
+    sort: (sp.get('sort') as any) || 'id',
+    order: (sp.get('order') as any) || 'desc',
+    pageSize: 30,
+  };
+
+  if (sp.get('search')) filters.search = sp.get('search')!;
+  if (sp.get('authors')) filters.authors = sp.get('authors')!.split(',').filter(Boolean);
+  else if (sp.get('author')) filters.authors = [sp.get('author')!];
+
+  if (sp.get('tags')) filters.tags = sp.get('tags')!.split(',').filter(Boolean);
+  else if (sp.get('tag')) filters.tags = [sp.get('tag')!];
+
+  if (sp.get('seriesList')) filters.seriesList = sp.get('seriesList')!.split(',').filter(Boolean);
+  else if (sp.get('series')) filters.seriesList = [sp.get('series')!];
+
+  if (sp.get('collections')) filters.collections = sp.get('collections')!.split(',').filter(Boolean);
+  else if (sp.get('collection')) filters.collections = [sp.get('collection')!];
+
+  if (sp.get('publishers')) filters.publishers = sp.get('publishers')!.split(',').filter(Boolean);
+  else if (sp.get('publisher')) filters.publishers = [sp.get('publisher')!];
+
+  if (sp.get('languages')) filters.languages = sp.get('languages')!.split(',').filter(Boolean);
+  else if (sp.get('language')) filters.languages = [sp.get('language')!];
+
+  if (sp.get('formats')) filters.formats = sp.get('formats')!.split(',').filter(Boolean);
+  else if (sp.get('format')) filters.formats = [sp.get('format')!];
+
+  if (sp.get('ratings')) filters.ratings = sp.get('ratings')!.split(',').map(Number).filter((n) => !isNaN(n));
+  else if (sp.get('rating')) filters.rating = Number(sp.get('rating'));
+
+  if (sp.get('hasCover') !== null) {
+    const hc = sp.get('hasCover');
+    if (hc === 'true' || hc === '1') filters.hasCover = true;
+    else if (hc === 'false' || hc === '0') filters.hasCover = false;
+  }
+
+  return { library, viewMode, filterLayout, filters };
+}
+
+// Helper: Serialize application state into URL search string
+function serializeUrlState(
+  library: string,
+  viewMode: 'gallery' | 'table',
+  filterLayout: 'sidebar' | 'commandBar',
+  filters: BookQueryOptions
+): string {
+  const sp = new URLSearchParams();
+  if (library) {
+    sp.set('library', library);
+  }
+  if (viewMode !== 'gallery') {
+    sp.set('view', viewMode);
+  }
+  if (filterLayout !== 'sidebar') {
+    sp.set('layout', filterLayout);
+  }
+  if (filters.search) sp.set('search', filters.search);
+  if (filters.authors && filters.authors.length > 0) sp.set('authors', filters.authors.join(','));
+  if (filters.tags && filters.tags.length > 0) sp.set('tags', filters.tags.join(','));
+  if (filters.seriesList && filters.seriesList.length > 0) sp.set('seriesList', filters.seriesList.join(','));
+  if (filters.collections && filters.collections.length > 0) sp.set('collections', filters.collections.join(','));
+  if (filters.publishers && filters.publishers.length > 0) sp.set('publishers', filters.publishers.join(','));
+  if (filters.languages && filters.languages.length > 0) sp.set('languages', filters.languages.join(','));
+  if (filters.formats && filters.formats.length > 0) sp.set('formats', filters.formats.join(','));
+  if (filters.ratings && filters.ratings.length > 0) sp.set('ratings', filters.ratings.join(','));
+  if (filters.hasCover !== undefined) sp.set('hasCover', String(filters.hasCover));
+  if (filters.sort && filters.sort !== 'id') sp.set('sort', filters.sort);
+  if (filters.order && filters.order !== 'desc') sp.set('order', filters.order);
+
+  const queryStr = sp.toString();
+  return queryStr ? `?${queryStr}` : window.location.pathname;
+}
 
 export default function HomePage() {
   const queryClient = useQueryClient();
@@ -24,6 +105,41 @@ export default function HomePage() {
     order: 'desc',
     pageSize: 30,
   });
+
+  const isInitialized = useRef(false);
+
+  // Initialize state from URL on first mount
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.location.search) {
+      const parsed = parseUrlState(window.location.search);
+      setCurrentLibrary(parsed.library);
+      setViewMode(parsed.viewMode);
+      setFilterLayout(parsed.filterLayout);
+      setFilters(parsed.filters);
+    }
+    isInitialized.current = true;
+  }, []);
+
+  // Sync state to URL in address bar whenever filters, library, view, or sort change
+  useEffect(() => {
+    if (!isInitialized.current) return;
+    const newUrl = serializeUrlState(currentLibrary, viewMode, filterLayout, filters);
+    window.history.replaceState(null, '', newUrl);
+  }, [currentLibrary, viewMode, filterLayout, filters]);
+
+  // Support Browser Back/Forward navigation
+  useEffect(() => {
+    const handlePopState = () => {
+      const parsed = parseUrlState(window.location.search);
+      setCurrentLibrary(parsed.library);
+      setViewMode(parsed.viewMode);
+      setFilterLayout(parsed.filterLayout);
+      setFilters(parsed.filters);
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
 
   // Fetch all 8 Calibre Facets
   const { data: facets } = useQuery({
