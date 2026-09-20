@@ -108,4 +108,25 @@ describe('Skalybr FlatBookRepository', () => {
       expect(descResult.books).toBeInstanceOf(Array);
     }
   });
+
+  it('should filter by hasCover (true, false, or undefined for all books)', () => {
+    const libraries = FlatBookRepository.listAvailableLibraries(DEFAULT_CALIBRE_BASE_DIR);
+    const targetLib = libraries[0]?.name;
+    const repo = new FlatBookRepository(targetLib);
+
+    // When hasCover is undefined / omitted -> includes both with and without covers
+    const allResult = repo.getBooks({ pageSize: 100 });
+    const withCoverResult = repo.getBooks({ hasCover: true, pageSize: 100 });
+    const withoutCoverResult = repo.getBooks({ hasCover: false, pageSize: 100 });
+
+    expect(allResult.total).toBe(withCoverResult.total + withoutCoverResult.total);
+
+    withCoverResult.books.forEach((b) => {
+      expect(b.hasCover).toBe(true);
+    });
+
+    withoutCoverResult.books.forEach((b) => {
+      expect(b.hasCover).toBe(false);
+    });
+  });
 });
