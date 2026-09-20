@@ -7,14 +7,25 @@ export const DEFAULT_CALIBRE_BASE_DIR =
 export const DEFAULT_LIBRARY_NAME = process.env.DEFAULT_LIBRARY || 'boox';
 
 export function getLibraryPath(libraryName: string = DEFAULT_LIBRARY_NAME): string {
-  // If libraryName is already a valid absolute path or relative directory with metadata.db
-  if (path.isAbsolute(libraryName) && fs.existsSync(path.join(libraryName, 'metadata.db'))) {
-    return libraryName;
+  // Strip .. components to prevent traversal, but keep path separators for nested libraries
+  const sanitizedName = libraryName.replace(/\.\./g, '');
+  
+  if (!sanitizedName) {
+    throw new Error('Invalid library name');
   }
-  const relPath = path.join(process.cwd(), libraryName);
-  if (fs.existsSync(path.join(relPath, 'metadata.db'))) {
-    return relPath;
+
+  // Allow resolving in cwd if it matches our basic metadata.db heuristic
+  const relPath = path.join(process.cwd(), sanitizedName);
+  const resolvedRelPath = path.resolve(relPath);
+  if (resolvedRelPath.startsWith(path.resolve(process.cwd()) + path.sep) && fs.existsSync(path.join(resolvedRelPath, 'metadata.db'))) {
+    return resolvedRelPath;
   }
+  
   // Standard base dir resolution
-  return path.join(DEFAULT_CALIBRE_BASE_DIR, libraryName);
+  const basePath = path.join(DEFAULT_CALIBRE_BASE_DIR, sanitizedName);
+  const resolvedBasePath = path.resolve(basePath);
+  if (!resolvedBasePath.startsWith(path.resolve(DEFAULT_CALIBRE_BASE_DIR) + path.sep)) {
+    throw new Error('Path escape detected');
+  }
+  return resolvedBasePath;
 }

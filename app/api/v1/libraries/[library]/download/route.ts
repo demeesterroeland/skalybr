@@ -13,6 +13,10 @@ function addDirectoryToZip(zip: JSZip, dirPath: string, rootDir: string) {
     const fullPath = path.join(dirPath, entry.name);
     const relPath = path.relative(rootDir, fullPath);
 
+    if (entry.isSymbolicLink()) {
+      continue;
+    }
+
     if (entry.isDirectory()) {
       addDirectoryToZip(zip, fullPath, rootDir);
     } else {
@@ -21,14 +25,12 @@ function addDirectoryToZip(zip: JSZip, dirPath: string, rootDir: string) {
   }
 }
 
-export async function GET(req: NextRequest) {
+export async function GET(req: NextRequest, { params }: { params: Promise<any> }) {
   try {
+    const { library } = await params;
     const { searchParams } = new URL(req.url);
-    const library = searchParams.get('library');
-
-    if (!library) {
-      return new NextResponse('Library query param is required', { status: 400 });
-    }
+    
+    
 
     const libPath = getLibraryPath(library);
     const resolvedPath = path.resolve(libPath);
@@ -57,6 +59,6 @@ export async function GET(req: NextRequest) {
     });
   } catch (error: any) {
     console.error('Error downloading library ZIP:', error);
-    return new NextResponse(error.message, { status: 500 });
+    return new NextResponse('Internal Server Error', { status: 500 });
   }
 }

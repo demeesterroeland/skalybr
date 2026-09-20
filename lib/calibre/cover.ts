@@ -104,6 +104,11 @@ export async function getResizedCover(
 ): Promise<Buffer | null> {
   const coverPath = path.join(libraryPath, bookRelativePath, 'cover.jpg');
 
+  const resolvedCoverPath = path.resolve(coverPath);
+  if (!resolvedCoverPath.startsWith(path.resolve(libraryPath) + path.sep)) {
+    return null;
+  }
+
   if (!fs.existsSync(coverPath)) {
     return null;
   }

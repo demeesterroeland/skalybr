@@ -7,13 +7,12 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ library: string, id: string }> }
 ) {
   try {
-    const { id } = await params;
+    const { library, id } = await params;
     const { searchParams } = new URL(req.url);
-    const library = searchParams.get('library') || undefined;
-    const width = parseInt(searchParams.get('width') || '360', 10);
+        const width = parseInt(searchParams.get('width') || '360', 10);
     const format = (searchParams.get('format') as 'webp' | 'jpeg') || 'webp';
 
     const repo = new FlatBookRepository(library);
@@ -49,6 +48,7 @@ export async function GET(
       },
     });
   } catch (error: any) {
-    return new NextResponse(error.message, { status: 500 });
+    console.error(error);
+    return new NextResponse('Internal Server Error', { status: 500 });
   }
 }

@@ -8,13 +8,12 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: Promise<{ id: string; format: string }> }
+  { params }: { params: Promise<{ library: string, id: string; format: string }> }
 ) {
   try {
-    const { id, format } = await params;
+    const { library, id, format } = await params;
     const { searchParams } = new URL(req.url);
-    const library = searchParams.get('library') || undefined;
-
+    
     const libPath = getLibraryPath(library);
     const db = getDatabaseConnection(libPath);
 
@@ -32,6 +31,11 @@ export async function GET(
     }
 
     const filePath = path.join(libPath, row.path, `${row.name}.${row.format.toLowerCase()}`);
+
+    const resolvedFilePath = path.resolve(filePath);
+    if (!resolvedFilePath.startsWith(path.resolve(libPath) + path.sep)) {
+      return new NextResponse('Forbidden', { status: 403 });
+    }
 
     if (!fs.existsSync(filePath)) {
       return new NextResponse('File missing on disk', { status: 404 });
@@ -61,6 +65,7 @@ export async function GET(
       },
     });
   } catch (error: any) {
-    return new NextResponse(error.message, { status: 500 });
+    console.error(error);
+    return new NextResponse('Internal Server Error', { status: 500 });
   }
 }

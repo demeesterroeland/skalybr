@@ -21,7 +21,8 @@ export async function GET(req: NextRequest) {
       data: libraries,
     });
   } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    console.error(error);
+    return NextResponse.json({ success: false, error: 'Internal Server Error' }, { status: 500 });
   }
 }
 
@@ -46,7 +47,7 @@ export async function POST(req: NextRequest) {
       }
 
       // Sanitize library folder name
-      libraryName = libraryName.replace(/[^a-zA-Z0-9_\-\.\/]/g, '_');
+      libraryName = libraryName.replace(/[^a-zA-Z0-9_\-]/g, '_');
       const targetDir = path.join(process.cwd(), libraryName);
 
       if (fs.existsSync(targetDir)) {
@@ -56,6 +57,11 @@ export async function POST(req: NextRequest) {
         );
       }
 
+      const MAX_UPLOAD_SIZE = process.env.MAX_UPLOAD_SIZE_MB ? parseInt(process.env.MAX_UPLOAD_SIZE_MB, 10) * 1024 * 1024 : 500 * 1024 * 1024;
+      if (file.size > MAX_UPLOAD_SIZE) {
+        return NextResponse.json({ success: false, error: 'File size exceeds limit' }, { status: 413 });
+      }
+      
       const buffer = Buffer.from(await file.arrayBuffer());
       const zip = await JSZip.loadAsync(buffer);
 
@@ -94,7 +100,7 @@ export async function POST(req: NextRequest) {
 
         // Prevent path traversal
         const resolvedPath = path.resolve(targetDir, cleanRelPath);
-        if (!resolvedPath.startsWith(path.resolve(targetDir))) {
+        if (!resolvedPath.startsWith(path.resolve(targetDir) + path.sep)) {
           continue;
         }
 
@@ -129,92 +135,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: false, error: 'Unsupported Content-Type' }, { status: 400 });
   } catch (error: any) {
     console.error('Error uploading library:', error);
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    return NextResponse.json({ success: false, error: 'Internal Server Error' }, { status: 500 });
   }
 }
 
-// PATCH: Rename, toggle visibility (show/hide in dropdown)
-export async function PATCH(req: NextRequest) {
-  try {
-    const body = await req.json();
-    const { library, displayName, isHidden } = body;
-
-    if (!library) {
-      return NextResponse.json({ success: false, error: 'Library name is required' }, { status: 400 });
-    }
-
-    const settings = getLibrarySettings();
-
-    if (displayName !== undefined) {
-      if (displayName.trim() === '') {
-        delete settings.customNames[library];
-      } else {
-        settings.customNames[library] = displayName.trim();
-      }
-    }
-
-    if (isHidden !== undefined) {
-      if (isHidden) {
-        if (!settings.hiddenLibraries.includes(library)) {
-          settings.hiddenLibraries.push(library);
-        }
-      } else {
-        settings.hiddenLibraries = settings.hiddenLibraries.filter((l) => l !== library);
-      }
-    }
-
-    saveLibrarySettings(settings);
-
-    return NextResponse.json({
-      success: true,
-      message: 'Library settings updated successfully.',
-      settings,
-    });
-  } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
-  }
-}
-
-// DELETE: Delete a library from disk
-export async function DELETE(req: NextRequest) {
-  try {
-    const { searchParams } = new URL(req.url);
-    const library = searchParams.get('library');
-
-    if (!library) {
-      return NextResponse.json({ success: false, error: 'Library parameter is required' }, { status: 400 });
-    }
-
-    // Protect against accidentally deleting root or critical directories
-    const libPath = getLibraryPath(library);
-    const resolvedPath = path.resolve(libPath);
-    const cwd = path.resolve(process.cwd());
-
-    if (resolvedPath === cwd || resolvedPath === '/' || resolvedPath === path.resolve(cwd, 'app') || resolvedPath === path.resolve(cwd, 'node_modules')) {
-      return NextResponse.json({ success: false, error: 'Cannot delete root or core directories' }, { status: 400 });
-    }
-
-    if (!fs.existsSync(resolvedPath)) {
-      return NextResponse.json({ success: false, error: 'Library directory does not exist' }, { status: 404 });
-    }
-
-    // Close SQLite connection pool for this library
-    closeDatabaseConnection(resolvedPath);
-
-    // Delete directory recursively
-    fs.rmSync(resolvedPath, { recursive: true, force: true });
-
-    // Clean up settings
-    const settings = getLibrarySettings();
-    delete settings.customNames[library];
-    settings.hiddenLibraries = settings.hiddenLibraries.filter((l) => l !== library);
-    saveLibrarySettings(settings);
-
-    return NextResponse.json({
-      success: true,
-      message: `Library "${library}" deleted permanently.`,
-    });
-  } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
-  }
-}

@@ -43,9 +43,9 @@ export default function BookDetailModal({
   if (!book) return null;
 
   const timestamp = book.timestamp ? new Date(book.timestamp).getTime() : Date.now();
-  const coverUrl = `/api/v1/books/${book.id}/cover?library=${encodeURIComponent(
+  const coverUrl = `/api/v1/libraries/${encodeURIComponent(
     libraryName
-  )}&width=600&format=webp&v=${encodeURIComponent(book.uuid || String(book.id))}_${book.hasCover ? 1 : 0}_${timestamp}`;
+  )}/books/${book.id}/cover?width=600&format=webp&v=${encodeURIComponent(book.uuid || String(book.id))}_${book.hasCover ? 1 : 0}_${timestamp}`;
 
   const formatList = book.formats ? book.formats.split(',').filter(Boolean) : [];
 
@@ -55,7 +55,7 @@ export default function BookDetailModal({
     setIsDeleting(true);
     try {
       const res = await fetch(
-        `/api/v1/books/${book.id}?library=${encodeURIComponent(libraryName)}`,
+        `/api/v1/libraries/${encodeURIComponent(libraryName)}/books/${book.id}`,
         {
           method: 'DELETE',
         }
@@ -112,9 +112,9 @@ export default function BookDetailModal({
                       {formatList.map((fmt) => (
                         <a
                           key={fmt}
-                          href={`/api/v1/books/${book.id}/file/${fmt.toLowerCase()}?library=${encodeURIComponent(
+                          href={`/api/v1/libraries/${encodeURIComponent(
                             libraryName
-                          )}`}
+                          )}/books/${book.id}/file/${fmt.toLowerCase()}`}
                           download
                           className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-sky-500/15 hover:bg-sky-500 text-sky-400 hover:text-white border border-sky-500/30 text-xs font-mono font-bold uppercase transition-all shadow-sm cursor-pointer"
                         >

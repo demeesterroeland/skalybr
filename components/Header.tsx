@@ -7,13 +7,24 @@ import { Code2, FolderArchive, Settings } from 'lucide-react';
 import Link from 'next/link';
 import { APP_VERSION } from '@/lib/constants';
 
+import { useRouter } from 'next/navigation';
+
 interface HeaderProps {
   currentLibrary: string;
-  onSelectLibrary: (lib: string) => void;
 }
 
-export default function Header({ currentLibrary, onSelectLibrary }: HeaderProps) {
+export default function Header({ currentLibrary }: HeaderProps) {
   const [isManagerOpen, setIsManagerOpen] = useState(false);
+  const router = useRouter();
+
+  const handleSelectLibrary = (lib: string) => {
+    try {
+      localStorage.setItem('skalybr-last-library', lib);
+    } catch (e) {
+      // Ignore
+    }
+    router.push(`/libraries/${encodeURIComponent(lib)}/books`);
+  };
 
   return (
     <header className="sticky top-0 z-40 w-full border-b border-slate-800/80 bg-slate-950/80 backdrop-blur-md">
@@ -40,7 +51,7 @@ export default function Header({ currentLibrary, onSelectLibrary }: HeaderProps)
           {/* Library Switcher */}
           <LibrarySelector
             currentLibrary={currentLibrary}
-            onSelectLibrary={onSelectLibrary}
+            onSelectLibrary={handleSelectLibrary}
             onOpenManager={() => setIsManagerOpen(true)}
           />
         </div>
@@ -86,7 +97,7 @@ export default function Header({ currentLibrary, onSelectLibrary }: HeaderProps)
         isOpen={isManagerOpen}
         onClose={() => setIsManagerOpen(false)}
         currentLibrary={currentLibrary}
-        onSelectLibrary={onSelectLibrary}
+        onSelectLibrary={handleSelectLibrary}
       />
     </header>
   );

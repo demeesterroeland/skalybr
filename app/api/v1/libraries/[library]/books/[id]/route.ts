@@ -6,13 +6,12 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ library: string, id: string }> }
 ) {
   try {
-    const { id } = await params;
+    const { library, id } = await params;
     const { searchParams } = new URL(req.url);
-    const library = searchParams.get('library') || undefined;
-
+    
     const repo = new FlatBookRepository(library);
     const book = repo.getBookById(parseInt(id, 10));
 
@@ -22,19 +21,19 @@ export async function GET(
 
     return NextResponse.json({ success: true, data: book });
   } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    console.error(error);
+    return NextResponse.json({ success: false, error: 'Internal Server Error' }, { status: 500 });
   }
 }
 
-export async function PUT(
+export async function PATCH(
   req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ library: string, id: string }> }
 ) {
   try {
-    const { id } = await params;
+    const { library, id } = await params;
     const { searchParams } = new URL(req.url);
-    const library = searchParams.get('library') || undefined;
-    const body = await req.json();
+        const body = await req.json();
 
     const parsed = UpdateBookSchema.safeParse(body);
     if (!parsed.success) {
@@ -53,19 +52,19 @@ export async function PUT(
 
     return NextResponse.json({ success: true, data: updated });
   } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    console.error(error);
+    return NextResponse.json({ success: false, error: 'Internal Server Error' }, { status: 500 });
   }
 }
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ library: string, id: string }> }
 ) {
   try {
-    const { id } = await params;
+    const { library, id } = await params;
     const { searchParams } = new URL(req.url);
-    const library = searchParams.get('library') || undefined;
-
+    
     const repo = new FlatBookRepository(library);
     const deleted = repo.deleteBook(parseInt(id, 10));
 
@@ -75,6 +74,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true, message: 'Book deleted successfully' });
   } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    console.error(error);
+    return NextResponse.json({ success: false, error: 'Internal Server Error' }, { status: 500 });
   }
 }

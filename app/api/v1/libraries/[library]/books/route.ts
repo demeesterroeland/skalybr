@@ -3,11 +3,11 @@ import { FlatBookRepository } from '@/lib/calibre/repository';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET(req: NextRequest) {
+export async function GET(req: NextRequest, { params }: { params: Promise<any> }) {
   try {
+    const { library } = await params;
     const { searchParams } = new URL(req.url);
-    const library = searchParams.get('library') || undefined;
-    const search = searchParams.get('search') || undefined;
+        const search = searchParams.get('search') || undefined;
     const authors = searchParams.get('authors')
       ? searchParams.get('authors')!.split(',').map((s) => s.trim()).filter(Boolean)
       : undefined;
@@ -92,6 +92,7 @@ export async function GET(req: NextRequest) {
       data: result,
     });
   } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    console.error(error);
+    return NextResponse.json({ success: false, error: 'Internal Server Error' }, { status: 500 });
   }
 }

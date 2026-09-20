@@ -25,14 +25,53 @@ export async function GET() {
             },
           },
         },
+        post: {
+          summary: 'Upload a Calibre library zip',
+          responses: {
+            '200': { description: 'Upload success' },
+          },
+        }
       },
-      '/api/v1/facets': {
+      '/api/v1/libraries/{library}': {
+        get: {
+          summary: 'Get details of a specific library',
+          parameters: [
+            { name: 'library', in: 'path', required: true, schema: { type: 'string' } },
+          ],
+          responses: { '200': { description: 'Library info' } },
+        },
+        patch: {
+          summary: 'Update library visibility/name',
+          parameters: [
+            { name: 'library', in: 'path', required: true, schema: { type: 'string' } },
+          ],
+          responses: { '200': { description: 'Updated library info' } },
+        },
+        delete: {
+          summary: 'Delete library',
+          parameters: [
+            { name: 'library', in: 'path', required: true, schema: { type: 'string' } },
+          ],
+          responses: { '200': { description: 'Deletion confirmed' } },
+        }
+      },
+      '/api/v1/libraries/{library}/download': {
+        get: {
+          summary: 'Download a library zip',
+          parameters: [
+            { name: 'library', in: 'path', required: true, schema: { type: 'string' } },
+          ],
+          responses: { '200': { description: 'Zip stream' } },
+        }
+      },
+      '/api/v1/libraries/{library}/facets': {
         get: {
           summary: 'Get filter facets (authors, tags, series, collections, formats)',
           parameters: [
             {
               name: 'library',
-              in: 'query',
+              in: 'path',
+              required: true,
               schema: { type: 'string' },
               description: 'Calibre library name',
             },
@@ -42,11 +81,11 @@ export async function GET() {
           },
         },
       },
-      '/api/v1/books': {
+      '/api/v1/libraries/{library}/books': {
         get: {
           summary: 'List and search books',
           parameters: [
-            { name: 'library', in: 'query', schema: { type: 'string' } },
+            { name: 'library', in: 'path', required: true, schema: { type: 'string' } },
             { name: 'search', in: 'query', schema: { type: 'string' } },
             { name: 'author', in: 'query', schema: { type: 'string' } },
             { name: 'tag', in: 'query', schema: { type: 'string' } },
@@ -67,23 +106,23 @@ export async function GET() {
           },
         },
       },
-      '/api/v1/books/{id}': {
+      '/api/v1/libraries/{library}/books/{id}': {
         get: {
           summary: 'Get book details by ID',
           parameters: [
             { name: 'id', in: 'path', required: true, schema: { type: 'integer' } },
-            { name: 'library', in: 'query', schema: { type: 'string' } },
+            { name: 'library', in: 'path', required: true, schema: { type: 'string' } },
           ],
           responses: {
             '200': { description: 'Book details' },
             '404': { description: 'Book not found' },
           },
         },
-        put: {
+        patch: {
           summary: 'Update book metadata',
           parameters: [
             { name: 'id', in: 'path', required: true, schema: { type: 'integer' } },
-            { name: 'library', in: 'query', schema: { type: 'string' } },
+            { name: 'library', in: 'path', required: true, schema: { type: 'string' } },
           ],
           requestBody: {
             required: true,
@@ -108,19 +147,19 @@ export async function GET() {
           summary: 'Delete book',
           parameters: [
             { name: 'id', in: 'path', required: true, schema: { type: 'integer' } },
-            { name: 'library', in: 'query', schema: { type: 'string' } },
+            { name: 'library', in: 'path', required: true, schema: { type: 'string' } },
           ],
           responses: {
             '200': { description: 'Deletion confirmation' },
           },
         },
       },
-      '/api/v1/books/{id}/cover': {
+      '/api/v1/libraries/{library}/books/{id}/cover': {
         get: {
           summary: 'Stream resized WebP/JPEG cover image',
           parameters: [
             { name: 'id', in: 'path', required: true, schema: { type: 'integer' } },
-            { name: 'library', in: 'query', schema: { type: 'string' } },
+            { name: 'library', in: 'path', required: true, schema: { type: 'string' } },
             { name: 'width', in: 'query', schema: { type: 'integer', default: 360 } },
             { name: 'format', in: 'query', schema: { type: 'string', enum: ['webp', 'jpeg'], default: 'webp' } },
           ],
@@ -129,13 +168,13 @@ export async function GET() {
           },
         },
       },
-      '/api/v1/books/{id}/file/{format}': {
+      '/api/v1/libraries/{library}/books/{id}/file/{format}': {
         get: {
           summary: 'Download e-book file format',
           parameters: [
             { name: 'id', in: 'path', required: true, schema: { type: 'integer' } },
             { name: 'format', in: 'path', required: true, schema: { type: 'string' } },
-            { name: 'library', in: 'query', schema: { type: 'string' } },
+            { name: 'library', in: 'path', required: true, schema: { type: 'string' } },
           ],
           responses: {
             '200': { description: 'E-book binary file' },

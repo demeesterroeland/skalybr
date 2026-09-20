@@ -134,9 +134,9 @@ export default function BookTable({
           <tbody className="divide-y divide-slate-800/60">
             {books.map((book) => {
               const timestamp = book.timestamp ? new Date(book.timestamp).getTime() : Date.now();
-              const coverUrl = `/api/v1/books/${book.id}/cover?library=${encodeURIComponent(
+              const coverUrl = `/api/v1/libraries/${encodeURIComponent(
                 libraryName
-              )}&width=120&format=webp&v=${encodeURIComponent(book.uuid || String(book.id))}_${
+              )}/books/${book.id}/cover?width=120&format=webp&v=${encodeURIComponent(book.uuid || String(book.id))}_${
                 book.hasCover ? 1 : 0
               }_${timestamp}`;
 

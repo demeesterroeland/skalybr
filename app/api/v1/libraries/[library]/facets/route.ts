@@ -3,11 +3,11 @@ import { FlatBookRepository } from '@/lib/calibre/repository';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET(req: NextRequest) {
+export async function GET(req: NextRequest, { params }: { params: Promise<any> }) {
   try {
+    const { library } = await params;
     const { searchParams } = new URL(req.url);
-    const library = searchParams.get('library') || undefined;
-
+    
     const repo = new FlatBookRepository(library);
     const facets = repo.getFilterFacets();
 
@@ -16,6 +16,7 @@ export async function GET(req: NextRequest) {
       data: facets,
     });
   } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    console.error(error);
+    return NextResponse.json({ success: false, error: 'Internal Server Error' }, { status: 500 });
   }
 }

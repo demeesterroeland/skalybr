@@ -163,7 +163,7 @@ export default function LibraryManagerModal({
 
     setIsDeleting(true);
     try {
-      const res = await fetch(`/api/v1/libraries?library=${encodeURIComponent(deletingLib.name)}`, {
+      const res = await fetch(`/api/v1/libraries/${encodeURIComponent(deletingLib.name)}`, {
         method: 'DELETE',
       });
       const json = await res.json();
@@ -450,7 +450,7 @@ export default function LibraryManagerModal({
 
                                   {/* Download ZIP */}
                                   <a
-                                    href={`/api/v1/libraries/download?library=${encodeURIComponent(lib.name)}`}
+                                    href={`/api/v1/libraries/${encodeURIComponent(lib.name)}/download`}
                                     download
                                     className="p-1.5 rounded hover:bg-slate-800 text-slate-400 hover:text-sky-400 transition-colors inline-block"
                                     title="Download library ZIP"
