@@ -279,7 +279,28 @@ export function getDefaultLibraryRecord(): LibraryRecord | null {
 
 export function deleteLibraryRecord(name: string): boolean {
   const db = getSkalybrDb();
+  let wasDefault = false;
+  const existing = getLibraryByName(name);
+  if (existing?.isDefault) {
+    wasDefault = true;
+  }
+
   const res = db.prepare('DELETE FROM libraries WHERE name = ?').run(name);
+
+  // Clean up associated reading progress and shelf links for this library
+  db.prepare('DELETE FROM reading_progress WHERE library = ?').run(name);
+  db.prepare('DELETE FROM book_shelf_link WHERE library = ?').run(name);
+
+  // If deleted library was the active default, promote the first remaining non-hidden library
+  if (wasDefault) {
+    const nextDefault = db
+      .prepare('SELECT name FROM libraries WHERE is_hidden = 0 ORDER BY id ASC LIMIT 1')
+      .get() as { name: string } | undefined;
+    if (nextDefault) {
+      db.prepare('UPDATE libraries SET is_default = 1 WHERE name = ?').run(nextDefault.name);
+    }
+  }
+
   return res.changes > 0;
 }
 
