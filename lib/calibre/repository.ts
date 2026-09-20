@@ -12,29 +12,57 @@ export class FlatBookRepository {
   }
 
   public static listAvailableLibraries(baseDir: string = DEFAULT_CALIBRE_BASE_DIR): LibraryInfo[] {
-    if (!fs.existsSync(baseDir)) return [];
-
-    const entries = fs.readdirSync(baseDir, { withFileTypes: true });
     const libraries: LibraryInfo[] = [];
+    const seenPaths = new Set<string>();
 
-    for (const entry of entries) {
-      if (entry.isDirectory()) {
-        const dbPath = path.join(baseDir, entry.name, 'metadata.db');
-        if (fs.existsSync(dbPath)) {
+    const checkAndAdd = (dirPath: string, displayName?: string) => {
+      const fullPath = path.isAbsolute(dirPath) ? dirPath : path.join(process.cwd(), dirPath);
+      const dbPath = path.join(fullPath, 'metadata.db');
+      if (fs.existsSync(dbPath) && !seenPaths.has(fullPath)) {
+        seenPaths.add(fullPath);
+        try {
+          const db = getDatabaseConnection(fullPath);
+          const countRow = db.prepare('SELECT count(*) as count FROM books').get() as { count: number };
+          const customColRow = db.prepare('SELECT count(*) as count FROM custom_columns').get() as { count: number };
+          const name = displayName || path.relative(process.cwd(), fullPath) || path.basename(fullPath);
+
+          libraries.push({
+            name,
+            path: fullPath,
+            bookCount: countRow.count,
+            hasCustomColumns: customColRow.count > 0,
+          });
+        } catch (e) {
+          // Skip unreadable databases
+        }
+      }
+    };
+
+    // 1. Check explicitly specified CALIBRE_LIBRARIES env var
+    if (process.env.CALIBRE_LIBRARIES) {
+      const explicitLibs = process.env.CALIBRE_LIBRARIES.split(',').map((s) => s.trim()).filter(Boolean);
+      for (const lib of explicitLibs) {
+        checkAndAdd(lib);
+      }
+    }
+
+    // 2. Check top-level directories in baseDir
+    if (fs.existsSync(baseDir)) {
+      const entries = fs.readdirSync(baseDir, { withFileTypes: true });
+      for (const entry of entries) {
+        if (entry.isDirectory()) {
+          const dir = path.join(baseDir, entry.name);
+          checkAndAdd(dir, entry.name);
+
+          // Also check 1 level deeper (e.g. demo-library/demo)
           try {
-            const db = getDatabaseConnection(path.join(baseDir, entry.name));
-            const countRow = db.prepare('SELECT count(*) as count FROM books').get() as { count: number };
-            const customColRow = db.prepare('SELECT count(*) as count FROM custom_columns').get() as { count: number };
-
-            libraries.push({
-              name: entry.name,
-              path: path.join(baseDir, entry.name),
-              bookCount: countRow.count,
-              hasCustomColumns: customColRow.count > 0,
-            });
-          } catch (e) {
-            // Skip unreadable databases
-          }
+            const subEntries = fs.readdirSync(dir, { withFileTypes: true });
+            for (const sub of subEntries) {
+              if (sub.isDirectory()) {
+                checkAndAdd(path.join(dir, sub.name), `${entry.name}/${sub.name}`);
+              }
+            }
+          } catch (e) {}
         }
       }
     }
