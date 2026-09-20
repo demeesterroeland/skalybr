@@ -249,7 +249,23 @@ export default function LibraryGateway() {
   }
 
   if (!libraries || libraries.length === 0) {
-    return <OnboardingZeroState />;
+    return (
+      <>
+        <OnboardingZeroState onOpenAddLibrary={() => setIsManagerOpen(true)} />
+        <LibraryManagerModal
+          isOpen={isManagerOpen}
+          onClose={() => {
+            setIsManagerOpen(false);
+            queryClient.invalidateQueries({ queryKey: ['libraries'] });
+          }}
+          currentLibrary=""
+          onSelectLibrary={(libName) => {
+            setIsManagerOpen(false);
+            handleSelect(libName);
+          }}
+        />
+      </>
+    );
   }
 
   const handleSelect = (libName: string) => {

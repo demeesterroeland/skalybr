@@ -174,12 +174,12 @@ export default function LibraryManagerModal({
         queryClient.invalidateQueries({ queryKey: ['libraries'] });
         refetch();
 
-        // If deleted current active library, switch to first available
+        // If deleted current active library, redirect safely to /libraries
         if (currentLibrary === deletingLib.name) {
-          const remaining = libraries.filter((l) => l.name !== deletingLib.name && !l.isHidden);
-          if (remaining.length > 0) {
-            onSelectLibrary(remaining[0].name);
-          }
+          try {
+            localStorage.removeItem('skalybr-last-library');
+          } catch (e) {}
+          window.location.href = '/libraries';
         }
       } else {
         toast.error(json.error || 'Failed to delete library');

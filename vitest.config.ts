@@ -9,6 +9,7 @@ export default defineConfig(({ mode }) => {
     test: {
       environment: 'node',
       globals: true,
+      exclude: ['**/node_modules/**', '**/.next/**'],
     },
     resolve: {
       alias: {
