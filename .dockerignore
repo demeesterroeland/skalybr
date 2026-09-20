@@ -7,6 +7,5 @@ node_modules
 .env
 boox
 DRM
-demo-library
 *.zip
 *.tar.gz
