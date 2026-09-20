@@ -14,9 +14,10 @@ export default function BookCard({ book, libraryName, onClick }: BookCardProps) 
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
 
+  const timestamp = book.timestamp ? new Date(book.timestamp).getTime() : Date.now();
   const coverUrl = `/api/v1/books/${book.id}/cover?library=${encodeURIComponent(
     libraryName
-  )}&width=360&format=webp`;
+  )}&width=360&format=webp&v=${encodeURIComponent(book.uuid || String(book.id))}`;
 
   const formatList = book.formats ? book.formats.split(',').filter(Boolean) : [];
 

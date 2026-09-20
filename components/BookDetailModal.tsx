@@ -44,7 +44,7 @@ export default function BookDetailModal({
 
   const coverUrl = `/api/v1/books/${book.id}/cover?library=${encodeURIComponent(
     libraryName
-  )}&width=600&format=webp`;
+  )}&width=600&format=webp&v=${encodeURIComponent(book.uuid || String(book.id))}`;
 
   const formatList = book.formats ? book.formats.split(',').filter(Boolean) : [];
 
