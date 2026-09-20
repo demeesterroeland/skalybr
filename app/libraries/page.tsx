@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import OnboardingZeroState from '@/components/onboarding-zero-state';
 import LibraryManagerModal from '@/components/LibraryManagerModal';
 import { LibraryInfo } from '@/lib/types';
-import { BookOpen, Plus, Settings2, ArrowRight } from 'lucide-react';
+import { BookOpen, Plus, Settings2, ArrowRight, FolderArchive } from 'lucide-react';
 
 /**
  * Seeded pseudo-random number generator (Mulberry32)
@@ -25,262 +25,190 @@ function createPRNG(seedStr: string) {
 }
 
 /**
- * 3-Tone palettes inspired by nice-color-palettes & generative-placeholders
+ * Geometric Abstract Wallpaper Palettes inspired by modern OS wallpapers
  */
-const PALETTES = [
-  { bg: '#0f172a', primary: '#cbd5e1', accent: '#f59e0b', stroke: '#94a3b8' }, // Slate & Warm Amber
-  { bg: '#0b192c', primary: '#e2e8f0', accent: '#008b8b', stroke: '#64748b' }, // Midnight & Teal
-  { bg: '#18181b', primary: '#f4f4f5', accent: '#e11d48', stroke: '#71717a' }, // Charcoal & Crimson
-  { bg: '#06201b', primary: '#d1fae5', accent: '#ca8a04', stroke: '#34d399' }, // Forest & Ochre
-  { bg: '#172554', primary: '#e0f2fe', accent: '#f97316', stroke: '#60a5fa' }, // Deep Blue & Tangerine
+const WALLPAPER_THEMES = [
+  // Theme 0: Cyan, Teal, Coral Pink & Sunset Amber (Exact user reference match!)
+  {
+    sky: '#0284c7',
+    skyGradient: ['#0284c7', '#38bdf8'],
+    band: '#0d9488',
+    diagonalGradient: ['#e11d48', '#f97316'],
+    domeGradient: ['#1d4ed8', '#06b6d4'],
+    accentCircle: '#f59e0b',
+  },
+  // Theme 1: Sunset Rose, Plum, Magenta & Warm Gold
+  {
+    sky: '#4c1d95',
+    skyGradient: ['#4c1d95', '#7c3aed'],
+    band: '#be185d',
+    diagonalGradient: ['#f43f5e', '#fb923c'],
+    domeGradient: ['#6366f1', '#ec4899'],
+    accentCircle: '#fbbf24',
+  },
+  // Theme 2: Emerald Forest, Sage, Teal & Sun Ochre
+  {
+    sky: '#064e3b',
+    skyGradient: ['#064e3b', '#059669'],
+    band: '#047857',
+    diagonalGradient: ['#0284c7', '#10b981'],
+    domeGradient: ['#0f766e', '#14b8a6'],
+    accentCircle: '#f59e0b',
+  },
+  // Theme 3: Deep Midnight Indigo, Klein Blue, Tangerine & Coral
+  {
+    sky: '#1e1b4b',
+    skyGradient: ['#1e1b4b', '#312e81'],
+    band: '#1d4ed8',
+    diagonalGradient: ['#ea580c', '#e11d48'],
+    domeGradient: ['#2563eb', '#38bdf8'],
+    accentCircle: '#fb923c',
+  },
 ];
 
 /**
- * Generative Style 1: Cubic Disarray (Georg Nees, 1968)
- * A grid of squares that progressively jitter and rotate with increasing entropy.
+ * Full-bleed geometric abstract wallpaper SVG
+ * Matches the user's reference image with large sweeping circular curves,
+ * sharp diagonal cut planes, horizontal color bands, and intersecting gradients.
  */
-function renderCubicDisarray(prng: () => number, palette: typeof PALETTES[0]) {
-  const cols = 9;
-  const rows = 6;
-  const size = 26;
-  const startX = 25;
-  const startY = 22;
-  const squares = [];
+function GeometricWallpaperSVG({ seed }: { seed: string }) {
+  const { theme, variant, id } = useMemo(() => {
+    const prng = createPRNG(seed);
+    const themeIndex = Math.floor(prng() * WALLPAPER_THEMES.length);
+    const variant = Math.floor(prng() * 3);
+    const id = seed.replace(/[^a-zA-Z0-9]/g, '');
+    return { theme: WALLPAPER_THEMES[themeIndex], variant, id };
+  }, [seed]);
 
-  for (let y = 0; y < rows; y++) {
-    for (let x = 0; x < cols; x++) {
-      const entropy = (y / (rows - 1));
-      const rotate = entropy * (prng() - 0.5) * 45;
-      const offsetX = entropy * (prng() - 0.5) * 12;
-      const offsetY = entropy * (prng() - 0.5) * 12;
-      const isAccent = prng() < 0.12;
+  if (variant === 0) {
+    // Style A: Classic Reference (User's image: Left sky + teal band, Right diagonal coral, Bottom sweeping dome)
+    return (
+      <svg
+        className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+        viewBox="0 0 320 420"
+        preserveAspectRatio="xMidYMid slice"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <defs>
+          <linearGradient id={`sky-${id}`} x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stopColor={theme.skyGradient[0]} />
+            <stop offset="100%" stopColor={theme.skyGradient[1]} />
+          </linearGradient>
+          <linearGradient id={`diag-${id}`} x1="0" y1="0" x2="0.8" y2="1">
+            <stop offset="0%" stopColor={theme.diagonalGradient[0]} />
+            <stop offset="100%" stopColor={theme.diagonalGradient[1]} />
+          </linearGradient>
+          <linearGradient id={`dome-${id}`} x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor={theme.domeGradient[0]} />
+            <stop offset="100%" stopColor={theme.domeGradient[1]} />
+          </linearGradient>
+        </defs>
 
-      squares.push(
-        <rect
-          key={`${x}-${y}`}
-          x={-size / 2}
-          y={-size / 2}
-          width={size}
-          height={size}
-          fill={isAccent ? palette.accent : 'none'}
-          fillOpacity={isAccent ? 0.85 : 0}
-          stroke={isAccent ? palette.accent : palette.primary}
-          strokeWidth={1.5}
-          transform={`translate(${startX + x * size + size / 2 + offsetX}, ${startY + y * size + size / 2 + offsetY}) rotate(${rotate})`}
+        {/* Base: Top Left Sky Blue */}
+        <rect x="0" y="0" width="320" height="420" fill={`url(#sky-${id})`} />
+
+        {/* Mid-height horizontal block */}
+        <rect x="0" y="140" width="320" height="130" fill={theme.band} />
+
+        {/* Right Sharp Diagonal Plane */}
+        <polygon points="180,0 320,0 320,420 120,420" fill={`url(#diag-${id})`} />
+
+        {/* Big Sweeping Bottom Curve (Dome / Arc) */}
+        <ellipse
+          cx="100"
+          cy="380"
+          rx="170"
+          ry="170"
+          fill={`url(#dome-${id})`}
+          opacity="0.92"
         />
-      );
-    }
-  }
 
-  return squares;
-}
-
-/**
- * Generative Style 2: 10 PRINT Maze (Commodore 64 algorithm)
- * Rhythmic maze patterns formed from procedurally angled slash lines.
- */
-function render10Print(prng: () => number, palette: typeof PALETTES[0]) {
-  const cols = 12;
-  const rows = 8;
-  const stepX = 280 / cols;
-  const stepY = 190 / rows;
-  const elements = [];
-
-  for (let y = 0; y < rows; y++) {
-    for (let x = 0; x < cols; x++) {
-      const leftToRight = prng() > 0.5;
-      const isAccent = prng() < 0.15;
-      const strokeColor = isAccent ? palette.accent : palette.primary;
-      const strokeWidth = isAccent ? 2.5 : 1.5;
-
-      const x1 = 10 + x * stepX;
-      const y1 = 10 + y * stepY;
-      const x2 = x1 + stepX;
-      const y2 = y1 + stepY;
-
-      if (leftToRight) {
-        elements.push(
-          <line
-            key={`line-${x}-${y}`}
-            x1={x1}
-            y1={y1}
-            x2={x2}
-            y2={y2}
-            stroke={strokeColor}
-            strokeWidth={strokeWidth}
-            strokeLinecap="round"
-          />
-        );
-      } else {
-        elements.push(
-          <line
-            key={`line-${x}-${y}`}
-            x1={x1}
-            y1={y2}
-            x2={x2}
-            y2={y1}
-            stroke={strokeColor}
-            strokeWidth={strokeWidth}
-            strokeLinecap="round"
-          />
-        );
-      }
-
-      // Occasional geometric dot at intersections
-      if (prng() < 0.08) {
-        elements.push(
-          <circle
-            key={`dot-${x}-${y}`}
-            cx={x1}
-            cy={y1}
-            r={3}
-            fill={palette.accent}
-          />
-        );
-      }
-    }
-  }
-
-  return elements;
-}
-
-/**
- * Generative Style 3: Joy Division / Unknown Pleasures Pulse Waves
- * Stacked topographic elevation waveforms with centered noise peaks.
- */
-function renderJoyDivision(prng: () => number, palette: typeof PALETTES[0]) {
-  const lineCount = 14;
-  const pointsPerLine = 32;
-  const width = 280;
-  const height = 190;
-  const stepY = (height - 40) / lineCount;
-  const paths = [];
-
-  for (let i = 0; i < lineCount; i++) {
-    const baseY = 25 + i * stepY;
-    let d = `M 20 ${baseY}`;
-
-    for (let j = 0; j <= pointsPerLine; j++) {
-      const x = 20 + (j / pointsPerLine) * (width - 40);
-      const distFromCenter = Math.abs(j - pointsPerLine / 2) / (pointsPerLine / 2);
-      const bell = Math.max(0, 1 - distFromCenter * distFromCenter);
-      const noise = (prng() * 18 + 2) * Math.pow(bell, 2.5);
-      const y = baseY - noise;
-      d += ` L ${x} ${y}`;
-    }
-
-    const isAccent = i === Math.floor(lineCount / 2);
-
-    paths.push(
-      <g key={`wave-${i}`}>
-        {/* Fill to occlude lines behind it */}
-        <path
-          d={`${d} L 260 ${baseY + 12} L 20 ${baseY + 12} Z`}
-          fill={palette.bg}
+        {/* Overlapping intersection crescent */}
+        <ellipse
+          cx="80"
+          cy="420"
+          rx="140"
+          ry="130"
+          fill="#38bdf8"
+          opacity="0.35"
         />
-        {/* Stroke line */}
-        <path
-          d={d}
-          fill="none"
-          stroke={isAccent ? palette.accent : palette.primary}
-          strokeWidth={isAccent ? 2 : 1.5}
-          strokeLinecap="round"
-        />
-      </g>
+      </svg>
     );
   }
 
-  return paths;
-}
+  if (variant === 1) {
+    // Style B: Inverted dynamic diagonal with top arch and floating horizon
+    return (
+      <svg
+        className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+        viewBox="0 0 320 420"
+        preserveAspectRatio="xMidYMid slice"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <defs>
+          <linearGradient id={`diag1-${id}`} x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor={theme.diagonalGradient[0]} />
+            <stop offset="100%" stopColor={theme.diagonalGradient[1]} />
+          </linearGradient>
+          <linearGradient id={`dome1-${id}`} x1="0" y1="1" x2="1" y2="0">
+            <stop offset="0%" stopColor={theme.domeGradient[0]} />
+            <stop offset="100%" stopColor={theme.domeGradient[1]} />
+          </linearGradient>
+        </defs>
 
-/**
- * Generative Style 4: Piet Mondrian De Stijl Partition
- * Recursive rectangular divisions with primary accent blocks.
- */
-function renderMondrian(prng: () => number, palette: typeof PALETTES[0]) {
-  const width = 270;
-  const height = 180;
-  const xSplits = [40, 100, 175, 230].sort((a, b) => a - b);
-  const ySplits = [40, 95, 140].sort((a, b) => a - b);
-  const rects = [];
+        {/* Base Background */}
+        <rect x="0" y="0" width="320" height="420" fill={theme.band} />
 
-  const allX = [15, ...xSplits, width + 15];
-  const allY = [15, ...ySplits, height + 15];
+        {/* Large sweeping diagonal band */}
+        <polygon points="0,60 320,0 320,240 0,340" fill={`url(#diag1-${id})`} />
 
-  for (let i = 0; i < allX.length - 1; i++) {
-    for (let j = 0; j < allY.length - 1; j++) {
-      const rx = allX[i];
-      const ry = allY[j];
-      const rw = allX[i + 1] - rx;
-      const rh = allY[j + 1] - ry;
+        {/* Giant Circle Arc */}
+        <circle cx="240" cy="320" r="180" fill={`url(#dome1-${id})`} opacity="0.9" />
 
-      const fillRoll = prng();
-      let fill = 'none';
-      if (fillRoll < 0.12) fill = palette.accent;
-      else if (fillRoll < 0.28) fill = palette.stroke;
-
-      rects.push(
-        <rect
-          key={`m-${i}-${j}`}
-          x={rx}
-          y={ry}
-          width={rw}
-          height={rh}
-          fill={fill}
-          fillOpacity={fill === 'none' ? 0 : 0.85}
-          stroke={palette.primary}
-          strokeWidth={2}
-        />
-      );
-    }
+        {/* Top Floating Arc */}
+        <ellipse cx="60" cy="40" rx="90" ry="90" fill={theme.skyGradient[1]} opacity="0.85" />
+      </svg>
+    );
   }
 
-  return rects;
-}
-
-/**
- * Deterministic Generative Placeholder Component
- */
-function GenerativePlaceholder({ seed }: { seed: string }) {
-  const { palette, styleName, content } = useMemo(() => {
-    const prng = createPRNG(seed);
-    const paletteIndex = Math.floor(prng() * PALETTES.length);
-    const palette = PALETTES[paletteIndex];
-    const stylePick = Math.floor(prng() * 4);
-
-    let content;
-    let styleName = 'Cubic Disarray';
-
-    if (stylePick === 0) {
-      styleName = 'Cubic Disarray';
-      content = renderCubicDisarray(prng, palette);
-    } else if (stylePick === 1) {
-      styleName = '10 PRINT';
-      content = render10Print(prng, palette);
-    } else if (stylePick === 2) {
-      styleName = 'Pulse Waves';
-      content = renderJoyDivision(prng, palette);
-    } else {
-      styleName = 'Mondrian';
-      content = renderMondrian(prng, palette);
-    }
-
-    return { palette, styleName, content };
-  }, [seed]);
-
+  // Style C: Architectural vertical partition with oversized intersecting hemisphere
   return (
-    <div
-      className="relative w-full h-full flex items-center justify-center overflow-hidden"
-      style={{ backgroundColor: palette.bg }}
+    <svg
+      className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+      viewBox="0 0 320 420"
+      preserveAspectRatio="xMidYMid slice"
+      xmlns="http://www.w3.org/2000/svg"
     >
-      <svg
-        className="w-full h-full p-2 transition-transform duration-500 ease-out group-hover:scale-105"
-        viewBox="0 0 300 200"
-        preserveAspectRatio="xMidYMid meet"
-      >
-        {content}
-      </svg>
-    </div>
+      <defs>
+        <linearGradient id={`v-sky-${id}`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={theme.skyGradient[0]} />
+          <stop offset="100%" stopColor={theme.skyGradient[1]} />
+        </linearGradient>
+        <linearGradient id={`v-diag-${id}`} x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor={theme.diagonalGradient[0]} />
+          <stop offset="100%" stopColor={theme.diagonalGradient[1]} />
+        </linearGradient>
+        <linearGradient id={`v-dome-${id}`} x1="1" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={theme.domeGradient[0]} />
+          <stop offset="100%" stopColor={theme.domeGradient[1]} />
+        </linearGradient>
+      </defs>
+
+      {/* Left Vertical Half */}
+      <rect x="0" y="0" width="170" height="420" fill={`url(#v-sky-${id})`} />
+
+      {/* Right Vertical Half with Angle */}
+      <polygon points="170,0 320,0 320,420 120,420" fill={`url(#v-diag-${id})`} />
+
+      {/* Mid Horizontal Stripe */}
+      <rect x="0" y="160" width="150" height="90" fill={theme.band} opacity="0.9" />
+
+      {/* Prominent Intersecting Bottom Hemisphere */}
+      <ellipse cx="160" cy="370" rx="160" ry="150" fill={`url(#v-dome-${id})`} opacity="0.95" />
+
+      {/* Accent Geometry */}
+      <circle cx="260" cy="110" r="45" fill={theme.accentCircle} opacity="0.8" />
+    </svg>
   );
 }
 
@@ -309,8 +237,8 @@ export default function LibraryGateway() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center">
-        <div className="w-10 h-10 rounded-full border-2 border-slate-800 border-t-slate-400 animate-spin" />
-        <p className="mt-4 text-slate-500 text-sm">Loading libraries...</p>
+        <div className="w-10 h-10 rounded-full border-2 border-slate-800 border-t-cyan-400 animate-spin" />
+        <p className="mt-4 text-slate-400 text-sm font-medium">Loading libraries...</p>
       </div>
     );
   }
@@ -329,19 +257,25 @@ export default function LibraryGateway() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-6 sm:p-12 selection:bg-slate-800">
+    <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-6 sm:p-12 selection:bg-cyan-500/30">
+      {/* Glow Backdrop */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none -z-10">
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-cyan-500/10 rounded-full blur-[140px]" />
+        <div className="absolute bottom-10 left-1/3 w-[600px] h-[400px] bg-rose-500/10 rounded-full blur-[160px]" />
+      </div>
+
       {/* Header Title Section */}
       <div className="text-center max-w-xl mb-12 animate-in fade-in slide-in-from-bottom-2 duration-500">
-        <h1 className="text-4xl sm:text-5xl font-bold text-slate-100 tracking-tight">
+        <h1 className="text-4xl sm:text-5xl font-extrabold text-white tracking-tight">
           Who&apos;s reading?
         </h1>
-        <p className="text-slate-400 text-base mt-3">
-          Select a Calibre library to open your collection.
+        <p className="text-slate-400 text-base sm:text-lg mt-3">
+          Select your Calibre library to enter your collection.
         </p>
       </div>
 
-      {/* Library Cards Grid */}
-      <div className="flex flex-wrap items-stretch justify-center gap-8 max-w-5xl w-full">
+      {/* Library Wallpaper Cards Grid */}
+      <div className="flex flex-wrap items-stretch justify-center gap-8 max-w-6xl w-full">
         {libraries.map((lib) => {
           const displayName = lib.displayName || cleanLibraryName(lib.name);
 
@@ -356,41 +290,49 @@ export default function LibraryGateway() {
                   handleSelect(lib.name);
                 }
               }}
-              className="group flex flex-col w-64 sm:w-72 rounded-2xl bg-slate-900 border border-slate-800 hover:border-slate-600 overflow-hidden cursor-pointer transition-all duration-300 hover:-translate-y-1.5 shadow-lg hover:shadow-2xl hover:shadow-black/50"
+              className="group relative flex flex-col w-72 sm:w-80 h-[420px] rounded-3xl overflow-hidden cursor-pointer shadow-2xl transition-all duration-300 hover:scale-[1.03] hover:-translate-y-2 hover:shadow-cyan-500/25 border border-white/10"
             >
-              {/* Top Banner with Generative 3-Tone Artwork */}
-              <div className="relative h-48 sm:h-52 w-full border-b border-slate-800 overflow-hidden">
-                <GenerativePlaceholder seed={lib.name} />
+              {/* Full Tile Wallpaper Art */}
+              <div className="absolute inset-0 w-full h-full overflow-hidden -z-10">
+                <GeometricWallpaperSVG seed={lib.name} />
               </div>
 
-              {/* Card Footer Info */}
-              <div className="flex-1 p-5 flex flex-col justify-between bg-slate-900">
-                <div>
-                  <h3 className="text-lg font-semibold text-slate-100 tracking-tight group-hover:text-white transition-colors truncate">
-                    {displayName}
-                  </h3>
-                  <p className="text-xs font-mono text-slate-500 mt-1 truncate">
-                    {lib.name}
-                  </p>
+              {/* Top Glass Badge Header */}
+              <div className="p-5 flex items-center justify-between z-10">
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/35 backdrop-blur-md border border-white/20 text-white/95 text-xs font-medium shadow-sm">
+                  <BookOpen className="w-3.5 h-3.5 text-cyan-300" />
+                  <span>{lib.bookCount ?? 0} books</span>
                 </div>
 
-                <div className="flex items-center justify-between mt-5 pt-3.5 border-t border-slate-800/80">
-                  <div className="flex items-center gap-1.5 text-xs text-slate-400">
-                    <BookOpen className="w-3.5 h-3.5 text-slate-500" />
-                    <span>{lib.bookCount ?? 0} books</span>
-                  </div>
+                <div className="w-8 h-8 rounded-full bg-black/30 backdrop-blur-md border border-white/20 flex items-center justify-center text-white/80 group-hover:text-white group-hover:bg-black/50 transition-all shadow-sm">
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+                </div>
+              </div>
 
-                  <div className="flex items-center gap-1 text-xs font-medium text-slate-400 group-hover:text-slate-200 transition-colors">
-                    <span>Open</span>
-                    <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
-                  </div>
+              {/* Bottom Scrim & Informative Text Overlay */}
+              <div className="mt-auto p-6 pt-20 bg-gradient-to-t from-black/90 via-black/55 to-transparent flex flex-col justify-end z-10">
+                <h3 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight drop-shadow-md group-hover:text-cyan-200 transition-colors truncate">
+                  {displayName}
+                </h3>
+                
+                <div className="flex items-center gap-1.5 text-xs font-mono text-white/70 mt-1.5 drop-shadow">
+                  <FolderArchive className="w-3.5 h-3.5 text-cyan-300/80" />
+                  <span className="truncate">{lib.name}</span>
+                </div>
+
+                {/* Subtle Hover Action Bar */}
+                <div className="mt-4 pt-3 border-t border-white/15 flex items-center justify-between text-xs font-semibold text-white/90 group-hover:text-cyan-300 transition-colors">
+                  <span>Enter Collection</span>
+                  <span className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
+                    Explore &rarr;
+                  </span>
                 </div>
               </div>
             </div>
           );
         })}
 
-        {/* Add Library Tile */}
+        {/* Add Library Card */}
         <div
           role="button"
           tabIndex={0}
@@ -400,16 +342,16 @@ export default function LibraryGateway() {
               setIsManagerOpen(true);
             }
           }}
-          className="group flex flex-col items-center justify-center w-64 sm:w-72 min-h-[290px] rounded-2xl border border-dashed border-slate-800 hover:border-slate-600 bg-slate-900/30 hover:bg-slate-900/70 p-6 text-center cursor-pointer transition-all duration-300 hover:-translate-y-1.5 shadow-md"
+          className="group flex flex-col items-center justify-center w-72 sm:w-80 h-[420px] rounded-3xl border-2 border-dashed border-slate-700/80 hover:border-cyan-400/80 bg-slate-900/40 hover:bg-slate-900/70 p-6 text-center cursor-pointer transition-all duration-300 hover:scale-[1.03] hover:-translate-y-2 shadow-xl hover:shadow-cyan-500/10 backdrop-blur-md"
         >
-          <div className="w-14 h-14 rounded-xl bg-slate-800/80 border border-slate-700/60 flex items-center justify-center text-slate-400 group-hover:text-slate-200 group-hover:scale-105 transition-all duration-200">
-            <Plus className="w-6 h-6" />
+          <div className="w-16 h-16 rounded-2xl bg-slate-800/80 border border-slate-700/70 flex items-center justify-center text-slate-300 group-hover:text-cyan-300 group-hover:scale-110 group-hover:border-cyan-500/50 transition-all duration-300 shadow-inner">
+            <Plus className="w-8 h-8" />
           </div>
-          <h4 className="text-base font-semibold text-slate-200 group-hover:text-white mt-4 transition-colors">
+          <h4 className="text-xl font-bold text-slate-100 group-hover:text-white mt-5 transition-colors">
             Add Library
           </h4>
-          <p className="text-xs text-slate-500 mt-1 max-w-[180px] leading-relaxed">
-            Upload a Calibre .zip archive
+          <p className="text-xs text-slate-400 mt-2 max-w-[200px] leading-relaxed">
+            Upload a Calibre .zip archive or connect existing directories
           </p>
         </div>
       </div>
@@ -418,9 +360,9 @@ export default function LibraryGateway() {
       <div className="mt-12 flex items-center">
         <button
           onClick={() => setIsManagerOpen(true)}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-400 hover:text-slate-200 text-xs font-medium transition-all"
+          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-900/80 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-white text-xs font-semibold tracking-wide transition-all shadow-md active:scale-95"
         >
-          <Settings2 className="w-3.5 h-3.5 text-slate-500" />
+          <Settings2 className="w-4 h-4 text-slate-400" />
           <span>Manage Libraries</span>
         </button>
       </div>
