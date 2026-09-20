@@ -275,7 +275,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in Technology by Steven Levy. Exploring core themes including Computers, Hacking, History, Culture."
   },
@@ -438,7 +439,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in Technology by Safiya Umoja Noble. Exploring core themes including Search Engines, Race, Data, Ethics."
   },
@@ -484,7 +486,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in Technology by Marshall McLuhan. Exploring core themes including Media, Communication, Culture, Philosophy."
   },
@@ -556,7 +559,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in Technology by James Gleick. Exploring core themes including Information Theory, History, Science, Claude Shannon."
   },
@@ -649,8 +653,7 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF",
-      "MOBI"
+      "PDF"
     ],
     "description": "A seminal work in Technology by Jon Gertner. Exploring core themes including Bell Labs, Innovation, Physics, Transistors."
   },
@@ -673,8 +676,7 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF",
-      "MOBI"
+      "PDF"
     ],
     "description": "A seminal work in Technology by Marie Hicks. Exploring core themes including History, Gender, Computing, Labor."
   },
@@ -812,7 +814,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in Technology by Simon Singh. Exploring core themes including Mathematics, Number Theory, History, Andrew Wiles."
   },
@@ -858,7 +861,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in Technology by Michael Nielsen. Exploring core themes including Deep Learning, Machine Learning, Math, Python."
   },
@@ -927,8 +931,7 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF",
-      "MOBI"
+      "PDF"
     ],
     "description": "A seminal work in Technology by Neal Stephenson. Exploring core themes including Operating Systems, GUI, Unix, Essays."
   },
@@ -1021,7 +1024,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in Technology by Peter Morville. Exploring core themes including Information Architecture, Search, Wayfinding, Web."
   },
@@ -1114,8 +1118,7 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF",
-      "MOBI"
+      "PDF"
     ],
     "description": "A seminal work in Technology by Eric S. Raymond. Exploring core themes including Open Source, Linux, Collaboration, Software."
   },
@@ -1184,8 +1187,7 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF",
-      "MOBI"
+      "PDF"
     ],
     "description": "A seminal work in Software by Robert C. Martin. Exploring core themes including Clean Code, Refactoring, Object-Oriented, Best Practices."
   },
@@ -1230,8 +1232,7 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF",
-      "MOBI"
+      "PDF"
     ],
     "description": "A seminal work in Software by Martin Fowler. Exploring core themes including Refactoring, Code Quality, Patterns, Java/JS."
   },
@@ -1301,7 +1302,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in Software by Harold Abelson, Gerald Jay Sussman. Exploring core themes including Lisp, Computer Science, Abstractions, Recursion."
   },
@@ -1327,7 +1329,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in Software by Thomas H. Cormen, Charles E. Leiserson, Ronald L. Rivest, Clifford Stein. Exploring core themes including Algorithms, Data Structures, Computer Science, Theory."
   },
@@ -1349,7 +1352,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in Software by Frederick P. Brooks Jr.. Exploring core themes including Project Management, Software Engineering, Team Dynamics."
   },
@@ -1394,7 +1398,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in Software by Donald E. Knuth. Exploring core themes including Random Numbers, Arithmetic, Algorithms."
   },
@@ -1443,8 +1448,7 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF",
-      "MOBI"
+      "PDF"
     ],
     "description": "A seminal work in Software by Betsy Beyer, Chris Jones, Jennifer Petoff, Niall Richard Murphy. Exploring core themes including SRE, DevOps, Reliability, Distributed Systems."
   },
@@ -1588,7 +1592,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in Software by Robert Nystrom. Exploring core themes including Design Patterns, Game Dev, Architecture, C++."
   },
@@ -1611,8 +1616,7 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF",
-      "MOBI"
+      "PDF"
     ],
     "description": "A seminal work in Software by Alex Petrov. Exploring core themes including B-Trees, LSM-Trees, Storage Engines, Raft."
   },
@@ -1659,8 +1663,7 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF",
-      "MOBI"
+      "PDF"
     ],
     "description": "A seminal work in Software by Andrew S. Tanenbaum, Herbert Bos. Exploring core themes including Operating Systems, Kernels, Memory Management."
   },
@@ -1710,7 +1713,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in Software by Alfred V. Aho, Monica S. Lam, Ravi Sethi, Jeffrey D. Ullman. Exploring core themes including Compilers, Parsing, Lexing, Optimization."
   },
@@ -1755,8 +1759,7 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF",
-      "MOBI"
+      "PDF"
     ],
     "description": "A seminal work in Software by Jon Bentley. Exploring core themes including Problem Solving, Algorithms, Performance, C."
   },
@@ -1873,7 +1876,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in Software by Sam Newman. Exploring core themes including Refactoring, Architecture, Database Migration."
   },
@@ -2015,7 +2019,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in Software by Brendan Burns, Joe Beda, Kelsey Hightower. Exploring core themes including Kubernetes, Containers, DevOps, Cloud."
   },
@@ -2062,7 +2067,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in Software by Steve Klabnik, Carol Nichols. Exploring core themes including Rust, Language Guide, Ownership, Borrowing."
   },
@@ -2158,7 +2164,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in Software by Brian W. Kernighan, Dennis M. Ritchie. Exploring core themes including C, Unix, Pointers, Classic."
   },
@@ -2206,7 +2213,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in Software by Brian W. Kernighan, Rob Pike. Exploring core themes including Unix, Shell Scripting, Filters, Pipes."
   },
@@ -2321,7 +2329,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in Philosophy by Plato. Exploring core themes including Plato, Justice, Polity, Ancient Greece."
   },
@@ -2344,8 +2353,7 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF",
-      "MOBI"
+      "PDF"
     ],
     "description": "A seminal work in Philosophy by Aristotle. Exploring core themes including Aristotle, Virtue Ethics, Eudaimonia, Philosophy."
   },
@@ -2368,7 +2376,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in Philosophy by Immanuel Kant. Exploring core themes including Epistemology, Metaphysics, Transcendental Idealism, Kant."
   },
@@ -2460,8 +2469,7 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF",
-      "MOBI"
+      "PDF"
     ],
     "description": "A seminal work in Philosophy by Albert Camus. Exploring core themes including Absurdism, Existentialism, Camus, Meaning."
   },
@@ -2530,8 +2538,7 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF",
-      "MOBI"
+      "PDF"
     ],
     "description": "A seminal work in Philosophy by Simone de Beauvoir. Exploring core themes including Feminism, Existentialism, Ethics, Philosophy."
   },
@@ -2554,8 +2561,7 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF",
-      "MOBI"
+      "PDF"
     ],
     "description": "A seminal work in Philosophy by Simone de Beauvoir. Exploring core themes including Ethics, Existentialism, Freedom, Beauvoir."
   },
@@ -2578,7 +2584,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in Philosophy by Ludwig Wittgenstein. Exploring core themes including Logic, Language, Wittgenstein, Analytic Philosophy."
   },
@@ -2600,7 +2607,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in Philosophy by Ludwig Wittgenstein. Exploring core themes including Language Games, Meaning as Use, Wittgenstein."
   },
@@ -2668,7 +2676,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in Philosophy by Jean Baudrillard. Exploring core themes including Hyperreality, Postmodernism, Media, Baudrillard."
   },
@@ -2714,7 +2723,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in Philosophy by Michel Foucault. Exploring core themes including Panopticon, Power, Biopolitics, Foucault."
   },
@@ -2831,8 +2841,7 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF",
-      "MOBI"
+      "PDF"
     ],
     "description": "A seminal work in Philosophy by Thomas Hobbes. Exploring core themes including Social Contract, State of Nature, Political Philosophy."
   },
@@ -2877,8 +2886,7 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF",
-      "MOBI"
+      "PDF"
     ],
     "description": "A seminal work in Philosophy by Jean-Jacques Rousseau. Exploring core themes including General Will, Popular Sovereignty, Rousseau."
   },
@@ -2925,7 +2933,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in Philosophy by Zhuangzi, Brook Ziporyn. Exploring core themes including Taoism, Perspectivism, Freedom, Parables."
   },
@@ -2972,8 +2981,7 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF",
-      "MOBI"
+      "PDF"
     ],
     "description": "A seminal work in Philosophy by Nagarjuna, Jay L. Garfield. Exploring core themes including Madhyamaka, Sunyata, Emptiness, Buddhism."
   },
@@ -2996,7 +3004,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in Philosophy by Karl Popper. Exploring core themes including Democracy, Falsification, Liberalism, Critique."
   },
@@ -3019,8 +3028,7 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF",
-      "MOBI"
+      "PDF"
     ],
     "description": "A seminal work in Philosophy by Herbert Marcuse. Exploring core themes including Frankfurt School, Consumerism, Critique, Marcuse."
   },
@@ -3113,8 +3121,7 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF",
-      "MOBI"
+      "PDF"
     ],
     "description": "A seminal work in Philosophy by Paul Tillich. Exploring core themes including Theology, Existentialism, Anxiety, Courage."
   },
@@ -3160,7 +3167,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in Philosophy by Søren Kierkegaard. Exploring core themes including Despair, Selfhood, Existentialism, Kierkegaard."
   },
@@ -3205,7 +3213,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in Philosophy by Hans-Georg Gadamer. Exploring core themes including Hermeneutics, Interpretation, Tradition, Language."
   },
@@ -3228,8 +3237,7 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF",
-      "MOBI"
+      "PDF"
     ],
     "description": "A seminal work in Philosophy by Michael J. Sandel. Exploring core themes including Justice, Moral Philosophy, Utilitarianism, Kant."
   },
@@ -3458,8 +3466,7 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF",
-      "MOBI"
+      "PDF"
     ],
     "description": "A seminal work in Art & Aesthetics by E. H. Gombrich. Exploring core themes including Art History, Civilization, Masterpieces, Classic."
   },
@@ -3574,7 +3581,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in Art & Aesthetics by Robert Hughes. Exploring core themes including Modern Art, Cubism, Surrealism, Art Criticism."
   },
@@ -3596,8 +3604,7 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF",
-      "MOBI"
+      "PDF"
     ],
     "description": "A seminal work in Art & Aesthetics by George Kubler. Exploring core themes including Art History, Morphology, Temporal Sequences."
   },
@@ -3620,7 +3627,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in Art & Aesthetics by Susan Sontag. Exploring core themes including Photography, Essays, Cultural Criticism, Image."
   },
@@ -3690,7 +3698,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in Art & Aesthetics by Italo Calvino. Exploring core themes including Lightness, Quickness, Exactitude, Literature."
   },
@@ -3713,7 +3722,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in Art & Aesthetics by Juhani Pallasmaa. Exploring core themes including Phenomenology, Architecture, Touch, Atmosphere."
   },
@@ -3736,7 +3746,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in Art & Aesthetics by Jun'ichirō Tanizaki. Exploring core themes including Japanese Aesthetics, Architecture, Shadows, Wabi-Sabi."
   },
@@ -3759,7 +3770,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in Art & Aesthetics by Robert Bringhurst. Exploring core themes including Typography, Book Design, Craft, Typefaces."
   },
@@ -3782,7 +3794,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in Art & Aesthetics by Josef Müller-Brockmann. Exploring core themes including Swiss Design, Grid, Layout, Typography."
   },
@@ -3965,7 +3978,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in Art & Aesthetics by Rudolf Arnheim. Exploring core themes including Gestalt Psychology, Visual Form, Balance, Shape."
   },
@@ -4010,7 +4024,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in Art & Aesthetics by Theodor W. Adorno. Exploring core themes including Negative Dialectics, Modernism, Autonomy of Art."
   },
@@ -4055,8 +4070,7 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF",
-      "MOBI"
+      "PDF"
     ],
     "description": "A seminal work in Art & Aesthetics by Erwin Panofsky. Exploring core themes including Humanistic Themes, Symbolism, Art History."
   },
@@ -4080,7 +4094,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in Art & Aesthetics by Simon Schama. Exploring core themes including Caravaggio, Bernini, Rembrandt, Turner, Rothko."
   },
@@ -4286,7 +4301,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in Art & Aesthetics by Edward Tufte. Exploring core themes including Sparklines, Analytical Design, Sculpture."
   },
@@ -4331,7 +4347,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in Art & Aesthetics by Leonard Koren. Exploring core themes including Composition, Still Life, Objects, Spatial Harmony."
   },
@@ -4377,8 +4394,7 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF",
-      "MOBI"
+      "PDF"
     ],
     "description": "A seminal work in Art & Aesthetics by Richard Sennett. Exploring core themes including Craftsmanship, Material Culture, Tacit Knowledge."
   },
@@ -4425,7 +4441,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in Art & Aesthetics by Christopher Alexander, Sara Ishikawa, Murray Silverstein. Exploring core themes including Architecture, Urban Planning, Living Structures, Patterns."
   },
@@ -4447,8 +4464,7 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF",
-      "MOBI"
+      "PDF"
     ],
     "description": "A seminal work in Art & Aesthetics by Christopher Alexander. Exploring core themes including Quality Without a Name, Architecture, Organic Order."
   },
@@ -4517,8 +4533,7 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF",
-      "MOBI"
+      "PDF"
     ],
     "description": "A seminal work in Self-Improvement by James Clear. Exploring core themes including Habits, Behavior Change, Productivity, Systems."
   },
@@ -4587,8 +4602,7 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF",
-      "MOBI"
+      "PDF"
     ],
     "description": "A seminal work in Self-Improvement by Cal Newport. Exploring core themes including Deep Work, Focus, Productivity, Digital Minimalism."
   },
@@ -4632,7 +4646,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in Self-Improvement by Cal Newport. Exploring core themes including Career Capital, Craftsmanship, Passion Myth."
   },
@@ -4724,7 +4739,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in Self-Improvement by Eckhart Tolle. Exploring core themes including Pain Body, Ego Transmutation, Consciousness."
   },
@@ -4770,7 +4786,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in Self-Improvement by Robert Greene. Exploring core themes including Apprenticeship, Mentorship, Skill Acquisition, Da Vinci."
   },
@@ -4816,8 +4833,7 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF",
-      "MOBI"
+      "PDF"
     ],
     "description": "A seminal work in Self-Improvement by Stephen R. Covey. Exploring core themes including Character Ethic, Proactivity, Win-Win, Synergy."
   },
@@ -4840,7 +4856,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in Self-Improvement by David Allen. Exploring core themes including GTD, Inbox Zero, Next Actions, Organization."
   },
@@ -4864,8 +4881,7 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF",
-      "MOBI"
+      "PDF"
     ],
     "description": "A seminal work in Self-Improvement by Peter C. Brown, Henry L. Roediger III, Mark A. McDaniel. Exploring core themes including Spaced Repetition, Retrieval Practice, Active Recall."
   },
@@ -4911,7 +4927,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in Self-Improvement by Daniel H. Pink. Exploring core themes including Autonomy, Mastery, Purpose, Intrinsic Motivation."
   },
@@ -5002,8 +5019,7 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF",
-      "MOBI"
+      "PDF"
     ],
     "description": "A seminal work in Self-Improvement by Donella H. Meadows. Exploring core themes including Systems Thinking, Feedback Loops, Resilience, Leverage Points."
   },
@@ -5119,8 +5135,7 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF",
-      "MOBI"
+      "PDF"
     ],
     "description": "A seminal work in Self-Improvement by Anna Lembke. Exploring core themes including Addiction, Pleasure-Pain Balance, Neuroscience, Fasting."
   },
@@ -5164,8 +5179,7 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF",
-      "MOBI"
+      "PDF"
     ],
     "description": "A seminal work in Self-Improvement by Tara Brach. Exploring core themes including Mindfulness, Self-Compassion, Trance of Unworthiness."
   },
@@ -5188,7 +5202,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in Self-Improvement by Marshall B. Rosenberg. Exploring core themes including NVC, Empathy, Needs & Feelings, Conflict Resolution."
   },
@@ -5211,8 +5226,7 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF",
-      "MOBI"
+      "PDF"
     ],
     "description": "A seminal work in Self-Improvement by Amir Levine, Rachel Heller. Exploring core themes including Attachment Theory, Relationships, Anxious/Avoidant."
   },
@@ -5259,7 +5273,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in Self-Improvement by Deb Dana. Exploring core themes including Autonomic Nervous System, Vagus Nerve, Safety, Co-regulation."
   },
@@ -5281,7 +5296,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in Self-Improvement by Kristin Neff. Exploring core themes including Self-Kindness, Common Humanity, Mindfulness."
   },
@@ -5303,7 +5319,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in Self-Improvement by Martin E. P. Seligman. Exploring core themes including Positive Psychology, Explanatory Style, Resilience."
   },
@@ -5490,7 +5507,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in Self-Improvement by Bill Burnett, Dave Evans. Exploring core themes including Design Thinking, Life Prototyping, Odyssey Plans."
   },
@@ -5513,7 +5531,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in Self-Improvement by Josh Waitzkin. Exploring core themes including Chess, Tai Chi, Making Smaller Circles, Mastery."
   },
@@ -5559,7 +5578,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in Self-Improvement by Thich Nhat Hanh. Exploring core themes including Mindfulness, Washing the Dishes, Peace, Zen."
   },
@@ -5654,7 +5674,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in History by Jared Diamond. Exploring core themes including Geographic Determinism, Agriculture, Epidemics, Eurasia."
   },
@@ -5747,8 +5768,7 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF",
-      "MOBI"
+      "PDF"
     ],
     "description": "A seminal work in History by David Graeber, David Wengrow. Exploring core themes including Anthropology, Egalitarian Societies, Origins of the State, Archaeology."
   },
@@ -5840,8 +5860,7 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF",
-      "MOBI"
+      "PDF"
     ],
     "description": "A seminal work in History by Will Durant, Ariel Durant. Exploring core themes including Civilization Cycles, Morals, Economics, Philosophy."
   },
@@ -5864,8 +5883,7 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF",
-      "MOBI"
+      "PDF"
     ],
     "description": "A seminal work in History by Mary Beard. Exploring core themes including Ancient Rome, Cicero, Julius Caesar, Republic & Empire."
   },
@@ -5888,8 +5906,7 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF",
-      "MOBI"
+      "PDF"
     ],
     "description": "A seminal work in History by Francis Fukuyama. Exploring core themes including State Building, Rule of Law, Accountability, Institutions."
   },
@@ -5933,8 +5950,7 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF",
-      "MOBI"
+      "PDF"
     ],
     "description": "A seminal work in History by Neil MacGregor. Exploring core themes including British Museum, Material Culture, Artifacts."
   },
@@ -5957,8 +5973,7 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF",
-      "MOBI"
+      "PDF"
     ],
     "description": "A seminal work in History by Tony Judt. Exploring core themes including Modern Europe, Cold War, Welfare State, Reconstruction."
   },
@@ -5981,7 +5996,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in History by Christopher Clark. Exploring core themes including WWI Origins, Balkans, Diplomacy, Crisis Dynamics."
   },
@@ -6027,8 +6043,7 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF",
-      "MOBI"
+      "PDF"
     ],
     "description": "A seminal work in History by Timothy Snyder. Exploring core themes including Authoritarianism, Civic Resistance, Institutions, Truth."
   },
@@ -6188,7 +6203,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in History by C. L. R. James. Exploring core themes including Haitian Revolution, Slavery, Toussaint, Anti-Colonialism."
   },
@@ -6211,7 +6227,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in History by Eduardo Galeano. Exploring core themes including Extraction, Potosi Silver, Imperialism, Latin America."
   },
@@ -6257,7 +6274,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in History by Mike Davis. Exploring core themes including Famine, Colonial Free Market, Climate, Imperialism."
   },
@@ -6280,7 +6298,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in History by Dee Brown. Exploring core themes including Native American History, Genocide, Sioux, Sitting Bull."
   },
@@ -6303,8 +6322,7 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF",
-      "MOBI"
+      "PDF"
     ],
     "description": "A seminal work in History by Stephen Greenblatt. Exploring core themes including Lucretius, Renaissance, Epicureanism, Manuscript Hunting."
   },
@@ -6372,8 +6390,7 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF",
-      "MOBI"
+      "PDF"
     ],
     "description": "A seminal work in History by James C. Scott. Exploring core themes including High Modernism, Legibility, Metis, Forestry Schemes."
   },
@@ -6396,7 +6413,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in History by James C. Scott. Exploring core themes including Zoonoses, Grain Domestications, Non-State Peoples, Mesopotamia."
   },
@@ -6441,7 +6459,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in History by James C. Scott. Exploring core themes including Vernacular Knowledge, Infrapolitics, Anarchist Squints."
   },
@@ -6463,7 +6482,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in History by James C. Scott. Exploring core themes including Peasant Resistance, Foot-Dragging, Hidden Transcripts."
   },
@@ -6580,8 +6600,7 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF",
-      "MOBI"
+      "PDF"
     ],
     "description": "A seminal work in Sociocracy & Governance by Ted J. Rau, Jerry Koch-Gonzalez. Exploring core themes including Sociocracy, Consent Decision Making, Circle Structure, Governance."
   },
@@ -6604,7 +6623,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in Sociocracy & Governance by John Buck, Sharon Villines. Exploring core themes including Sociocracy, Dynamic Governance, Circular Hierarchy."
   },
@@ -6629,8 +6649,7 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF",
-      "MOBI"
+      "PDF"
     ],
     "description": "A seminal work in Sociocracy & Governance by James Priest, Bernhard Bockelbrink, Lili David. Exploring core themes including S3, Patterns, Agile, Decentralized Organizing."
   },
@@ -6653,8 +6672,7 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF",
-      "MOBI"
+      "PDF"
     ],
     "description": "A seminal work in Sociocracy & Governance by Frédéric Laloux. Exploring core themes including Teal Organizations, Self-Management, Wholeness, Evolutionary Purpose."
   },
@@ -6699,7 +6717,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in Sociocracy & Governance by Murray Bookchin. Exploring core themes including Social Ecology, Libertarian Municipalism, Post-Scarcity."
   },
@@ -6721,7 +6740,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in Sociocracy & Governance by Murray Bookchin. Exploring core themes including Ecology, Direct Democracy, Technology for Liberation."
   },
@@ -6743,7 +6763,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in Sociocracy & Governance by Murray Bookchin. Exploring core themes including Social Ecology, Grassroots Democracy, Decentralization."
   },
@@ -6788,8 +6809,7 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF",
-      "MOBI"
+      "PDF"
     ],
     "description": "A seminal work in Sociocracy & Governance by David Graeber. Exploring core themes including Bureaucracy, Structural Violence, Imagination."
   },
@@ -6811,8 +6831,7 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF",
-      "MOBI"
+      "PDF"
     ],
     "description": "A seminal work in Sociocracy & Governance by David Graeber. Exploring core themes including Global Justice Movement, Consensus, Anarchism."
   },
@@ -6834,8 +6853,7 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF",
-      "MOBI"
+      "PDF"
     ],
     "description": "A seminal work in Sociocracy & Governance by Trebor Scholz. Exploring core themes including Cooperatives, Digital Labor, Worker Ownership."
   },
@@ -6858,7 +6876,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in Sociocracy & Governance by Trebor Scholz, Nathan Schneider. Exploring core themes including Co-ops, Platform Economy, Solidarity."
   },
@@ -6925,7 +6944,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in Sociocracy & Governance by Peter Kropotkin. Exploring core themes including Mutual Aid, Evolutionary Biology, Cooperation, Anarchism."
   },
@@ -7083,8 +7103,7 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF",
-      "MOBI"
+      "PDF"
     ],
     "description": "A seminal work in Sociocracy & Governance by Rick Falkvinge. Exploring core themes including Swarm Organizing, Decentralization, Activism."
   },
@@ -7107,7 +7126,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in Sociocracy & Governance by Brian J. Robertson. Exploring core themes including Holacracy, Tactical Meetings, Roles, Governance."
   },
@@ -7129,7 +7149,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in Sociocracy & Governance by Lisa Gill. Exploring core themes including Self-Management, Progressive Organizations, Interviews."
   },
@@ -7196,8 +7217,7 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF",
-      "MOBI"
+      "PDF"
     ],
     "description": "A seminal work in Sociocracy & Governance by Martha A. Ackelsberg. Exploring core themes including Mujeres Libres, Spanish Civil War, Collectives."
   },
@@ -7243,8 +7263,7 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF",
-      "MOBI"
+      "PDF"
     ],
     "description": "A seminal work in Sociocracy & Governance by Saul D. Alinsky. Exploring core themes including Community Organizing, Tactics, Power, Coalitions."
   },
@@ -7267,7 +7286,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in Sociocracy & Governance by Ursula K. Le Guin. Exploring core themes including Anarres, Ambiguous Utopia, Mutual Aid, Anarchism."
   },
@@ -7359,8 +7379,7 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF",
-      "MOBI"
+      "PDF"
     ],
     "description": "A seminal work in Indigenous Religion by Robin Wall Kimmerer. Exploring core themes including Mosses, Micro-Ecology, Indigenous Ecology, Patience."
   },
@@ -7383,8 +7402,7 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF",
-      "MOBI"
+      "PDF"
     ],
     "description": "A seminal work in Indigenous Religion by Tyson Yunkaporta. Exploring core themes including Aboriginal Philosophy, Pattern Thinking, Complex Systems, Kinship."
   },
@@ -7501,8 +7519,7 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF",
-      "MOBI"
+      "PDF"
     ],
     "description": "A seminal work in Indigenous Religion by Mircea Eliade. Exploring core themes including Comparative Religion, Cosmic Axis, Initiation, Trance."
   },
@@ -7548,8 +7565,7 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF",
-      "MOBI"
+      "PDF"
     ],
     "description": "A seminal work in Indigenous Religion by Keith H. Basso. Exploring core themes including Western Apache, Toponyms, Sense of Place, Moral Geography."
   },
@@ -7663,8 +7679,7 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF",
-      "MOBI"
+      "PDF"
     ],
     "description": "A seminal work in Indigenous Religion by Melissa K. Nelson. Exploring core themes including Bioneers, Traditional Ecological Knowledge, Sovereignty."
   },
@@ -7686,7 +7701,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in Indigenous Religion by Linda Tuhiwai Smith. Exploring core themes including Maori, Decolonization, Indigenous Epistemology."
   },
@@ -7869,8 +7885,7 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF",
-      "MOBI"
+      "PDF"
     ],
     "description": "A seminal work in Indigenous Religion by Jeremy Narby. Exploring core themes including Plant Intelligence, Crow Cognition, Molecular Ecology."
   },
@@ -7915,8 +7930,7 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF",
-      "MOBI"
+      "PDF"
     ],
     "description": "A seminal work in Indigenous Religion by Stephen Harrod Buhner. Exploring core themes including Goethean Science, Heart Perception, Plant Secondary Metabolites."
   },
@@ -8007,8 +8021,7 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF",
-      "MOBI"
+      "PDF"
     ],
     "description": "A seminal work in Indigenous Religion by Starhawk. Exploring core themes including Reclaiming Witchcraft, Goddess Spirituality, Rituals."
   },
@@ -8031,7 +8044,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in Indigenous Religion by Starhawk. Exploring core themes including Immanence, Power-With, Witch Trials, Direct Action."
   },
@@ -8053,7 +8067,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in Indigenous Religion by Grace L. Dillon. Exploring core themes including Indigenous Futurisms, Speculative Fiction, Decolonization."
   },
@@ -8075,7 +8090,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in Indigenous Religion by Leanne Betasamosake Simpson. Exploring core themes including Nishnaabeg, Land as Pedagogy, Radical Resurgence."
   },
@@ -8122,8 +8138,7 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF",
-      "MOBI"
+      "PDF"
     ],
     "description": "A seminal work in Plant Medicine by Michael Pollan. Exploring core themes including Psychedelics, Psilocybin, LSD, Neuroscience, Mental Health."
   },
@@ -8193,7 +8208,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in Plant Medicine by Terence McKenna. Exploring core themes including Shamanism, UFOs, Alchemy, Eschatology, DMT."
   },
@@ -8333,7 +8349,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in Plant Medicine by Aldous Huxley. Exploring core themes including Visionary Experience, Luminosity, Aesthetics."
   },
@@ -8356,7 +8373,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in Plant Medicine by Aldous Huxley. Exploring core themes including Pala Utopia, Moksha Medicine, Tantra, Ecology."
   },
@@ -8380,8 +8398,7 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF",
-      "MOBI"
+      "PDF"
     ],
     "description": "A seminal work in Plant Medicine by Merlin Sheldrake. Exploring core themes including Mycology, Wood Wide Web, Lichens, Psilocybin, Fungi."
   },
@@ -8569,7 +8586,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in Plant Medicine by Luis Eduardo Luna, Steven F. White. Exploring core themes including Myths, Indigenous Stories, Shamanic Songs, Anthology."
   },
@@ -8593,8 +8611,7 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF",
-      "MOBI"
+      "PDF"
     ],
     "description": "A seminal work in Plant Medicine by Dale Pendell. Exploring core themes including Poison Path, Herbalism, Tobacco, Alcohol, Poetry."
   },
@@ -8642,8 +8659,7 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF",
-      "MOBI"
+      "PDF"
     ],
     "description": "A seminal work in Plant Medicine by Dale Pendell. Exploring core themes including Ayahuasca, Peyote, Mushrooms, Salvia, Datura."
   },
@@ -8665,7 +8681,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in Plant Medicine by Stanislav Grof. Exploring core themes including Holotropic Breathwork, Perinatal Matrices, Transpersonal."
   },
@@ -8709,8 +8726,7 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF",
-      "MOBI"
+      "PDF"
     ],
     "description": "A seminal work in Plant Medicine by Stanislav Grof. Exploring core themes including Psychotherapy, Clinical Protocols, COEX Systems."
   },
@@ -8755,8 +8771,7 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF",
-      "MOBI"
+      "PDF"
     ],
     "description": "A seminal work in Plant Medicine by Françoise Bourzat, Kristina Hunter. Exploring core themes including Mazatec Tradition, Preparation & Integration, Guiding."
   },
@@ -8826,7 +8841,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in Plant Medicine by Paul Stamets. Exploring core themes including Taxonomy, Identification, Psilocybe Semilanceata, Mycology."
   },
@@ -8917,8 +8933,7 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF",
-      "MOBI"
+      "PDF"
     ],
     "description": "A seminal work in Plant Medicine by Christian Rätsch. Exploring core themes including Salvinorin A, Mazatec Shamanism, Diviner's Sage."
   },
@@ -8966,7 +8981,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in Plant Medicine by Ralph Metzner. Exploring core themes including Santo Daime, UDV, Visions, Psychotherapy."
   },
@@ -8988,7 +9004,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in Plant Medicine by Ralph Metzner. Exploring core themes including Maria Sabina, Psilocybe, Ethnomycology."
   },
@@ -9010,7 +9027,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in Plant Medicine by Ralph Metzner. Exploring core themes including Alchemical Metaphors, Kundalini, Shamanic Metamorphosis."
   },
@@ -9055,7 +9073,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in Nature by Peter Wohlleben. Exploring core themes including Forestry, Mycorrhizal Networks, Tree Communication, Beech Trees."
   },
@@ -9121,7 +9140,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in Nature by Peter Wohlleben. Exploring core themes including Forest Bathing, Senses, Tree Physiology."
   },
@@ -9213,8 +9233,7 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF",
-      "MOBI"
+      "PDF"
     ],
     "description": "A seminal work in Nature by J. A. Baker. Exploring core themes including Falconry, Obsession, Essex Coast, Nature Prose."
   },
@@ -9237,8 +9256,7 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF",
-      "MOBI"
+      "PDF"
     ],
     "description": "A seminal work in Nature by Suzanne Simard. Exploring core themes including Douglas Firs, Mother Trees, Carbon Transfer, Mycorrhizal Fungi."
   },
@@ -9261,8 +9279,7 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF",
-      "MOBI"
+      "PDF"
     ],
     "description": "A seminal work in Nature by Elizabeth Kolbert. Exploring core themes including Anthropocene, Biodiversity Loss, Ocean Acidification, Amphibian Crisis."
   },
@@ -9332,7 +9349,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in Nature by George Monbiot. Exploring core themes including Rewilding, Apex Predators, Whales, Deforestation."
   },
@@ -9355,8 +9373,7 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF",
-      "MOBI"
+      "PDF"
     ],
     "description": "A seminal work in Nature by Annie Dillard. Exploring core themes including Virginia Blue Ridge, Fecundity, Eskimo Stalker, Mysticism."
   },
@@ -9380,7 +9397,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in Nature by Nan Shepherd. Exploring core themes including Cairngorms, Walking, Water, Sensory Immersion, Scotland."
   },
@@ -9427,7 +9445,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in Nature by Robert Macfarlane. Exploring core themes including Footpaths, Chalk Tracks, Walking, Landscape."
   },
@@ -9564,7 +9583,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in Nature by Edward O. Wilson. Exploring core themes including Speciation, Mass Extinctions, Adaptive Radiation."
   },
@@ -9586,8 +9606,7 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF",
-      "MOBI"
+      "PDF"
     ],
     "description": "A seminal work in Nature by Edward O. Wilson. Exploring core themes including Conservation, Wild Corridors, Biosphere Protection."
   },
@@ -9634,8 +9653,7 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF",
-      "MOBI"
+      "PDF"
     ],
     "description": "A seminal work in Nature by Bill Mollison, David Holmgren. Exploring core themes including Foundations, Perennial Crops, Agroforestry."
   },
@@ -9725,8 +9743,7 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF",
-      "MOBI"
+      "PDF"
     ],
     "description": "A seminal work in Nature by Masanobu Fukuoka. Exploring core themes including No-Till, Weed Management, Natural Succession."
   },
@@ -9748,8 +9765,7 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF",
-      "MOBI"
+      "PDF"
     ],
     "description": "A seminal work in Nature by James Lovelock. Exploring core themes including Gaia Hypothesis, Atmospheric Homeostasis, Earth System Science."
   },
@@ -9793,8 +9809,7 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF",
-      "MOBI"
+      "PDF"
     ],
     "description": "A seminal work in Nature by David Quammen. Exploring core themes including Alfred Russel Wallace, Habitat Fragmentation, Komodo Dragons."
   },
@@ -9817,7 +9832,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in Nature by David Quammen. Exploring core themes including Zoonotic Viruses, Ebola, Bats, Deforestation."
   },
@@ -9883,8 +9899,7 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF",
-      "MOBI"
+      "PDF"
     ],
     "description": "A seminal work in Nature by Mark Shepard. Exploring core themes including Chestnut Savannas, Keyline Design, Perennial Ag."
   },
@@ -9906,8 +9921,7 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF",
-      "MOBI"
+      "PDF"
     ],
     "description": "A seminal work in Nature by Kristin Ohlson. Exploring core themes including Soil Food Web, Glomalin, Carbon Sequestration."
   },
@@ -9930,8 +9944,7 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF",
-      "MOBI"
+      "PDF"
     ],
     "description": "A seminal work in Nature by Paul Stamets. Exploring core themes including Mycoremediation, Mycofiltration, Mycopesticides, Fungi."
   },
@@ -9977,8 +9990,7 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF",
-      "MOBI"
+      "PDF"
     ],
     "description": "A seminal work in Nature by David George Haskell. Exploring core themes including Acoustic Ecology, Olive Trees, Ceibo, Bonsai."
   },
@@ -10047,8 +10059,7 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF",
-      "MOBI"
+      "PDF"
     ],
     "description": "A seminal work in Nature by Donna J. Haraway. Exploring core themes including Chthulucene, Sympoiesis, Pigeon Worlds, Making Kin."
   },
@@ -10070,8 +10081,7 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF",
-      "MOBI"
+      "PDF"
     ],
     "description": "A seminal work in Nature by Donna J. Haraway. Exploring core themes including Companion Species, Agility Dogs, Co-Evolution."
   },
@@ -10093,7 +10103,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in Nature by Gary Paul Nabhan. Exploring core themes including Desert Bighorn Sheep, Sonoran Desert, O'odham Lore."
   },
@@ -10139,7 +10150,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in Nature by David Rains Wallace. Exploring core themes including Siskiyou Mountains, Deep Time, Evolution, Ecology."
   },
@@ -10162,7 +10174,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in Nature by Edward Abbey. Exploring core themes including Eco-Defense, Southwest, Wilderness Protection, Abbey."
   },
@@ -10185,7 +10198,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in Nature by Edward Abbey. Exploring core themes including Arches National Park, Solitude, Conservation, Essays."
   },
@@ -10208,8 +10222,7 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF",
-      "MOBI"
+      "PDF"
     ],
     "description": "A seminal work in Nature by Theodore Roszak. Exploring core themes including Ecopsychology, Earth Connection, Gaia, Healing."
   },
@@ -10233,7 +10246,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in Nature by Theodore Roszak, Mary E. Gomes, Allen D. Kanner. Exploring core themes including Wilderness Therapy, Ecological Ego, Planetary Health."
   },
@@ -10256,8 +10270,7 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF",
-      "MOBI"
+      "PDF"
     ],
     "description": "A seminal work in Nature by Freya Mathews. Exploring core themes including Deep Ecology, Cosmology, Geoaesthetics, Spinoza."
   },
@@ -10326,7 +10339,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in Nature by Fritjof Capra. Exploring core themes including Autopoiesis, Systems Theory, Complexity, Non-linear Dynamics."
   },
@@ -10372,7 +10386,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in Nature by Fritjof Capra. Exploring core themes including Quantum Physics, Eastern Mysticism, Parallel Insights."
   },
@@ -10440,7 +10455,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in Nature by Allan Savory, Jody Butterfield. Exploring core themes including Holistic Grazing, Desertification, Soil Regeneration, Decision Testing."
   },
@@ -10488,8 +10504,7 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF",
-      "MOBI"
+      "PDF"
     ],
     "description": "A seminal work in Nature by Ken Mudge, Steve Gabriel. Exploring core themes including Forest Farming, Shiitake, Ginseng, Silvopasture."
   },
@@ -10511,8 +10526,7 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF",
-      "MOBI"
+      "PDF"
     ],
     "description": "A seminal work in Nature by Steve Gabriel. Exploring core themes including Silvopasture, Carbon Drawdown, Livestock Management."
   },
@@ -10534,7 +10548,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in Nature by J. Russell Smith. Exploring core themes including Classic Agroforestry, Erosion Control, Oak & Chestnut."
   },
@@ -10556,7 +10571,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in Nature by Eric Toensmeier. Exploring core themes including Perennial Agriculture, Carbon Sequestration, Climate Solutions."
   },
@@ -10601,8 +10617,7 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF",
-      "MOBI"
+      "PDF"
     ],
     "description": "A seminal work in Nature by Dave Jacke, Eric Toensmeier. Exploring core themes including Forest Gardening, Ecological Structure, Succession."
   },
@@ -10626,7 +10641,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in Nature by Dave Jacke, Eric Toensmeier. Exploring core themes including Plant Matrix, Guilds, Microclimates, Site Analysis."
   },
@@ -10648,7 +10664,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in Nature by Tom Atlee. Exploring core themes including Collective Intelligence, Wisdom Councils, Citizen Deliberation."
   },
@@ -10670,7 +10687,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in Nature by Tom Atlee. Exploring core themes including Citizen Assemblies, Deliberative Democracy, Facilitation."
   },
@@ -10692,7 +10710,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in Nature by Jim Rough. Exploring core themes including Dynamic Facilitation, Choice-Creating, Wisdom Councils."
   },
@@ -10718,8 +10737,7 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF",
-      "MOBI"
+      "PDF"
     ],
     "description": "A seminal work in Nature by Sam Kaner, Leny Lind, Catherine Toldi, Sarah Fisk, Duane Berger. Exploring core themes including Groan Zone, Gradients of Agreement, Facilitation Tools."
   },
@@ -10809,8 +10827,7 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF",
-      "MOBI"
+      "PDF"
     ],
     "description": "A seminal work in Nature by C. Otto Scharmer. Exploring core themes including Presencing, Open Mind Heart Will, Systems Transformation."
   },
@@ -10833,7 +10850,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in Nature by C. Otto Scharmer, Katrin Kaufer. Exploring core themes including Eco-System Economy, Institutional Renewal, Systems Sensing."
   },
@@ -10856,7 +10874,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in Nature by Peter M. Senge. Exploring core themes including Learning Organizations, Mental Models, Shared Vision, Systems Thinking."
   },
@@ -10948,7 +10967,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in Nature by David Bohm. Exploring core themes including Quantum Holism, Implicate Order, Holomovement, Physics."
   },
@@ -11017,8 +11037,7 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF",
-      "MOBI"
+      "PDF"
     ],
     "description": "A seminal work in Nature by Jiddu Krishnamurti. Exploring core themes including Meditation, Self-Knowledge, Relationship, Love."
   },
@@ -11089,7 +11108,8 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF"
+      "PDF",
+      "MOBI"
     ],
     "description": "A seminal work in Nature by Ram Dass, Rameshwar Das. Exploring core themes including Guru Grace, Bhakti Yoga, Heart Consciousness, Aging."
   },
@@ -11112,8 +11132,7 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF",
-      "MOBI"
+      "PDF"
     ],
     "description": "A seminal work in Nature by Stephen Levine. Exploring core themes including Vipassana, Loving Kindness, Body Scans, Letting Go."
   },
@@ -11136,8 +11155,7 @@ export const REAL_BOOKS = [
     "language": "eng",
     "formats": [
       "EPUB",
-      "PDF",
-      "MOBI"
+      "PDF"
     ],
     "description": "A seminal work in Nature by Stephen Levine. Exploring core themes including Grief, Conscious Dying, Compassion, Hospice Care."
   },

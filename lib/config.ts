@@ -2,7 +2,7 @@ import path from 'path';
 import fs from 'fs';
 
 export const DEFAULT_CALIBRE_BASE_DIR =
-  process.env.CALIBRE_BASE_DIR || process.cwd();
+  process.env.CALIBRE_BASE_DIR || path.join(process.cwd(), 'libraries');
 
 export const DEFAULT_LIBRARY_NAME = process.env.DEFAULT_LIBRARY || 'boox';
 
