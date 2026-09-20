@@ -1,8 +1,9 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import LibrarySelector from './LibrarySelector';
-import { Code2 } from 'lucide-react';
+import LibraryManagerModal from './LibraryManagerModal';
+import { Code2, FolderArchive, Settings } from 'lucide-react';
 import Link from 'next/link';
 
 interface HeaderProps {
@@ -11,11 +12,13 @@ interface HeaderProps {
 }
 
 export default function Header({ currentLibrary, onSelectLibrary }: HeaderProps) {
+  const [isManagerOpen, setIsManagerOpen] = useState(false);
+
   return (
     <header className="sticky top-0 z-40 w-full border-b border-slate-800/80 bg-slate-950/80 backdrop-blur-md">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
         {/* Logo & Brand */}
-        <div className="flex items-center gap-6">
+        <div className="flex items-center gap-4 sm:gap-6">
           <Link href="/" className="flex items-center gap-2.5 group">
             <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-sky-600 to-cyan-400 flex items-center justify-center shadow-lg shadow-sky-500/20 group-hover:scale-105 transition-transform">
               <span className="text-xl">🗡️</span>
@@ -34,11 +37,25 @@ export default function Header({ currentLibrary, onSelectLibrary }: HeaderProps)
           </Link>
 
           {/* Library Switcher */}
-          <LibrarySelector currentLibrary={currentLibrary} onSelectLibrary={onSelectLibrary} />
+          <LibrarySelector
+            currentLibrary={currentLibrary}
+            onSelectLibrary={onSelectLibrary}
+            onOpenManager={() => setIsManagerOpen(true)}
+          />
         </div>
 
         {/* Right Nav links */}
         <div className="flex items-center gap-2 sm:gap-3">
+          {/* Manage Libraries Button */}
+          <button
+            onClick={() => setIsManagerOpen(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg text-slate-300 hover:text-white bg-slate-900 border border-slate-800 hover:border-slate-700 transition-all cursor-pointer shadow-sm"
+            title="Upload, rename, download, or manage libraries"
+          >
+            <FolderArchive className="w-4 h-4 text-sky-400" />
+            <span className="hidden sm:inline">Manage Libraries</span>
+          </button>
+
           <Link
             href="/api/reference"
             target="_blank"
@@ -46,7 +63,7 @@ export default function Header({ currentLibrary, onSelectLibrary }: HeaderProps)
             title="OpenAPI 3.1 Documentation via Scalar"
           >
             <Code2 className="w-4 h-4 text-sky-400" />
-            <span className="hidden sm:inline">API Reference</span>
+            <span className="hidden md:inline">API Reference</span>
           </Link>
 
           <a
@@ -62,6 +79,14 @@ export default function Header({ currentLibrary, onSelectLibrary }: HeaderProps)
           </a>
         </div>
       </div>
+
+      {/* Library Manager Modal */}
+      <LibraryManagerModal
+        isOpen={isManagerOpen}
+        onClose={() => setIsManagerOpen(false)}
+        currentLibrary={currentLibrary}
+        onSelectLibrary={onSelectLibrary}
+      />
     </header>
   );
 }

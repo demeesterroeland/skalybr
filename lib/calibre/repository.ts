@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { getDatabaseConnection } from './db';
 import { DEFAULT_CALIBRE_BASE_DIR, getLibraryPath } from '../config';
+import { getLibrarySettings } from '../library-settings';
 import { BookFlattened, BookListResponse, BookQueryOptions, LibraryInfo, UpdateBookInput } from '../types';
 
 export class FlatBookRepository {
@@ -11,11 +12,12 @@ export class FlatBookRepository {
     this.libraryPath = getLibraryPath(libraryName);
   }
 
-  public static listAvailableLibraries(baseDir: string = DEFAULT_CALIBRE_BASE_DIR): LibraryInfo[] {
+  public static listAvailableLibraries(baseDir: string = DEFAULT_CALIBRE_BASE_DIR, includeHidden: boolean = false): LibraryInfo[] {
     const libraries: LibraryInfo[] = [];
     const seenPaths = new Set<string>();
+    const settings = getLibrarySettings();
 
-    const checkAndAdd = (dirPath: string, displayName?: string) => {
+    const checkAndAdd = (dirPath: string, fallbackName?: string) => {
       const fullPath = path.isAbsolute(dirPath) ? dirPath : path.join(process.cwd(), dirPath);
       const dbPath = path.join(fullPath, 'metadata.db');
       if (fs.existsSync(dbPath) && !seenPaths.has(fullPath)) {
@@ -24,14 +26,20 @@ export class FlatBookRepository {
           const db = getDatabaseConnection(fullPath);
           const countRow = db.prepare('SELECT count(*) as count FROM books').get() as { count: number };
           const customColRow = db.prepare('SELECT count(*) as count FROM custom_columns').get() as { count: number };
-          const name = displayName || path.relative(process.cwd(), fullPath) || path.basename(fullPath);
+          const name = fallbackName || path.relative(process.cwd(), fullPath) || path.basename(fullPath);
+          const displayName = settings.customNames[name] || settings.customNames[fullPath] || name;
+          const isHidden = settings.hiddenLibraries.includes(name) || settings.hiddenLibraries.includes(fullPath);
 
-          libraries.push({
-            name,
-            path: fullPath,
-            bookCount: countRow.count,
-            hasCustomColumns: customColRow.count > 0,
-          });
+          if (!isHidden || includeHidden) {
+            libraries.push({
+              name,
+              displayName,
+              path: fullPath,
+              bookCount: countRow.count,
+              hasCustomColumns: customColRow.count > 0,
+              isHidden,
+            });
+          }
         } catch (e) {
           // Skip unreadable databases
         }
@@ -50,15 +58,15 @@ export class FlatBookRepository {
     if (fs.existsSync(baseDir)) {
       const entries = fs.readdirSync(baseDir, { withFileTypes: true });
       for (const entry of entries) {
-        if (entry.isDirectory()) {
+        if (entry.isDirectory() && entry.name !== 'node_modules' && entry.name !== '.next' && entry.name !== '.git') {
           const dir = path.join(baseDir, entry.name);
           checkAndAdd(dir, entry.name);
 
-          // Also check 1 level deeper (e.g. demo-library/demo)
+          // Also check 1 level deeper (e.g. demo-library/demo or libraries/my-lib)
           try {
             const subEntries = fs.readdirSync(dir, { withFileTypes: true });
             for (const sub of subEntries) {
-              if (sub.isDirectory()) {
+              if (sub.isDirectory() && sub.name !== 'node_modules') {
                 checkAndAdd(path.join(dir, sub.name), `${entry.name}/${sub.name}`);
               }
             }

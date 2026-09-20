@@ -33,6 +33,16 @@ export function getDatabaseConnection(libraryPath: string): Database.Database {
   return db;
 }
 
+export function closeDatabaseConnection(libraryPath: string): void {
+  const normalizedPath = path.resolve(libraryPath);
+  if (connectionPool.has(normalizedPath)) {
+    try {
+      connectionPool.get(normalizedPath)!.close();
+    } catch (e) {}
+    connectionPool.delete(normalizedPath);
+  }
+}
+
 export function ensureFlattenedView(db: Database.Database): void {
   // Check if custom_column_1 exists
   const hasCustomCol1 = db

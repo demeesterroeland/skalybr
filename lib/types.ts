@@ -25,9 +25,11 @@ export interface BookFlattened {
 
 export interface LibraryInfo {
   name: string;
+  displayName: string;
   path: string;
   bookCount: number;
   hasCustomColumns: boolean;
+  isHidden?: boolean;
 }
 
 export interface BookQueryOptions {
