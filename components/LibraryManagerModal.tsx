@@ -54,6 +54,13 @@ export default function LibraryManagerModal({
   const [customLibName, setCustomLibName] = useState('');
   const [customDisplayName, setCustomDisplayName] = useState('');
   const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<{
+    percent: number;
+    stage: 'connecting' | 'uploading' | 'downloading' | 'extracting' | 'finalizing' | 'complete';
+    stageLabel?: string;
+    message: string;
+    detail?: string;
+  } | null>(null);
   const [urlInspection, setUrlInspection] = useState<UrlInspection>({ status: 'idle' });
 
   // Rename editing state
@@ -160,19 +167,86 @@ export default function LibraryManagerModal({
     setIsUploading(true);
 
     try {
-      let res: Response;
       if (uploadMode === 'file' && uploadFile) {
         const formData = new FormData();
         formData.append('file', uploadFile);
         if (customLibName.trim()) formData.append('name', customLibName.trim());
         if (customDisplayName.trim()) formData.append('displayName', customDisplayName.trim());
 
-        res = await fetch('/api/v1/libraries', {
-          method: 'POST',
-          body: formData,
+        await new Promise<void>((resolve, reject) => {
+          const xhr = new XMLHttpRequest();
+          xhr.open('POST', '/api/v1/libraries');
+
+          xhr.upload.onprogress = (event) => {
+            if (event.lengthComputable) {
+              const uploadPct = Math.round((event.loaded / event.total) * 100);
+              const percent = Math.min(85, Math.round((event.loaded / event.total) * 85));
+              const loadedMb = (event.loaded / (1024 * 1024)).toFixed(1);
+              const totalMb = (event.total / (1024 * 1024)).toFixed(1);
+              setUploadProgress({
+                percent,
+                stage: 'uploading',
+                stageLabel: 'Uploading ZIP to server',
+                message: `Uploading: ${loadedMb} MB / ${totalMb} MB (${uploadPct}%)`,
+                detail: `${loadedMb} MB of ${totalMb} MB`,
+              });
+            }
+          };
+
+          xhr.upload.onload = () => {
+            setUploadProgress({
+              percent: 88,
+              stage: 'extracting',
+              stageLabel: 'Extracting library on server',
+              message: 'Upload complete! Extracting archive and verifying Calibre database...',
+              detail: 'Please wait...',
+            });
+          };
+
+          xhr.onload = () => {
+            try {
+              const json = JSON.parse(xhr.responseText);
+              if (xhr.status >= 200 && xhr.status < 300 && json.success) {
+                setUploadProgress({
+                  percent: 100,
+                  stage: 'complete',
+                  stageLabel: 'Completed',
+                  message: json.message || 'Library imported successfully!',
+                });
+                toast.success(json.message || 'Library imported successfully');
+                setUploadFile(null);
+                setCustomLibName('');
+                setCustomDisplayName('');
+                if (fileInputRef.current) fileInputRef.current.value = '';
+                queryClient.invalidateQueries({ queryKey: ['libraries'] });
+                refetch();
+                if (json.library) {
+                  onSelectLibrary(json.library);
+                }
+                resolve();
+              } else {
+                reject(new Error(json.error || 'Failed to import library'));
+              }
+            } catch (err: any) {
+              reject(new Error(err.message || 'Unexpected server response'));
+            }
+          };
+
+          xhr.onerror = () => {
+            reject(new Error('Network error during upload'));
+          };
+
+          xhr.send(formData);
         });
       } else {
-        res = await fetch('/api/v1/libraries', {
+        setUploadProgress({
+          percent: 5,
+          stage: 'connecting',
+          stageLabel: 'Connecting to cloud',
+          message: 'Connecting to cloud provider...',
+        });
+
+        const res = await fetch('/api/v1/libraries?stream=true', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -181,29 +255,74 @@ export default function LibraryManagerModal({
             displayName: customDisplayName.trim() || undefined,
           }),
         });
-      }
 
-      const json = await res.json();
-
-      if (json.success) {
-        toast.success(json.message || 'Library imported successfully');
-        setUploadFile(null);
-        setRemoteUrl('');
-        setCustomLibName('');
-        setCustomDisplayName('');
-        if (fileInputRef.current) fileInputRef.current.value = '';
-        queryClient.invalidateQueries({ queryKey: ['libraries'] });
-        refetch();
-        if (json.library) {
-          onSelectLibrary(json.library);
+        if (!res.ok) {
+          const errJson = await res.json().catch(() => null);
+          throw new Error(errJson?.error || `Server error: HTTP ${res.status}`);
         }
-      } else {
-        toast.error(json.error || 'Failed to import library');
+
+        if (!res.body) {
+          throw new Error('Server returned empty stream');
+        }
+
+        const reader = res.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n');
+          buffer = lines.pop() || '';
+
+          for (const line of lines) {
+            const trimmed = line.trim();
+            if (!trimmed.startsWith('data:')) continue;
+            try {
+              const event = JSON.parse(trimmed.slice(5).trim());
+              if (event.stage === 'error') {
+                throw new Error(event.error || 'Failed to import library');
+              }
+
+              setUploadProgress({
+                percent: event.percent ?? 50,
+                stage: event.stage,
+                stageLabel:
+                  event.stage === 'downloading'
+                    ? 'Downloading from cloud'
+                    : event.stage === 'extracting'
+                    ? 'Extracting archive'
+                    : 'Processing',
+                message: event.message || 'Processing library...',
+                detail: event.detail,
+              });
+
+              if (event.stage === 'complete' && event.success) {
+                toast.success(event.message || 'Library imported successfully');
+                setRemoteUrl('');
+                setCustomLibName('');
+                setCustomDisplayName('');
+                queryClient.invalidateQueries({ queryKey: ['libraries'] });
+                refetch();
+                if (event.library) {
+                  onSelectLibrary(event.library);
+                }
+              }
+            } catch (parseErr: any) {
+              if (parseErr.message && !parseErr.message.includes('JSON')) {
+                throw parseErr;
+              }
+            }
+          }
+        }
       }
     } catch (e: any) {
       toast.error(e.message || 'Import error');
     } finally {
       setIsUploading(false);
+      setTimeout(() => setUploadProgress(null), 2500);
     }
   };
 
@@ -529,7 +648,7 @@ export default function LibraryManagerModal({
                     {isUploading ? (
                       <>
                         <Loader2 className="w-4 h-4 animate-spin" />
-                        <span>{uploadMode === 'file' ? 'Extracting & Validating Library...' : 'Downloading & Extracting Library...'}</span>
+                        <span>{uploadProgress?.message || (uploadMode === 'file' ? 'Uploading & Extracting...' : 'Downloading & Extracting...')}</span>
                       </>
                     ) : (
                       <>
@@ -538,6 +657,36 @@ export default function LibraryManagerModal({
                       </>
                     )}
                   </button>
+
+                  {/* Real-time Progress Bar */}
+                  {uploadProgress && (
+                    <div className="mt-4 p-4 rounded-xl bg-slate-900/90 border border-sky-500/30 shadow-lg shadow-sky-500/5 space-y-2.5 transition-all animate-in fade-in slide-in-from-top-2 duration-200">
+                      <div className="flex items-center justify-between text-xs">
+                        <div className="flex items-center gap-2 text-sky-400 font-medium truncate pr-2">
+                          <Loader2 className="w-4 h-4 animate-spin text-sky-400 shrink-0" />
+                          <span className="truncate">{uploadProgress.message}</span>
+                        </div>
+                        <span className="font-mono font-bold text-sky-300 text-xs shrink-0">
+                          {uploadProgress.percent}%
+                        </span>
+                      </div>
+
+                      {/* Progress Bar Track */}
+                      <div className="w-full bg-slate-800/80 rounded-full h-2.5 overflow-hidden border border-slate-700/60 shadow-inner">
+                        <div
+                          className="bg-gradient-to-r from-sky-500 via-cyan-400 to-sky-400 h-full rounded-full transition-all duration-200 ease-out relative overflow-hidden"
+                          style={{ width: `${Math.min(100, Math.max(0, uploadProgress.percent))}%` }}
+                        >
+                          <div className="absolute inset-0 bg-white/20 animate-pulse" />
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between text-[11px] text-slate-400">
+                        <span className="font-medium text-slate-400">{uploadProgress.stageLabel || uploadProgress.stage}</span>
+                        {uploadProgress.detail && <span className="font-mono text-slate-300">{uploadProgress.detail}</span>}
+                      </div>
+                    </div>
+                  )}
                 </form>
               </div>
 

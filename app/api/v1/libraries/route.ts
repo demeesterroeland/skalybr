@@ -175,7 +175,8 @@ export async function resolveDirectDownloadUrl(inputUrl: string): Promise<Resolv
 
 export async function downloadRemoteZip(
   urlStr: string,
-  maxBytes: number
+  maxBytes: number,
+  onProgress?: (loaded: number, total: number | null) => void
 ): Promise<{ buffer?: Buffer; error?: string }> {
   const resolved = await resolveDirectDownloadUrl(urlStr);
   const normalized = resolved.url;
@@ -253,14 +254,18 @@ export async function downloadRemoteZip(
 
   // Check Content-Length on GET response before reading body stream
   const contentLength = response.headers.get('content-length');
+  let expectedTotal: number | null = null;
   if (contentLength) {
     const size = parseInt(contentLength, 10);
-    if (!isNaN(size) && size > maxBytes) {
-      const sizeMb = (size / (1024 * 1024)).toFixed(1);
-      const maxMb = Math.round(maxBytes / (1024 * 1024));
-      return {
-        error: `Remote file size (${sizeMb} MB) exceeds maximum limit of ${maxMb} MB. Aborted before download.`,
-      };
+    if (!isNaN(size)) {
+      expectedTotal = size;
+      if (size > maxBytes) {
+        const sizeMb = (size / (1024 * 1024)).toFixed(1);
+        const maxMb = Math.round(maxBytes / (1024 * 1024));
+        return {
+          error: `Remote file size (${sizeMb} MB) exceeds maximum limit of ${maxMb} MB. Aborted before download.`,
+        };
+      }
     }
   }
 
@@ -271,6 +276,7 @@ export async function downloadRemoteZip(
   const reader = response.body.getReader();
   const chunks: Uint8Array[] = [];
   let totalBytes = 0;
+  let lastProgressReport = 0;
 
   while (true) {
     const { done, value } = await reader.read();
@@ -282,7 +288,18 @@ export async function downloadRemoteZip(
         return { error: `Download exceeded maximum file size of ${Math.round(maxBytes / 1024 / 1024)}MB.` };
       }
       chunks.push(value);
+      if (onProgress) {
+        const now = Date.now();
+        if (now - lastProgressReport > 100) {
+          lastProgressReport = now;
+          onProgress(totalBytes, expectedTotal);
+        }
+      }
     }
+  }
+
+  if (onProgress) {
+    onProgress(totalBytes, expectedTotal);
   }
 
   return { buffer: Buffer.concat(chunks) };
@@ -291,7 +308,8 @@ export async function downloadRemoteZip(
 async function extractLibraryZip(
   buffer: Buffer,
   libraryName: string,
-  customDisplayName?: string
+  customDisplayName?: string,
+  onProgress?: (extracted: number, total: number) => void
 ): Promise<{ success: boolean; error?: string; message?: string }> {
   const zip = await JSZip.loadAsync(buffer);
 
@@ -325,9 +343,12 @@ async function extractLibraryZip(
 
   fs.mkdirSync(targetDir, { recursive: true });
 
-  for (const [relativePath, zipEntry] of Object.entries(zip.files)) {
-    if (zipEntry.dir) continue;
+  const fileEntries = Object.entries(zip.files).filter(([_, entry]) => !entry.dir);
+  const totalFiles = fileEntries.length;
+  let extractedCount = 0;
+  let lastProgressReport = 0;
 
+  for (const [relativePath, zipEntry] of fileEntries) {
     let cleanRelPath = relativePath;
     if (rootPrefix && cleanRelPath.startsWith(rootPrefix)) {
       cleanRelPath = cleanRelPath.slice(rootPrefix.length);
@@ -343,6 +364,15 @@ async function extractLibraryZip(
     fs.mkdirSync(path.dirname(resolvedPath), { recursive: true });
     const content = await zipEntry.async('nodebuffer');
     fs.writeFileSync(resolvedPath, content);
+    extractedCount++;
+
+    if (onProgress) {
+      const now = Date.now();
+      if (now - lastProgressReport > 100 || extractedCount === totalFiles) {
+        lastProgressReport = now;
+        onProgress(extractedCount, totalFiles);
+      }
+    }
   }
 
   // Verify metadata.db exists in extracted target
@@ -374,18 +404,125 @@ async function extractLibraryZip(
 // POST: Upload or download a zipped Calibre library from local file or remote URL
 export async function POST(req: NextRequest) {
   try {
+    const isStream = req.nextUrl.searchParams.get('stream') === 'true';
     const contentType = req.headers.get('content-type') || '';
     const MAX_UPLOAD_SIZE = process.env.MAX_UPLOAD_SIZE_MB
       ? parseInt(process.env.MAX_UPLOAD_SIZE_MB, 10) * 1024 * 1024
       : 1024 * 1024 * 1024; // Default 1GB (1024MB)
 
+    let bodyJson: any = null;
+    if (contentType.includes('application/json')) {
+      bodyJson = await req.json().catch(() => null);
+    }
+
+    // Streaming response mode for remote URL downloads
+    if (isStream && bodyJson) {
+      const { url, name, displayName } = bodyJson;
+
+      if (!url || typeof url !== 'string' || !url.trim()) {
+        return NextResponse.json({ success: false, error: 'Please provide a valid remote URL.' }, { status: 400 });
+      }
+
+      const stream = new ReadableStream({
+        async start(controller) {
+          const encoder = new TextEncoder();
+          const send = (data: any) => {
+            try {
+              controller.enqueue(encoder.encode(`data: ${JSON.stringify(data)}\n\n`));
+            } catch {}
+          };
+
+          try {
+            send({ stage: 'connecting', percent: 3, message: 'Connecting to cloud provider...' });
+
+            const downloadRes = await downloadRemoteZip(url.trim(), MAX_UPLOAD_SIZE, (loaded, total) => {
+              const loadedMb = (loaded / (1024 * 1024)).toFixed(1);
+              const totalMb = total ? `${(total / (1024 * 1024)).toFixed(1)} MB` : 'unknown';
+              const percent = total ? Math.min(75, Math.round(3 + (loaded / total) * 72)) : 35;
+              send({
+                stage: 'downloading',
+                percent,
+                loaded,
+                total,
+                message: `Downloading from cloud: ${loadedMb} MB / ${totalMb} (${total ? Math.round((loaded / total) * 100) : '?'}%)`,
+                detail: `${loadedMb} MB of ${totalMb}`,
+              });
+            });
+
+            if (downloadRes.error || !downloadRes.buffer) {
+              send({ stage: 'error', success: false, error: downloadRes.error || 'Failed to download file' });
+              controller.close();
+              return;
+            }
+
+            send({ stage: 'extracting', percent: 76, message: 'Download complete. Reading ZIP archive...' });
+
+            let libName = name?.trim();
+            if (!libName) {
+              try {
+                const pathname = new URL(url).pathname;
+                const base = path.basename(pathname).replace(/\.zip$/i, '').trim();
+                libName = base || 'cloud-library';
+              } catch {
+                libName = 'cloud-library';
+              }
+            }
+            const sanitizedName = libName.replace(/[^a-zA-Z0-9_\-]/g, '_');
+
+            const extractRes = await extractLibraryZip(
+              downloadRes.buffer,
+              sanitizedName,
+              displayName?.trim(),
+              (extracted, total) => {
+                const percent = Math.min(98, 76 + Math.round((extracted / total) * 22));
+                send({
+                  stage: 'extracting',
+                  percent,
+                  extracted,
+                  total,
+                  message: `Extracting archive: ${extracted.toLocaleString()} / ${total.toLocaleString()} files`,
+                  detail: `${Math.round((extracted / total) * 100)}% unzipped`,
+                });
+              }
+            );
+
+            if (!extractRes.success) {
+              send({ stage: 'error', success: false, error: extractRes.error });
+              controller.close();
+              return;
+            }
+
+            send({
+              stage: 'complete',
+              percent: 100,
+              success: true,
+              library: sanitizedName,
+              message: extractRes.message,
+            });
+            controller.close();
+          } catch (err: any) {
+            send({ stage: 'error', success: false, error: err.message || 'Import failed.' });
+            controller.close();
+          }
+        },
+      });
+
+      return new Response(stream, {
+        headers: {
+          'Content-Type': 'text/event-stream',
+          'Cache-Control': 'no-cache, no-transform',
+          'Connection': 'keep-alive',
+          'X-Accel-Buffering': 'no',
+        },
+      });
+    }
+
     let buffer: Buffer | null = null;
     let libraryName: string | undefined;
     let customDisplayName: string | undefined;
 
-    if (contentType.includes('application/json')) {
-      const json = await req.json();
-      const { url, name, displayName } = json;
+    if (bodyJson) {
+      const { url, name, displayName } = bodyJson;
 
       if (!url || typeof url !== 'string' || !url.trim()) {
         return NextResponse.json({ success: false, error: 'Please provide a valid remote URL.' }, { status: 400 });
