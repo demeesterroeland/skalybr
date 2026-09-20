@@ -33,3 +33,6 @@ boox/
 !/data/.gitkeep
 !/data/migrations/
 !/data/migrations/**
+
+# Large demo library (generated, too big for git)
+/demo/large/

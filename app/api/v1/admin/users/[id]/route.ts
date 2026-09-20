@@ -5,6 +5,8 @@ import {
   updateUser,
   deleteUser,
   incrementSessionEpoch,
+  listAccessGrantsForUser,
+  setAccessGrant,
 } from '@/lib/db/skalybr-db';
 import { toSafeUser } from '@/lib/auth/server';
 import type { UserStatus } from '@/lib/types';
@@ -33,7 +35,7 @@ export async function PATCH(
     }
 
     const body = await req.json().catch(() => ({}));
-    const { status, isAdmin, displayName } = body;
+    const { status, isAdmin, displayName, revokeSessions } = body;
 
     // Prevent self-lockout
     if (guard.user.id === userId) {
@@ -49,6 +51,11 @@ export async function PATCH(
           { status: 400 }
         );
       }
+    }
+
+    // Support manual session revocation
+    if (revokeSessions === true) {
+      incrementSessionEpoch(userId);
     }
 
     const updates: {
@@ -92,6 +99,20 @@ export async function PATCH(
     }
 
     const updated = updateUser(userId, updates);
+
+    // On user activation from pending, automatically seed baseline global reader grant if user has none
+    if (updates.status === 'active' && existing.status !== 'active') {
+      const existingGrants = listAccessGrantsForUser(userId);
+      if (existingGrants.length === 0) {
+        setAccessGrant({
+          userId,
+          resourceType: 'global',
+          resourceId: '*',
+          role: 'reader',
+          grantedBy: guard.user.id,
+        });
+      }
+    }
 
     return NextResponse.json({
       success: true,

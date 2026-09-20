@@ -2,9 +2,11 @@ import fs from 'fs';
 import path from 'path';
 import os from 'os';
 
-// Ensure libraries/demo and libraries/boox exist for test runs using the committed demo-library
+// Ensure libraries/demo and libraries/boox exist for test runs using the committed demo library
 const baseDir = process.env.CALIBRE_BASE_DIR || path.join(process.cwd(), 'libraries');
-const demoSrc = path.join(process.cwd(), 'demo-library', 'demo');
+const primaryDemoSrc = path.join(process.cwd(), 'demo', 'small');
+const fallbackDemoSrc = path.join(process.cwd(), 'demo-library', 'demo');
+const demoSrc = fs.existsSync(primaryDemoSrc) ? primaryDemoSrc : fallbackDemoSrc;
 const demoDest = path.join(baseDir, 'demo');
 const booxDest = path.join(baseDir, 'boox');
 

@@ -36,7 +36,7 @@ RUN mkdir -p /app/data /app/libraries && chown -R nextjs:nodejs /app
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 COPY --from=builder --chown=nextjs:nodejs /app/public ./public
-COPY --from=builder --chown=nextjs:nodejs /app/demo-library ./demo-library
+COPY --from=builder --chown=nextjs:nodejs /app/demo ./demo
 COPY --from=builder --chown=nextjs:nodejs /app/data/migrations ./migrations
 
 USER nextjs

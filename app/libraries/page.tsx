@@ -3,6 +3,7 @@
 import React, { useMemo, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
+import Header from '@/components/Header';
 import OnboardingZeroState from '@/components/onboarding-zero-state';
 import LibraryManagerModal from '@/components/LibraryManagerModal';
 import { LibraryInfo } from '@/lib/types';
@@ -250,21 +251,24 @@ export default function LibraryGateway() {
 
   if (!libraries || libraries.length === 0) {
     return (
-      <>
-        <OnboardingZeroState onOpenAddLibrary={() => setIsManagerOpen(true)} />
-        <LibraryManagerModal
-          isOpen={isManagerOpen}
-          onClose={() => {
-            setIsManagerOpen(false);
-            queryClient.invalidateQueries({ queryKey: ['libraries'] });
-          }}
-          currentLibrary=""
-          onSelectLibrary={(libName) => {
-            setIsManagerOpen(false);
-            handleSelect(libName);
-          }}
-        />
-      </>
+      <div className="min-h-screen bg-[#0e0e12] flex flex-col selection:bg-neutral-800">
+        <Header currentLibrary="" />
+        <div className="flex-1 flex flex-col items-center justify-center">
+          <OnboardingZeroState onOpenAddLibrary={() => setIsManagerOpen(true)} />
+          <LibraryManagerModal
+            isOpen={isManagerOpen}
+            onClose={() => {
+              setIsManagerOpen(false);
+              queryClient.invalidateQueries({ queryKey: ['libraries'] });
+            }}
+            currentLibrary=""
+            onSelectLibrary={(libName) => {
+              setIsManagerOpen(false);
+              handleSelect(libName);
+            }}
+          />
+        </div>
+      </div>
     );
   }
 
@@ -278,10 +282,12 @@ export default function LibraryGateway() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0e0e12] flex flex-col items-center justify-center p-6 sm:p-12 selection:bg-neutral-800">
-      <div className="w-full max-w-5xl flex flex-col items-center justify-center">
-        {/* Header - Centered */}
-        <div className="mb-10 text-center">
+    <div className="min-h-screen bg-[#0e0e12] flex flex-col selection:bg-neutral-800">
+      <Header currentLibrary="" />
+      <div className="flex-1 flex flex-col items-center justify-center p-6 sm:p-12">
+        <div className="w-full max-w-5xl flex flex-col items-center justify-center">
+          {/* Header - Centered */}
+          <div className="mb-10 text-center">
           <h1 className="text-3xl sm:text-4xl font-bold text-white tracking-tight">
             Select Library
           </h1>
@@ -326,6 +332,7 @@ export default function LibraryGateway() {
           handleSelect(libName);
         }}
       />
+      </div>
     </div>
   );
 }
