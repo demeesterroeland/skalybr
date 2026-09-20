@@ -10,6 +10,7 @@ export default defineConfig(({ mode }) => {
       environment: 'node',
       globals: true,
       exclude: ['**/node_modules/**', '**/.next/**'],
+      setupFiles: ['./testing/setup.ts'],
     },
     resolve: {
       alias: {

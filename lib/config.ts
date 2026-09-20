@@ -18,10 +18,10 @@ export function getDefaultLibraryName(): string {
   } catch (e) {
     // DB not yet initialized or during early build
   }
-  return process.env.DEFAULT_LIBRARY || 'boox';
+  return process.env.DEFAULT_LIBRARY || 'demo';
 }
 
-export const DEFAULT_LIBRARY_NAME = process.env.DEFAULT_LIBRARY || 'boox';
+export const DEFAULT_LIBRARY_NAME = process.env.DEFAULT_LIBRARY || 'demo';
 
 export function getLibraryPath(libraryName?: string): string {
   const targetName = libraryName || getDefaultLibraryName();
