@@ -6,7 +6,14 @@ export const metadata: Metadata = {
   title: 'Skalybr — Self-Hosted E-Book Library',
   description: 'The modern, ultra-fast self-hosted e-book server and reader for Calibre libraries.',
   icons: {
-    icon: '/favicon.ico',
+    icon: [
+      { url: '/favicon.svg', type: 'image/svg+xml' },
+      { url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
+      { url: '/favicon.ico', sizes: 'any' },
+    ],
+    apple: [
+      { url: '/apple-touch-icon.png', sizes: '180x180' },
+    ],
   },
 };
 
