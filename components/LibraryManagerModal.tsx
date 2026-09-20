@@ -18,6 +18,7 @@ import {
   AlertTriangle,
   Loader2,
   Plus,
+  Globe,
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -37,7 +38,9 @@ export default function LibraryManagerModal({
   const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const [uploadMode, setUploadMode] = useState<'file' | 'url'>('file');
   const [uploadFile, setUploadFile] = useState<File | null>(null);
+  const [remoteUrl, setRemoteUrl] = useState('');
   const [customLibName, setCustomLibName] = useState('');
   const [customDisplayName, setCustomDisplayName] = useState('');
   const [isUploading, setIsUploading] = useState(false);
@@ -62,30 +65,50 @@ export default function LibraryManagerModal({
     enabled: isOpen,
   });
 
-  // Handle Upload
+  // Handle Upload or Remote URL Import
   const handleUploadSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!uploadFile) {
+    if (uploadMode === 'file' && !uploadFile) {
       toast.error('Please select a ZIP file');
+      return;
+    }
+    if (uploadMode === 'url' && !remoteUrl.trim()) {
+      toast.error('Please enter a remote download URL');
       return;
     }
 
     setIsUploading(true);
-    const formData = new FormData();
-    formData.append('file', uploadFile);
-    if (customLibName.trim()) formData.append('name', customLibName.trim());
-    if (customDisplayName.trim()) formData.append('displayName', customDisplayName.trim());
 
     try {
-      const res = await fetch('/api/v1/libraries', {
-        method: 'POST',
-        body: formData,
-      });
+      let res: Response;
+      if (uploadMode === 'file' && uploadFile) {
+        const formData = new FormData();
+        formData.append('file', uploadFile);
+        if (customLibName.trim()) formData.append('name', customLibName.trim());
+        if (customDisplayName.trim()) formData.append('displayName', customDisplayName.trim());
+
+        res = await fetch('/api/v1/libraries', {
+          method: 'POST',
+          body: formData,
+        });
+      } else {
+        res = await fetch('/api/v1/libraries', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            url: remoteUrl.trim(),
+            name: customLibName.trim() || undefined,
+            displayName: customDisplayName.trim() || undefined,
+          }),
+        });
+      }
+
       const json = await res.json();
 
       if (json.success) {
-        toast.success(json.message || 'Library uploaded successfully');
+        toast.success(json.message || 'Library imported successfully');
         setUploadFile(null);
+        setRemoteUrl('');
         setCustomLibName('');
         setCustomDisplayName('');
         if (fileInputRef.current) fileInputRef.current.value = '';
@@ -95,10 +118,10 @@ export default function LibraryManagerModal({
           onSelectLibrary(json.library);
         }
       } else {
-        toast.error(json.error || 'Failed to upload library');
+        toast.error(json.error || 'Failed to import library');
       }
     } catch (e: any) {
-      toast.error(e.message || 'Upload error');
+      toast.error(e.message || 'Import error');
     } finally {
       setIsUploading(false);
     }
@@ -218,46 +241,110 @@ export default function LibraryManagerModal({
                 </Dialog.Description>
               </div>
 
-              {/* Upload Section */}
+              {/* Upload / Import Section */}
               <div className="bg-slate-950/80 border border-slate-800/80 rounded-xl p-4 sm:p-5">
-                <h3 className="text-sm font-semibold text-slate-200 mb-3 flex items-center gap-2">
-                  <Upload className="w-4 h-4 text-sky-400" />
-                  <span>Upload & Extract New Library (.zip)</span>
-                </h3>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+                  <h3 className="text-sm font-semibold text-slate-200 flex items-center gap-2">
+                    <Plus className="w-4 h-4 text-sky-400" />
+                    <span>Add New Library</span>
+                  </h3>
+                  {/* Mode Switcher */}
+                  <div className="flex items-center bg-slate-900 border border-slate-800 rounded-lg p-0.5 text-xs self-start sm:self-auto">
+                    <button
+                      type="button"
+                      onClick={() => setUploadMode('file')}
+                      className={`flex items-center gap-1.5 px-3 py-1 rounded-md font-medium transition-colors ${
+                        uploadMode === 'file'
+                          ? 'bg-sky-600 text-white shadow-sm'
+                          : 'text-slate-400 hover:text-slate-200'
+                      }`}
+                    >
+                      <FolderArchive className="w-3.5 h-3.5" />
+                      <span>Upload ZIP</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setUploadMode('url')}
+                      className={`flex items-center gap-1.5 px-3 py-1 rounded-md font-medium transition-colors ${
+                        uploadMode === 'url'
+                          ? 'bg-sky-600 text-white shadow-sm'
+                          : 'text-slate-400 hover:text-slate-200'
+                      }`}
+                    >
+                      <Globe className="w-3.5 h-3.5" />
+                      <span>Remote URL</span>
+                    </button>
+                  </div>
+                </div>
 
                 <form onSubmit={handleUploadSubmit} className="space-y-4">
-                  <div className="border-2 border-dashed border-slate-800 hover:border-sky-500/50 rounded-xl p-4 text-center cursor-pointer transition-colors bg-slate-900/30">
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      accept=".zip"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0] || null;
-                        setUploadFile(file);
-                        if (file) {
-                          const base = file.name.replace(/\.zip$/i, '');
-                          const sanitizedFolder = base.replace(/[^a-zA-Z0-9_\-\.\/]/g, '_');
-                          setCustomLibName(sanitizedFolder);
-                          setCustomDisplayName(base);
-                        }
-                      }}
-                      className="hidden"
-                      id="library-zip-input"
-                    />
-                    <label htmlFor="library-zip-input" className="cursor-pointer block">
-                      <FolderArchive className="w-8 h-8 text-slate-500 mx-auto mb-2" />
-                      {uploadFile ? (
-                        <p className="text-sm font-medium text-sky-300 truncate max-w-xs mx-auto">
-                          Selected: {uploadFile.name} ({(uploadFile.size / (1024 * 1024)).toFixed(1)} MB)
-                        </p>
-                      ) : (
-                        <div>
-                          <p className="text-xs font-semibold text-slate-300">Click to select a Calibre library ZIP file</p>
-                          <p className="text-[11px] text-slate-500 mt-0.5">ZIP archive must contain metadata.db</p>
-                        </div>
-                      )}
-                    </label>
-                  </div>
+                  {uploadMode === 'file' ? (
+                    <div className="border-2 border-dashed border-slate-800 hover:border-sky-500/50 rounded-xl p-4 text-center cursor-pointer transition-colors bg-slate-900/30">
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept=".zip"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0] || null;
+                          setUploadFile(file);
+                          if (file) {
+                            const base = file.name.replace(/\.zip$/i, '');
+                            const sanitizedFolder = base.replace(/[^a-zA-Z0-9_\-]/g, '_');
+                            setCustomLibName(sanitizedFolder);
+                            setCustomDisplayName(base);
+                          }
+                        }}
+                        className="hidden"
+                        id="library-zip-input"
+                      />
+                      <label htmlFor="library-zip-input" className="cursor-pointer block">
+                        <FolderArchive className="w-8 h-8 text-slate-500 mx-auto mb-2" />
+                        {uploadFile ? (
+                          <p className="text-sm font-medium text-sky-300 truncate max-w-xs mx-auto">
+                            Selected: {uploadFile.name} ({(uploadFile.size / (1024 * 1024)).toFixed(1)} MB)
+                          </p>
+                        ) : (
+                          <div>
+                            <p className="text-xs font-semibold text-slate-300">Click to select a Calibre library ZIP file</p>
+                            <p className="text-[11px] text-slate-500 mt-0.5">ZIP archive must contain metadata.db</p>
+                          </div>
+                        )}
+                      </label>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      <label className="text-xs font-medium text-slate-400 block">
+                        Remote ZIP URL (Cloud or Web)
+                      </label>
+                      <div className="relative">
+                        <Globe className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+                        <input
+                          type="url"
+                          placeholder="https://example.com/library.zip or Dropbox / Google Drive link"
+                          value={remoteUrl}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            setRemoteUrl(val);
+                            if (val && !customDisplayName) {
+                              try {
+                                const parsed = new URL(val);
+                                const lastSeg = parsed.pathname.split('/').filter(Boolean).pop();
+                                if (lastSeg && lastSeg.endsWith('.zip')) {
+                                  const name = decodeURIComponent(lastSeg.replace(/\.zip$/i, ''));
+                                  setCustomDisplayName(name);
+                                  setCustomLibName(name.replace(/[^a-zA-Z0-9_\-]/g, '_'));
+                                }
+                              } catch (_) {}
+                            }
+                          }}
+                          className="w-full pl-9 pr-3 py-2 bg-slate-900 border border-slate-800 rounded-lg text-xs text-slate-200 placeholder:text-slate-600 focus:outline-none focus:border-sky-500"
+                        />
+                      </div>
+                      <p className="text-[11px] text-slate-500">
+                        Supports direct download URLs, Dropbox links (<code className="text-sky-400">?dl=0/1</code>), and Google Drive share links.
+                      </p>
+                    </div>
+                  )}
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
@@ -288,18 +375,18 @@ export default function LibraryManagerModal({
 
                   <button
                     type="submit"
-                    disabled={!uploadFile || isUploading}
+                    disabled={isUploading || (uploadMode === 'file' ? !uploadFile : !remoteUrl.trim())}
                     className="flex items-center justify-center gap-2 w-full sm:w-auto px-5 py-2 bg-sky-500 hover:bg-sky-400 text-white rounded-xl text-xs font-bold transition-all disabled:opacity-50 cursor-pointer shadow-sm shadow-sky-500/20"
                   >
                     {isUploading ? (
                       <>
                         <Loader2 className="w-4 h-4 animate-spin" />
-                        <span>Extracting & Validating Library...</span>
+                        <span>{uploadMode === 'file' ? 'Extracting & Validating Library...' : 'Downloading & Extracting Library...'}</span>
                       </>
                     ) : (
                       <>
-                        <Upload className="w-4 h-4" />
-                        <span>Upload & Import Library</span>
+                        {uploadMode === 'file' ? <Upload className="w-4 h-4" /> : <Globe className="w-4 h-4" />}
+                        <span>{uploadMode === 'file' ? 'Upload & Import Library' : 'Download & Import Library'}</span>
                       </>
                     )}
                   </button>
