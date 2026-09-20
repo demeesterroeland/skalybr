@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { FlatBookRepository } from '@/lib/calibre/repository';
-import { getResizedCover } from '@/lib/calibre/cover';
+import { getResizedCover, generateFallbackCoverBuffer } from '@/lib/calibre/cover';
 import { getLibraryPath } from '@/lib/config';
 
 export const dynamic = 'force-dynamic';
@@ -19,15 +19,27 @@ export async function GET(
     const repo = new FlatBookRepository(library);
     const book = repo.getBookById(parseInt(id, 10));
 
-    if (!book || !book.hasCover) {
-      return new NextResponse('Cover not found', { status: 404 });
+    if (!book) {
+      return new NextResponse('Book not found', { status: 404 });
     }
 
     const libPath = getLibraryPath(library);
-    const buffer = await getResizedCover(libPath, book.path, width, format);
+    let buffer: Buffer | null = null;
 
+    if (book.hasCover) {
+      buffer = await getResizedCover(libPath, book.path, width, format);
+    }
+
+    // If book has no cover on disk or hasCover=0, generate on-the-fly typographic SVG cover
     if (!buffer) {
-      return new NextResponse('Cover image missing on disk', { status: 404 });
+      const category = book.collection || (book.tags ? book.tags.split(',')[0]?.trim() : 'CLASSIC') || 'CLASSIC';
+      buffer = await generateFallbackCoverBuffer(
+        book.title,
+        book.authors || 'Unknown Author',
+        category,
+        width,
+        format
+      );
     }
 
     return new NextResponse(new Uint8Array(buffer), {

@@ -28,7 +28,7 @@ export default function BookCard({ book, libraryName, onClick }: BookCardProps) 
     >
       {/* Cover Image Container */}
       <div className="relative aspect-[2/3] w-full bg-slate-950 overflow-hidden flex items-center justify-center">
-        {book.hasCover && !imageError ? (
+        {!imageError ? (
           <img
             src={coverUrl}
             alt={book.title}

@@ -93,19 +93,12 @@ export default function BookDetailModal({
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
               {/* Left: Cover & Downloads */}
               <div className="flex flex-col items-center">
-                <div className="w-full max-w-[240px] aspect-[2/3] bg-slate-950 rounded-xl overflow-hidden border border-slate-800 shadow-xl relative">
-                  {book.hasCover ? (
-                    <img
-                      src={coverUrl}
-                      alt={book.title}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="flex flex-col items-center justify-center h-full text-slate-600">
-                      <Book className="w-12 h-12 mb-2" />
-                      <span className="text-xs">No Cover</span>
-                    </div>
-                  )}
+                <div className="w-full max-w-[240px] aspect-[2/3] bg-slate-950 rounded-xl border border-slate-800 shadow-xl relative overflow-hidden">
+                  <img
+                    src={coverUrl}
+                    alt={book.title}
+                    className="w-full h-full object-cover"
+                  />
                 </div>
 
                 {/* Direct Download Buttons */}
