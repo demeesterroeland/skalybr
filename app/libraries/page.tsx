@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import OnboardingZeroState from '@/components/onboarding-zero-state';
@@ -8,143 +8,279 @@ import LibraryManagerModal from '@/components/LibraryManagerModal';
 import { LibraryInfo } from '@/lib/types';
 import { BookOpen, Plus, Settings2, ArrowRight } from 'lucide-react';
 
-// Deterministic artwork theme assignment based on library name
-function getThemeIndex(name: string): number {
-  if (name.toLowerCase().includes('demo')) return 0;
-  if (name.toLowerCase().includes('boox')) return 1;
-  let hash = 0;
-  for (let i = 0; i < name.length; i++) {
-    hash = (hash << 5) - hash + name.charCodeAt(i);
-    hash |= 0;
+/**
+ * Seeded pseudo-random number generator (Mulberry32)
+ */
+function createPRNG(seedStr: string) {
+  let h = 1779033703 ^ seedStr.length;
+  for (let i = 0; i < seedStr.length; i++) {
+    h = Math.imul(h ^ seedStr.charCodeAt(i), 3432918353);
+    h = (h << 13) | (h >>> 19);
   }
-  return Math.abs(hash) % 4;
+  return function () {
+    h = Math.imul(h ^ (h >>> 16), 2246822507);
+    h = Math.imul(h ^ (h >>> 13), 3266489909);
+    return ((h ^= h >>> 16) >>> 0) / 4294967296;
+  };
 }
 
-const THEMES = [
-  {
-    bg: 'bg-[#181d28]',
-    borderHover: 'group-hover:border-amber-500/50',
-  },
-  {
-    bg: 'bg-[#1a2130]',
-    borderHover: 'group-hover:border-orange-500/50',
-  },
-  {
-    bg: 'bg-[#142321]',
-    borderHover: 'group-hover:border-emerald-500/50',
-  },
-  {
-    bg: 'bg-[#1c1d2e]',
-    borderHover: 'group-hover:border-indigo-500/50',
-  },
+/**
+ * 3-Tone palettes inspired by nice-color-palettes & generative-placeholders
+ */
+const PALETTES = [
+  { bg: '#0f172a', primary: '#cbd5e1', accent: '#f59e0b', stroke: '#94a3b8' }, // Slate & Warm Amber
+  { bg: '#0b192c', primary: '#e2e8f0', accent: '#008b8b', stroke: '#64748b' }, // Midnight & Teal
+  { bg: '#18181b', primary: '#f4f4f5', accent: '#e11d48', stroke: '#71717a' }, // Charcoal & Crimson
+  { bg: '#06201b', primary: '#d1fae5', accent: '#ca8a04', stroke: '#34d399' }, // Forest & Ochre
+  { bg: '#172554', primary: '#e0f2fe', accent: '#f97316', stroke: '#60a5fa' }, // Deep Blue & Tangerine
 ];
 
 /**
- * Clean, modernist abstract 3-tone artwork compositions.
- * Inspired by Swiss graphic design, Bauhaus, and mid-century editorial book jackets.
+ * Generative Style 1: Cubic Disarray (Georg Nees, 1968)
+ * A grid of squares that progressively jitter and rotate with increasing entropy.
  */
-function AbstractThreeToneArtwork({ themeIndex }: { themeIndex: number }) {
-  if (themeIndex === 0) {
-    // Composition 1: The Folio Arch (Slate, Oatmeal Cream & Warm Ochre)
-    return (
-      <svg
-        className="w-40 h-40 transition-transform duration-500 ease-out group-hover:scale-105"
-        viewBox="0 0 160 160"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        {/* Tone 1: Dark Slate Silhouette / Base Plate */}
-        <rect x="24" y="24" width="112" height="112" rx="16" fill="#1e293b" />
-        
-        {/* Tone 2: Oatmeal Cream Geometric Arch & Spines */}
-        <path
-          d="M44 116 V74 C44 54.1 60.1 38 80 38 C99.9 38 116 54.1 116 74 V116 H100 V74 C100 62.9 91.1 54 80 54 C68.9 54 60 62.9 60 74 V116 H44 Z"
-          fill="#e2e8f0"
+function renderCubicDisarray(prng: () => number, palette: typeof PALETTES[0]) {
+  const cols = 9;
+  const rows = 6;
+  const size = 26;
+  const startX = 25;
+  const startY = 22;
+  const squares = [];
+
+  for (let y = 0; y < rows; y++) {
+    for (let x = 0; x < cols; x++) {
+      const entropy = (y / (rows - 1));
+      const rotate = entropy * (prng() - 0.5) * 45;
+      const offsetX = entropy * (prng() - 0.5) * 12;
+      const offsetY = entropy * (prng() - 0.5) * 12;
+      const isAccent = prng() < 0.12;
+
+      squares.push(
+        <rect
+          key={`${x}-${y}`}
+          x={-size / 2}
+          y={-size / 2}
+          width={size}
+          height={size}
+          fill={isAccent ? palette.accent : 'none'}
+          fillOpacity={isAccent ? 0.85 : 0}
+          stroke={isAccent ? palette.accent : palette.primary}
+          strokeWidth={1.5}
+          transform={`translate(${startX + x * size + size / 2 + offsetX}, ${startY + y * size + size / 2 + offsetY}) rotate(${rotate})`}
         />
-        <rect x="68" y="78" width="8" height="38" rx="1" fill="#cbd5e1" />
-        <rect x="84" y="72" width="8" height="44" rx="1" fill="#cbd5e1" />
+      );
+    }
+  }
 
-        {/* Tone 3: Ochre Accent Circle */}
-        <circle cx="80" cy="50" r="10" fill="#d97706" />
-      </svg>
+  return squares;
+}
+
+/**
+ * Generative Style 2: 10 PRINT Maze (Commodore 64 algorithm)
+ * Rhythmic maze patterns formed from procedurally angled slash lines.
+ */
+function render10Print(prng: () => number, palette: typeof PALETTES[0]) {
+  const cols = 12;
+  const rows = 8;
+  const stepX = 280 / cols;
+  const stepY = 190 / rows;
+  const elements = [];
+
+  for (let y = 0; y < rows; y++) {
+    for (let x = 0; x < cols; x++) {
+      const leftToRight = prng() > 0.5;
+      const isAccent = prng() < 0.15;
+      const strokeColor = isAccent ? palette.accent : palette.primary;
+      const strokeWidth = isAccent ? 2.5 : 1.5;
+
+      const x1 = 10 + x * stepX;
+      const y1 = 10 + y * stepY;
+      const x2 = x1 + stepX;
+      const y2 = y1 + stepY;
+
+      if (leftToRight) {
+        elements.push(
+          <line
+            key={`line-${x}-${y}`}
+            x1={x1}
+            y1={y1}
+            x2={x2}
+            y2={y2}
+            stroke={strokeColor}
+            strokeWidth={strokeWidth}
+            strokeLinecap="round"
+          />
+        );
+      } else {
+        elements.push(
+          <line
+            key={`line-${x}-${y}`}
+            x1={x1}
+            y1={y2}
+            x2={x2}
+            y2={y1}
+            stroke={strokeColor}
+            strokeWidth={strokeWidth}
+            strokeLinecap="round"
+          />
+        );
+      }
+
+      // Occasional geometric dot at intersections
+      if (prng() < 0.08) {
+        elements.push(
+          <circle
+            key={`dot-${x}-${y}`}
+            cx={x1}
+            cy={y1}
+            r={3}
+            fill={palette.accent}
+          />
+        );
+      }
+    }
+  }
+
+  return elements;
+}
+
+/**
+ * Generative Style 3: Joy Division / Unknown Pleasures Pulse Waves
+ * Stacked topographic elevation waveforms with centered noise peaks.
+ */
+function renderJoyDivision(prng: () => number, palette: typeof PALETTES[0]) {
+  const lineCount = 14;
+  const pointsPerLine = 32;
+  const width = 280;
+  const height = 190;
+  const stepY = (height - 40) / lineCount;
+  const paths = [];
+
+  for (let i = 0; i < lineCount; i++) {
+    const baseY = 25 + i * stepY;
+    let d = `M 20 ${baseY}`;
+
+    for (let j = 0; j <= pointsPerLine; j++) {
+      const x = 20 + (j / pointsPerLine) * (width - 40);
+      const distFromCenter = Math.abs(j - pointsPerLine / 2) / (pointsPerLine / 2);
+      const bell = Math.max(0, 1 - distFromCenter * distFromCenter);
+      const noise = (prng() * 18 + 2) * Math.pow(bell, 2.5);
+      const y = baseY - noise;
+      d += ` L ${x} ${y}`;
+    }
+
+    const isAccent = i === Math.floor(lineCount / 2);
+
+    paths.push(
+      <g key={`wave-${i}`}>
+        {/* Fill to occlude lines behind it */}
+        <path
+          d={`${d} L 260 ${baseY + 12} L 20 ${baseY + 12} Z`}
+          fill={palette.bg}
+        />
+        {/* Stroke line */}
+        <path
+          d={d}
+          fill="none"
+          stroke={isAccent ? palette.accent : palette.primary}
+          strokeWidth={isAccent ? 2 : 1.5}
+          strokeLinecap="round"
+        />
+      </g>
     );
   }
 
-  if (themeIndex === 1) {
-    // Composition 2: The Angled Spine (Midnight Blue, Sand & Terracotta)
-    return (
-      <svg
-        className="w-40 h-40 transition-transform duration-500 ease-out group-hover:scale-105"
-        viewBox="0 0 160 160"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        {/* Tone 1: Midnight Blue Base */}
-        <rect x="24" y="24" width="112" height="112" rx="16" fill="#0f172a" />
+  return paths;
+}
 
-        {/* Tone 2: Desert Sand Angled Books & Planes */}
-        <path d="M46 116 L76 44 L92 44 L62 116 Z" fill="#e2e8f0" />
-        <rect x="94" y="58" width="18" height="58" rx="2" fill="#cbd5e1" />
-        <path d="M40 116 H120" stroke="#94a3b8" strokeWidth="3" strokeLinecap="round" />
+/**
+ * Generative Style 4: Piet Mondrian De Stijl Partition
+ * Recursive rectangular divisions with primary accent blocks.
+ */
+function renderMondrian(prng: () => number, palette: typeof PALETTES[0]) {
+  const width = 270;
+  const height = 180;
+  const xSplits = [40, 100, 175, 230].sort((a, b) => a - b);
+  const ySplits = [40, 95, 140].sort((a, b) => a - b);
+  const rects = [];
 
-        {/* Tone 3: Terracotta Accent Wedge */}
-        <path d="M72 44 L88 44 L70 86 L54 86 Z" fill="#ea580c" />
-        <circle cx="103" cy="46" r="6" fill="#ea580c" />
-      </svg>
-    );
+  const allX = [15, ...xSplits, width + 15];
+  const allY = [15, ...ySplits, height + 15];
+
+  for (let i = 0; i < allX.length - 1; i++) {
+    for (let j = 0; j < allY.length - 1; j++) {
+      const rx = allX[i];
+      const ry = allY[j];
+      const rw = allX[i + 1] - rx;
+      const rh = allY[j + 1] - ry;
+
+      const fillRoll = prng();
+      let fill = 'none';
+      if (fillRoll < 0.12) fill = palette.accent;
+      else if (fillRoll < 0.28) fill = palette.stroke;
+
+      rects.push(
+        <rect
+          key={`m-${i}-${j}`}
+          x={rx}
+          y={ry}
+          width={rw}
+          height={rh}
+          fill={fill}
+          fillOpacity={fill === 'none' ? 0 : 0.85}
+          stroke={palette.primary}
+          strokeWidth={2}
+        />
+      );
+    }
   }
 
-  if (themeIndex === 2) {
-    // Composition 3: The Rhythmic Shelf (Forest Slate, Pale Sage & Mustard Gold)
-    return (
-      <svg
-        className="w-40 h-40 transition-transform duration-500 ease-out group-hover:scale-105"
-        viewBox="0 0 160 160"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        {/* Tone 1: Forest Slate Base */}
-        <rect x="24" y="24" width="112" height="112" rx="16" fill="#0f291e" />
+  return rects;
+}
 
-        {/* Tone 2: Pale Sage Staggered Books */}
-        <rect x="42" y="66" width="12" height="50" rx="2" fill="#a7f3d0" />
-        <rect x="58" y="54" width="10" height="62" rx="2" fill="#d1fae5" />
-        <rect x="72" y="74" width="14" height="42" rx="2" fill="#a7f3d0" />
-        <rect x="90" y="60" width="12" height="56" rx="2" fill="#d1fae5" />
-        <rect x="106" y="70" width="10" height="46" rx="2" fill="#a7f3d0" />
-        <path d="M36 116 H124" stroke="#6ee7b7" strokeWidth="2.5" strokeLinecap="round" />
+/**
+ * Deterministic Generative Placeholder Component
+ */
+function GenerativePlaceholder({ seed }: { seed: string }) {
+  const { palette, styleName, content } = useMemo(() => {
+    const prng = createPRNG(seed);
+    const paletteIndex = Math.floor(prng() * PALETTES.length);
+    const palette = PALETTES[paletteIndex];
+    const stylePick = Math.floor(prng() * 4);
 
-        {/* Tone 3: Mustard Gold Sun / Bookmark */}
-        <circle cx="96" cy="46" r="8" fill="#eab308" />
-      </svg>
-    );
-  }
+    let content;
+    let styleName = 'Cubic Disarray';
 
-  // Composition 4: The Unfolding Leaf (Indigo Slate, Ice Blue & Coral Red)
+    if (stylePick === 0) {
+      styleName = 'Cubic Disarray';
+      content = renderCubicDisarray(prng, palette);
+    } else if (stylePick === 1) {
+      styleName = '10 PRINT';
+      content = render10Print(prng, palette);
+    } else if (stylePick === 2) {
+      styleName = 'Pulse Waves';
+      content = renderJoyDivision(prng, palette);
+    } else {
+      styleName = 'Mondrian';
+      content = renderMondrian(prng, palette);
+    }
+
+    return { palette, styleName, content };
+  }, [seed]);
+
   return (
-    <svg
-      className="w-40 h-40 transition-transform duration-500 ease-out group-hover:scale-105"
-      viewBox="0 0 160 160"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
+    <div
+      className="relative w-full h-full flex items-center justify-center overflow-hidden"
+      style={{ backgroundColor: palette.bg }}
     >
-      {/* Tone 1: Deep Indigo Slate Base */}
-      <rect x="24" y="24" width="112" height="112" rx="16" fill="#172554" />
-
-      {/* Tone 2: Ice Blue Concentric Fan Folio */}
-      <path
-        d="M50 114 A 54 54 0 0 1 104 60 V114 Z"
-        fill="#bfdbfe"
-      />
-      <path
-        d="M50 114 A 36 36 0 0 1 86 78 V114 Z"
-        fill="#93c5fd"
-      />
-      <path d="M44 114 H116" stroke="#93c5fd" strokeWidth="2.5" strokeLinecap="round" />
-
-      {/* Tone 3: Coral Red Circular Focal Point */}
-      <circle cx="104" cy="50" r="9" fill="#f43f5e" />
-    </svg>
+      <svg
+        className="w-full h-full p-2 transition-transform duration-500 ease-out group-hover:scale-105"
+        viewBox="0 0 300 200"
+        preserveAspectRatio="xMidYMid meet"
+      >
+        {content}
+      </svg>
+    </div>
   );
 }
 
@@ -200,15 +336,13 @@ export default function LibraryGateway() {
           Who&apos;s reading?
         </h1>
         <p className="text-slate-400 text-base mt-3">
-          Select a library to explore your collection.
+          Select a Calibre library to open your collection.
         </p>
       </div>
 
       {/* Library Cards Grid */}
       <div className="flex flex-wrap items-stretch justify-center gap-8 max-w-5xl w-full">
         {libraries.map((lib) => {
-          const themeIdx = getThemeIndex(lib.name);
-          const theme = THEMES[themeIdx];
           const displayName = lib.displayName || cleanLibraryName(lib.name);
 
           return (
@@ -222,13 +356,11 @@ export default function LibraryGateway() {
                   handleSelect(lib.name);
                 }
               }}
-              className={`group flex flex-col w-64 sm:w-72 rounded-2xl bg-slate-900 border border-slate-800 hover:border-slate-700 overflow-hidden cursor-pointer transition-all duration-300 hover:-translate-y-1.5 shadow-lg hover:shadow-2xl ${theme.borderHover}`}
+              className="group flex flex-col w-64 sm:w-72 rounded-2xl bg-slate-900 border border-slate-800 hover:border-slate-600 overflow-hidden cursor-pointer transition-all duration-300 hover:-translate-y-1.5 shadow-lg hover:shadow-2xl hover:shadow-black/50"
             >
-              {/* Top Banner with Abstract 3-Tone Artwork */}
-              <div
-                className={`relative h-48 sm:h-52 w-full ${theme.bg} flex items-center justify-center p-4 border-b border-slate-800/80`}
-              >
-                <AbstractThreeToneArtwork themeIndex={themeIdx} />
+              {/* Top Banner with Generative 3-Tone Artwork */}
+              <div className="relative h-48 sm:h-52 w-full border-b border-slate-800 overflow-hidden">
+                <GenerativePlaceholder seed={lib.name} />
               </div>
 
               {/* Card Footer Info */}
