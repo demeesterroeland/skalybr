@@ -4,6 +4,7 @@ import { getLibrarySettings, saveLibrarySettings } from '@/lib/library-settings'
 import { closeDatabaseConnection } from '@/lib/calibre/db';
 import { getLibraryPath, DEFAULT_CALIBRE_BASE_DIR } from '@/lib/config';
 import { upsertLibraryRecord, setDefaultLibraryRecord, deleteLibraryRecord } from '@/lib/db/skalybr-db';
+import { requireLibraryAccess, requireAdmin } from '@/lib/auth/guard';
 import fs from 'fs';
 import path from 'path';
 
@@ -12,6 +13,11 @@ export const dynamic = 'force-dynamic';
 export async function GET(req: NextRequest, { params }: { params: Promise<{ library: string }> }) {
   try {
     const { library } = await params;
+    const guard = await requireLibraryAccess(req, library, 'reader');
+    if (!guard.authorized) {
+      return guard.response!;
+    }
+
     const libraries = FlatBookRepository.listAvailableLibraries(DEFAULT_CALIBRE_BASE_DIR, true);
     const libData = libraries.find(l => l.name === library);
     
@@ -32,7 +38,15 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ libr
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ library: string }> }) {
   try {
     const { library } = await params;
-    const body = await req.json();
+    const guard = await requireLibraryAccess(req, library, 'curator');
+    if (!guard.authorized) {
+      return guard.response!;
+    }
+
+    const body = await req.json().catch(() => null);
+    if (!body || typeof body !== 'object') {
+      return NextResponse.json({ success: false, error: 'Invalid JSON request body' }, { status: 400 });
+    }
     const { displayName, isHidden, isDefault, avatarImage } = body;
 
     const settings = getLibrarySettings();
@@ -82,6 +96,10 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ li
 export async function DELETE(req: NextRequest, { params }: { params: Promise<{ library: string }> }) {
   try {
     const { library } = await params;
+    const guard = await requireAdmin(req);
+    if (!guard.authorized) {
+      return guard.response!;
+    }
 
     const libPath = getLibraryPath(library);
     const resolvedPath = path.resolve(libPath);

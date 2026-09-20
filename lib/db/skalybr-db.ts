@@ -583,15 +583,17 @@ function rowToAccessGrantRecord(row: any): AccessGrantRecord {
 export function setAccessGrant(grant: {
   userId: number;
   resourceType: ResourceType;
-  resourceId: string;
+  resourceId?: string;
   role: AclRole;
   grantedBy?: number | null;
 }): AccessGrantRecord {
   if (!grant.userId || typeof grant.userId !== 'number' || grant.userId <= 0) {
     throw new Error('Valid userId is required');
   }
-  const resourceId = grant.resourceId?.trim();
-  if (!resourceId) {
+  let resourceId = grant.resourceId?.trim();
+  if (grant.resourceType === 'global') {
+    resourceId = '*';
+  } else if (!resourceId) {
     throw new Error('resourceId is required and cannot be empty');
   }
 
@@ -614,16 +616,20 @@ export function setAccessGrant(grant: {
 export function getAccessGrant(
   userId: number,
   resourceType: ResourceType,
-  resourceId: string
+  resourceId?: string
 ): AccessGrantRecord | null {
-  if (!userId || typeof userId !== 'number' || userId <= 0 || !resourceType || !resourceId) {
+  if (!userId || typeof userId !== 'number' || userId <= 0 || !resourceType) {
+    return null;
+  }
+  const targetResourceId = resourceType === 'global' ? '*' : resourceId?.trim();
+  if (!targetResourceId) {
     return null;
   }
   const db = getSkalybrDb();
   const row = db.prepare(`
     SELECT * FROM access_grants
     WHERE user_id = ? AND resource_type = ? AND resource_id = ?
-  `).get(userId, resourceType, resourceId);
+  `).get(userId, resourceType, targetResourceId);
   return row ? rowToAccessGrantRecord(row) : null;
 }
 
@@ -659,16 +665,123 @@ export function listAccessGrantsForResource(
 export function deleteAccessGrant(
   userId: number,
   resourceType: ResourceType,
-  resourceId: string
+  resourceId?: string
 ): boolean {
-  if (!userId || typeof userId !== 'number' || userId <= 0 || !resourceType || !resourceId) {
+  if (!userId || typeof userId !== 'number' || userId <= 0 || !resourceType) {
+    return false;
+  }
+  const targetResourceId = resourceType === 'global' ? '*' : resourceId?.trim();
+  if (!targetResourceId) {
     return false;
   }
   const db = getSkalybrDb();
   const res = db.prepare(`
     DELETE FROM access_grants
     WHERE user_id = ? AND resource_type = ? AND resource_id = ?
-  `).run(userId, resourceType, resourceId);
+  `).run(userId, resourceType, targetResourceId);
   return res.changes > 0;
 }
+
+// ---------------------------------------------------------------------------
+// Shelf DAO Helpers (for Cascading ACL and Shelf Resolution)
+// ---------------------------------------------------------------------------
+
+function rowToShelfRecord(row: any): ShelfRecord {
+  return {
+    id: row.id,
+    uuid: row.uuid,
+    name: row.name,
+    description: row.description ?? null,
+    userId: row.user_id,
+    isPublic: Boolean(row.is_public),
+    koboSync: Boolean(row.kobo_sync),
+    createdAt: row.created_at,
+  };
+}
+
+export function createShelf(input: {
+  uuid?: string;
+  name: string;
+  description?: string | null;
+  userId?: number;
+  isPublic?: boolean;
+  koboSync?: boolean;
+}): ShelfRecord {
+  const db = getSkalybrDb();
+  const uuid = input.uuid || crypto.randomUUID();
+  const userId = input.userId ?? 1;
+  const isPublic = input.isPublic !== undefined ? (input.isPublic ? 1 : 0) : 1;
+  const koboSync = input.koboSync ? 1 : 0;
+  const description = input.description ?? null;
+
+  const row = db.prepare(`
+    INSERT INTO shelves (uuid, name, description, user_id, is_public, kobo_sync, created_at)
+    VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+    RETURNING *
+  `).get(uuid, input.name, description, userId, isPublic, koboSync);
+
+  return rowToShelfRecord(row);
+}
+
+export function getShelfByUuid(uuid: string): ShelfRecord | null {
+  if (!uuid || !uuid.trim()) return null;
+  const db = getSkalybrDb();
+  const row = db.prepare('SELECT * FROM shelves WHERE uuid = ?').get(uuid.trim());
+  return row ? rowToShelfRecord(row) : null;
+}
+
+export function getShelfLibrary(shelfUuidOrId: string): string | null {
+  if (!shelfUuidOrId || !shelfUuidOrId.trim()) return null;
+  const db = getSkalybrDb();
+  const trimmed = shelfUuidOrId.trim();
+
+  // Check smart_shelves
+  const smart = db
+    .prepare('SELECT library FROM smart_shelves WHERE uuid = ?')
+    .get(trimmed) as { library: string } | undefined;
+  if (smart?.library) return smart.library;
+
+  // Check book_shelf_link
+  const link = db
+    .prepare(`
+      SELECT library FROM book_shelf_link
+      WHERE shelf_id = (SELECT id FROM shelves WHERE uuid = ? OR id = ?)
+      LIMIT 1
+    `)
+    .get(trimmed, trimmed) as { library: string } | undefined;
+  if (link?.library) return link.library;
+
+  return null;
+}
+
+export function isShelfPublic(shelfUuidOrId: string): boolean {
+  if (!shelfUuidOrId || !shelfUuidOrId.trim()) return false;
+  const db = getSkalybrDb();
+  const trimmed = shelfUuidOrId.trim();
+
+  const shelf = db
+    .prepare('SELECT is_public FROM shelves WHERE uuid = ? OR id = ?')
+    .get(trimmed, trimmed) as { is_public: number } | undefined;
+  if (shelf !== undefined) {
+    return Boolean(shelf.is_public);
+  }
+
+  const smart = db
+    .prepare('SELECT is_public FROM smart_shelves WHERE uuid = ? OR id = ?')
+    .get(trimmed, trimmed) as { is_public: number } | undefined;
+  if (smart !== undefined) {
+    return Boolean(smart.is_public);
+  }
+
+  return false;
+}
+
+export function linkBookToShelf(library: string, shelfId: number, bookId: number): void {
+  const db = getSkalybrDb();
+  db.prepare(`
+    INSERT OR IGNORE INTO book_shelf_link (library, shelf_id, book_id, date_added)
+    VALUES (?, ?, ?, CURRENT_TIMESTAMP)
+  `).run(library, shelfId, bookId);
+}
+
 

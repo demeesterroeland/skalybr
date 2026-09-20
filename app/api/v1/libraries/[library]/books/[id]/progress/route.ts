@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getReadingProgress, updateReadingProgress } from '@/lib/db/skalybr-db';
 import { ReadingStatus } from '@/lib/types';
+import { requireAuth, requireLibraryAccess } from '@/lib/auth/guard';
 
 export const dynamic = 'force-dynamic';
 
@@ -9,15 +10,23 @@ export async function GET(
   { params }: { params: Promise<{ library: string; id: string }> }
 ) {
   try {
+    const auth = await requireAuth(req);
+    if (!auth.authorized) {
+      return auth.response!;
+    }
+
     const { library, id } = await params;
+    const libGuard = await requireLibraryAccess(req, library, 'reader');
+    if (!libGuard.authorized) {
+      return libGuard.response!;
+    }
+
     const bookId = parseInt(id, 10);
     if (isNaN(bookId)) {
       return NextResponse.json({ success: false, error: 'Invalid book ID' }, { status: 400 });
     }
 
-    const { searchParams } = new URL(req.url);
-    const userId = searchParams.get('userId') ? parseInt(searchParams.get('userId')!, 10) : 1;
-
+    const userId = auth.user!.id;
     const progress = getReadingProgress(library, bookId, userId);
 
     return NextResponse.json({
@@ -49,15 +58,27 @@ export async function PATCH(
   { params }: { params: Promise<{ library: string; id: string }> }
 ) {
   try {
+    const auth = await requireAuth(req);
+    if (!auth.authorized) {
+      return auth.response!;
+    }
+
     const { library, id } = await params;
+    const libGuard = await requireLibraryAccess(req, library, 'reader');
+    if (!libGuard.authorized) {
+      return libGuard.response!;
+    }
+
     const bookId = parseInt(id, 10);
     if (isNaN(bookId)) {
       return NextResponse.json({ success: false, error: 'Invalid book ID' }, { status: 400 });
     }
 
-    const body = await req.json();
+    const body = await req.json().catch(() => null);
+    if (!body || typeof body !== 'object') {
+      return NextResponse.json({ success: false, error: 'Invalid JSON request body' }, { status: 400 });
+    }
     const {
-      userId = 1,
       status,
       progressPercent,
       currentPage,
@@ -67,10 +88,12 @@ export async function PATCH(
       timeSpentSeconds,
     } = body;
 
+    const userId = auth.user!.id;
+
     const updated = updateReadingProgress({
       library,
       bookId,
-      userId: typeof userId === 'number' ? userId : 1,
+      userId,
       status: status as ReadingStatus | undefined,
       progressPercent: typeof progressPercent === 'number' ? progressPercent : undefined,
       currentPage: typeof currentPage === 'number' ? currentPage : undefined,
@@ -89,3 +112,6 @@ export async function PATCH(
     return NextResponse.json({ success: false, error: 'Internal Server Error' }, { status: 500 });
   }
 }
+
+export const POST = PATCH;
+

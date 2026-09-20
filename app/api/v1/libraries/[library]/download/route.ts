@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getLibraryPath } from '@/lib/config';
+import { requireLibraryAccess } from '@/lib/auth/guard';
 import JSZip from 'jszip';
 import fs from 'fs';
 import path from 'path';
@@ -28,6 +29,11 @@ function addDirectoryToZip(zip: JSZip, dirPath: string, rootDir: string) {
 export async function GET(req: NextRequest, { params }: { params: Promise<any> }) {
   try {
     const { library } = await params;
+    const guard = await requireLibraryAccess(req, library, 'reader');
+    if (!guard.authorized) {
+      return guard.response!;
+    }
+
     const { searchParams } = new URL(req.url);
     
     

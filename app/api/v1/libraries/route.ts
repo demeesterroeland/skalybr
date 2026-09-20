@@ -7,6 +7,10 @@ import JSZip from 'jszip';
 import fs from 'fs';
 import path from 'path';
 
+import { getCurrentUser } from '@/lib/auth/server';
+import { filterAccessibleLibraries } from '@/lib/auth/acl';
+import { requireAdmin } from '@/lib/auth/guard';
+
 export const dynamic = 'force-dynamic';
 
 // GET: list libraries (with optional ?all=true to include hidden ones for management)
@@ -15,14 +19,17 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const includeHidden = searchParams.get('all') === 'true';
 
+    const { user } = await getCurrentUser(req);
     const libraries = FlatBookRepository.listAvailableLibraries(DEFAULT_CALIBRE_BASE_DIR, includeHidden);
+    const accessibleLibraries = filterAccessibleLibraries(user, libraries, 'reader');
+
     const maxUploadSizeMb = process.env.MAX_UPLOAD_SIZE_MB
       ? parseInt(process.env.MAX_UPLOAD_SIZE_MB, 10)
       : 1024;
 
     return NextResponse.json({
       success: true,
-      data: libraries,
+      data: accessibleLibraries,
       maxUploadSizeMb,
     });
   } catch (error: any) {
@@ -404,6 +411,11 @@ async function extractLibraryZip(
 // POST: Upload or download a zipped Calibre library from local file or remote URL
 export async function POST(req: NextRequest) {
   try {
+    const guard = await requireAdmin(req);
+    if (!guard.authorized) {
+      return guard.response!;
+    }
+
     const isStream = req.nextUrl.searchParams.get('stream') === 'true';
     const contentType = req.headers.get('content-type') || '';
     const MAX_UPLOAD_SIZE = process.env.MAX_UPLOAD_SIZE_MB

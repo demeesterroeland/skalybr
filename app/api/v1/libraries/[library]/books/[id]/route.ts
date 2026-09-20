@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { FlatBookRepository } from '@/lib/calibre/repository';
 import { UpdateBookSchema } from '@/lib/types';
+import { requireLibraryAccess } from '@/lib/auth/guard';
 
 export const dynamic = 'force-dynamic';
 
@@ -10,6 +11,11 @@ export async function GET(
 ) {
   try {
     const { library, id } = await params;
+    const guard = await requireLibraryAccess(req, library, 'reader');
+    if (!guard.authorized) {
+      return guard.response!;
+    }
+
     const { searchParams } = new URL(req.url);
     
     const repo = new FlatBookRepository(library);
@@ -32,6 +38,11 @@ export async function PATCH(
 ) {
   try {
     const { library, id } = await params;
+    const guard = await requireLibraryAccess(req, library, 'curator');
+    if (!guard.authorized) {
+      return guard.response!;
+    }
+
     const { searchParams } = new URL(req.url);
         const body = await req.json();
 
@@ -63,6 +74,11 @@ export async function DELETE(
 ) {
   try {
     const { library, id } = await params;
+    const guard = await requireLibraryAccess(req, library, 'curator');
+    if (!guard.authorized) {
+      return guard.response!;
+    }
+
     const { searchParams } = new URL(req.url);
     
     const repo = new FlatBookRepository(library);

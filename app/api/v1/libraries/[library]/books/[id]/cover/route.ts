@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { FlatBookRepository } from '@/lib/calibre/repository';
 import { getResizedCover, generateFallbackCoverBuffer } from '@/lib/calibre/cover';
 import { getLibraryPath } from '@/lib/config';
+import { requireLibraryAccess } from '@/lib/auth/guard';
 
 export const dynamic = 'force-dynamic';
 
@@ -11,6 +12,11 @@ export async function GET(
 ) {
   try {
     const { library, id } = await params;
+    const guard = await requireLibraryAccess(req, library, 'reader');
+    if (!guard.authorized) {
+      return guard.response!;
+    }
+
     const { searchParams } = new URL(req.url);
         const width = parseInt(searchParams.get('width') || '360', 10);
     const format = (searchParams.get('format') as 'webp' | 'jpeg') || 'webp';

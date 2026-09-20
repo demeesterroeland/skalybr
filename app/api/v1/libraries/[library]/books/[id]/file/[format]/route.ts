@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDatabaseConnection } from '@/lib/calibre/db';
 import { getLibraryPath } from '@/lib/config';
+import { requireLibraryAccess } from '@/lib/auth/guard';
 import fs from 'fs';
 import path from 'path';
 
@@ -12,6 +13,11 @@ export async function GET(
 ) {
   try {
     const { library, id, format } = await params;
+    const guard = await requireLibraryAccess(req, library, 'reader');
+    if (!guard.authorized) {
+      return guard.response!;
+    }
+
     const { searchParams } = new URL(req.url);
     
     const libPath = getLibraryPath(library);
