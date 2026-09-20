@@ -219,21 +219,7 @@ export default function CommandBarFilters({
 
   return (
     <div className="flex flex-wrap items-center gap-2 py-1">
-      {/* Collections Popover */}
-      {(facets.collections?.length || 0) > 0 && (
-        <FilterPopoverButton
-          title="Collections"
-          icon={Bookmark}
-          items={facets.collections || []}
-          selectedValues={filters.collections || (filters.collection ? [filters.collection] : [])}
-          isHighCardinality={false}
-          onToggle={(val) => toggleMultiSelect('collections', val)}
-          onClear={() => clearKey('collections')}
-          accentColor="sky"
-        />
-      )}
-
-      {/* Authors Popover */}
+      {/* 1. Authors Popover */}
       {(facets.authors?.length || 0) > 0 && (
         <FilterPopoverButton
           title="Authors"
@@ -247,7 +233,7 @@ export default function CommandBarFilters({
         />
       )}
 
-      {/* Languages Popover */}
+      {/* 2. Languages Popover */}
       {(facets.languages?.length || 0) > 0 && (
         <FilterPopoverButton
           title="Languages"
@@ -261,21 +247,7 @@ export default function CommandBarFilters({
         />
       )}
 
-      {/* Tags Popover */}
-      {(facets.tags?.length || 0) > 0 && (
-        <FilterPopoverButton
-          title="Tags"
-          icon={Tags}
-          items={facets.tags || []}
-          selectedValues={filters.tags || (filters.tag ? [filters.tag] : [])}
-          isHighCardinality={true}
-          onToggle={(val) => toggleMultiSelect('tags', val)}
-          onClear={() => clearKey('tags')}
-          accentColor="emerald"
-        />
-      )}
-
-      {/* Series Popover */}
+      {/* 3. Series Popover */}
       {(facets.series?.length || 0) > 0 && (
         <FilterPopoverButton
           title="Series"
@@ -289,21 +261,7 @@ export default function CommandBarFilters({
         />
       )}
 
-      {/* Publishers Popover */}
-      {(facets.publishers?.length || 0) > 0 && (
-        <FilterPopoverButton
-          title="Publishers"
-          icon={Building2}
-          items={facets.publishers || []}
-          selectedValues={filters.publishers || (filters.publisher ? [filters.publisher] : [])}
-          isHighCardinality={true}
-          onToggle={(val) => toggleMultiSelect('publishers', val)}
-          onClear={() => clearKey('publishers')}
-          accentColor="amber"
-        />
-      )}
-
-      {/* Formats Popover */}
+      {/* 4. Formats Popover */}
       {(facets.formats?.length || 0) > 0 && (
         <FilterPopoverButton
           title="Formats"
@@ -317,7 +275,21 @@ export default function CommandBarFilters({
         />
       )}
 
-      {/* Rating Popover */}
+      {/* 5. Publishers Popover */}
+      {(facets.publishers?.length || 0) > 0 && (
+        <FilterPopoverButton
+          title="Publishers"
+          icon={Building2}
+          items={facets.publishers || []}
+          selectedValues={filters.publishers || (filters.publisher ? [filters.publisher] : [])}
+          isHighCardinality={true}
+          onToggle={(val) => toggleMultiSelect('publishers', val)}
+          onClear={() => clearKey('publishers')}
+          accentColor="amber"
+        />
+      )}
+
+      {/* 6. Rating Popover */}
       {(facets.ratings?.length || 0) > 0 && (
         <FilterPopoverButton
           title="Rating"
@@ -328,6 +300,34 @@ export default function CommandBarFilters({
           onToggle={(val) => toggleMultiSelect('ratings', val)}
           onClear={() => clearKey('ratings')}
           accentColor="amber"
+        />
+      )}
+
+      {/* 7. Tags Popover */}
+      {(facets.tags?.length || 0) > 0 && (
+        <FilterPopoverButton
+          title="Tags"
+          icon={Tags}
+          items={facets.tags || []}
+          selectedValues={filters.tags || (filters.tag ? [filters.tag] : [])}
+          isHighCardinality={true}
+          onToggle={(val) => toggleMultiSelect('tags', val)}
+          onClear={() => clearKey('tags')}
+          accentColor="emerald"
+        />
+      )}
+
+      {/* 8. Collections Popover */}
+      {(facets.collections?.length || 0) > 0 && (
+        <FilterPopoverButton
+          title="Collections"
+          icon={Bookmark}
+          items={facets.collections || []}
+          selectedValues={filters.collections || (filters.collection ? [filters.collection] : [])}
+          isHighCardinality={false}
+          onToggle={(val) => toggleMultiSelect('collections', val)}
+          onClear={() => clearKey('collections')}
+          accentColor="sky"
         />
       )}
     </div>
