@@ -110,14 +110,31 @@ export default function HomePage() {
 
   // Initialize state from URL on first mount
   useEffect(() => {
+    let lib = DEFAULT_LIBRARY_NAME;
+    let vm: 'gallery' | 'table' = 'gallery';
+    let fl: 'sidebar' | 'commandBar' = 'sidebar';
+    let f: BookQueryOptions = {
+      sort: 'id',
+      order: 'desc',
+      pageSize: 30,
+    };
+
     if (typeof window !== 'undefined' && window.location.search) {
       const parsed = parseUrlState(window.location.search);
-      setCurrentLibrary(parsed.library);
-      setViewMode(parsed.viewMode);
-      setFilterLayout(parsed.filterLayout);
-      setFilters(parsed.filters);
+      lib = parsed.library;
+      vm = parsed.viewMode;
+      fl = parsed.filterLayout;
+      f = parsed.filters;
+
+      setCurrentLibrary(lib);
+      setViewMode(vm);
+      setFilterLayout(fl);
+      setFilters(f);
     }
+
     isInitialized.current = true;
+    const initialUrl = serializeUrlState(lib, vm, fl, f);
+    window.history.replaceState(null, '', initialUrl);
   }, []);
 
   // Sync state to URL in address bar whenever filters, library, view, or sort change
