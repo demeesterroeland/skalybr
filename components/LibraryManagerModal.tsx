@@ -72,6 +72,10 @@ export default function LibraryManagerModal({
       toast.error('Please select a ZIP file');
       return;
     }
+    if (uploadMode === 'file' && uploadFile && uploadFile.size > 1024 * 1024 * 1024) {
+      toast.error('File size exceeds the 1 GB maximum limit');
+      return;
+    }
     if (uploadMode === 'url' && !remoteUrl.trim()) {
       toast.error('Please enter a remote download URL');
       return;
@@ -306,7 +310,7 @@ export default function LibraryManagerModal({
                         ) : (
                           <div>
                             <p className="text-xs font-semibold text-slate-300">Click to select a Calibre library ZIP file</p>
-                            <p className="text-[11px] text-slate-500 mt-0.5">ZIP archive must contain metadata.db</p>
+                            <p className="text-[11px] text-slate-500 mt-0.5">ZIP archive must contain metadata.db (max 1 GB)</p>
                           </div>
                         )}
                       </label>

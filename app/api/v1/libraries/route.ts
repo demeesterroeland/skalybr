@@ -207,7 +207,7 @@ export async function POST(req: NextRequest) {
     const contentType = req.headers.get('content-type') || '';
     const MAX_UPLOAD_SIZE = process.env.MAX_UPLOAD_SIZE_MB
       ? parseInt(process.env.MAX_UPLOAD_SIZE_MB, 10) * 1024 * 1024
-      : 500 * 1024 * 1024;
+      : 1024 * 1024 * 1024; // Default 1GB (1024MB)
 
     let buffer: Buffer | null = null;
     let libraryName: string | undefined;
@@ -248,7 +248,10 @@ export async function POST(req: NextRequest) {
 
       if (file && file.size > 0) {
         if (file.size > MAX_UPLOAD_SIZE) {
-          return NextResponse.json({ success: false, error: 'File size exceeds limit' }, { status: 413 });
+          return NextResponse.json({
+            success: false,
+            error: `File size exceeds maximum limit of ${Math.round(MAX_UPLOAD_SIZE / (1024 * 1024))}MB.`,
+          }, { status: 413 });
         }
         buffer = Buffer.from(await file.arrayBuffer());
         if (!libraryName) {
