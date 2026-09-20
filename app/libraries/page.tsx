@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import OnboardingZeroState from '@/components/onboarding-zero-state';
 import LibraryManagerModal from '@/components/LibraryManagerModal';
 import { LibraryInfo } from '@/lib/types';
-import { BookOpen, Plus, Settings2, ArrowRight, FolderArchive } from 'lucide-react';
+import { Plus } from 'lucide-react';
 
 /**
  * Seeded pseudo-random number generator (Mulberry32)
@@ -25,53 +25,39 @@ function createPRNG(seedStr: string) {
 }
 
 /**
- * Geometric Abstract Wallpaper Palettes inspired by modern OS wallpapers
+ * Geometric Abstract Wallpaper Palettes
  */
 const WALLPAPER_THEMES = [
-  // Theme 0: Cyan, Teal, Coral Pink & Sunset Amber (Exact user reference match!)
   {
-    sky: '#0284c7',
     skyGradient: ['#0284c7', '#38bdf8'],
     band: '#0d9488',
     diagonalGradient: ['#e11d48', '#f97316'],
     domeGradient: ['#1d4ed8', '#06b6d4'],
-    accentCircle: '#f59e0b',
   },
-  // Theme 1: Sunset Rose, Plum, Magenta & Warm Gold
   {
-    sky: '#4c1d95',
     skyGradient: ['#4c1d95', '#7c3aed'],
     band: '#be185d',
     diagonalGradient: ['#f43f5e', '#fb923c'],
     domeGradient: ['#6366f1', '#ec4899'],
-    accentCircle: '#fbbf24',
   },
-  // Theme 2: Emerald Forest, Sage, Teal & Sun Ochre
   {
-    sky: '#064e3b',
     skyGradient: ['#064e3b', '#059669'],
     band: '#047857',
     diagonalGradient: ['#0284c7', '#10b981'],
     domeGradient: ['#0f766e', '#14b8a6'],
-    accentCircle: '#f59e0b',
   },
-  // Theme 3: Deep Midnight Indigo, Klein Blue, Tangerine & Coral
   {
-    sky: '#1e1b4b',
     skyGradient: ['#1e1b4b', '#312e81'],
     band: '#1d4ed8',
     diagonalGradient: ['#ea580c', '#e11d48'],
     domeGradient: ['#2563eb', '#38bdf8'],
-    accentCircle: '#fb923c',
   },
 ];
 
 /**
- * Full-bleed geometric abstract wallpaper SVG
- * Matches the user's reference image with large sweeping circular curves,
- * sharp diagonal cut planes, horizontal color bands, and intersecting gradients.
+ * Geometric Abstract Wallpaper SVG for Avatar Circle
  */
-function GeometricWallpaperSVG({ seed }: { seed: string }) {
+function GeometricWallpaperAvatarSVG({ seed }: { seed: string }) {
   const { theme, variant, id } = useMemo(() => {
     const prng = createPRNG(seed);
     const themeIndex = Math.floor(prng() * WALLPAPER_THEMES.length);
@@ -81,11 +67,10 @@ function GeometricWallpaperSVG({ seed }: { seed: string }) {
   }, [seed]);
 
   if (variant === 0) {
-    // Style A: Classic Reference (User's image: Left sky + teal band, Right diagonal coral, Bottom sweeping dome)
     return (
       <svg
-        className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-        viewBox="0 0 320 420"
+        className="w-full h-full object-cover"
+        viewBox="0 0 200 200"
         preserveAspectRatio="xMidYMid slice"
         xmlns="http://www.w3.org/2000/svg"
       >
@@ -104,44 +89,19 @@ function GeometricWallpaperSVG({ seed }: { seed: string }) {
           </linearGradient>
         </defs>
 
-        {/* Base: Top Left Sky Blue */}
-        <rect x="0" y="0" width="320" height="420" fill={`url(#sky-${id})`} />
-
-        {/* Mid-height horizontal block */}
-        <rect x="0" y="140" width="320" height="130" fill={theme.band} />
-
-        {/* Right Sharp Diagonal Plane */}
-        <polygon points="180,0 320,0 320,420 120,420" fill={`url(#diag-${id})`} />
-
-        {/* Big Sweeping Bottom Curve (Dome / Arc) */}
-        <ellipse
-          cx="100"
-          cy="380"
-          rx="170"
-          ry="170"
-          fill={`url(#dome-${id})`}
-          opacity="0.92"
-        />
-
-        {/* Overlapping intersection crescent */}
-        <ellipse
-          cx="80"
-          cy="420"
-          rx="140"
-          ry="130"
-          fill="#38bdf8"
-          opacity="0.35"
-        />
+        <rect x="0" y="0" width="200" height="200" fill={`url(#sky-${id})`} />
+        <rect x="0" y="70" width="200" height="60" fill={theme.band} />
+        <polygon points="90,0 200,0 200,200 60,200" fill={`url(#diag-${id})`} />
+        <ellipse cx="60" cy="180" rx="90" ry="90" fill={`url(#dome-${id})`} opacity="0.95" />
       </svg>
     );
   }
 
   if (variant === 1) {
-    // Style B: Inverted dynamic diagonal with top arch and floating horizon
     return (
       <svg
-        className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-        viewBox="0 0 320 420"
+        className="w-full h-full object-cover"
+        viewBox="0 0 200 200"
         preserveAspectRatio="xMidYMid slice"
         xmlns="http://www.w3.org/2000/svg"
       >
@@ -156,26 +116,18 @@ function GeometricWallpaperSVG({ seed }: { seed: string }) {
           </linearGradient>
         </defs>
 
-        {/* Base Background */}
-        <rect x="0" y="0" width="320" height="420" fill={theme.band} />
-
-        {/* Large sweeping diagonal band */}
-        <polygon points="0,60 320,0 320,240 0,340" fill={`url(#diag1-${id})`} />
-
-        {/* Giant Circle Arc */}
-        <circle cx="240" cy="320" r="180" fill={`url(#dome1-${id})`} opacity="0.9" />
-
-        {/* Top Floating Arc */}
-        <ellipse cx="60" cy="40" rx="90" ry="90" fill={theme.skyGradient[1]} opacity="0.85" />
+        <rect x="0" y="0" width="200" height="200" fill={theme.band} />
+        <polygon points="0,30 200,0 200,120 0,170" fill={`url(#diag1-${id})`} />
+        <circle cx="140" cy="150" r="90" fill={`url(#dome1-${id})`} opacity="0.9" />
+        <ellipse cx="30" cy="20" rx="50" ry="50" fill={theme.skyGradient[1]} opacity="0.85" />
       </svg>
     );
   }
 
-  // Style C: Architectural vertical partition with oversized intersecting hemisphere
   return (
     <svg
-      className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-      viewBox="0 0 320 420"
+      className="w-full h-full object-cover"
+      viewBox="0 0 200 200"
       preserveAspectRatio="xMidYMid slice"
       xmlns="http://www.w3.org/2000/svg"
     >
@@ -194,20 +146,10 @@ function GeometricWallpaperSVG({ seed }: { seed: string }) {
         </linearGradient>
       </defs>
 
-      {/* Left Vertical Half */}
-      <rect x="0" y="0" width="170" height="420" fill={`url(#v-sky-${id})`} />
-
-      {/* Right Vertical Half with Angle */}
-      <polygon points="170,0 320,0 320,420 120,420" fill={`url(#v-diag-${id})`} />
-
-      {/* Mid Horizontal Stripe */}
-      <rect x="0" y="160" width="150" height="90" fill={theme.band} opacity="0.9" />
-
-      {/* Prominent Intersecting Bottom Hemisphere */}
-      <ellipse cx="160" cy="370" rx="160" ry="150" fill={`url(#v-dome-${id})`} opacity="0.95" />
-
-      {/* Accent Geometry */}
-      <circle cx="260" cy="110" r="45" fill={theme.accentCircle} opacity="0.8" />
+      <rect x="0" y="0" width="100" height="200" fill={`url(#v-sky-${id})`} />
+      <polygon points="100,0 200,0 200,200 60,200" fill={`url(#v-diag-${id})`} />
+      <rect x="0" y="80" width="80" height="50" fill={theme.band} opacity="0.9" />
+      <ellipse cx="100" cy="175" rx="85" ry="80" fill={`url(#v-dome-${id})`} opacity="0.95" />
     </svg>
   );
 }
@@ -236,9 +178,9 @@ export default function LibraryGateway() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center">
-        <div className="w-10 h-10 rounded-full border-2 border-slate-800 border-t-cyan-400 animate-spin" />
-        <p className="mt-4 text-slate-400 text-sm font-medium">Loading libraries...</p>
+      <div className="min-h-screen bg-[#0e0e10] flex flex-col items-center justify-center">
+        <div className="w-10 h-10 rounded-full border-2 border-neutral-800 border-t-neutral-400 animate-spin" />
+        <p className="mt-4 text-neutral-500 text-sm">Loading libraries...</p>
       </div>
     );
   }
@@ -257,117 +199,83 @@ export default function LibraryGateway() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-6 sm:p-12 selection:bg-cyan-500/30">
-      {/* Glow Backdrop */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none -z-10">
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-cyan-500/10 rounded-full blur-[140px]" />
-        <div className="absolute bottom-10 left-1/3 w-[600px] h-[400px] bg-rose-500/10 rounded-full blur-[160px]" />
-      </div>
+    <div className="min-h-screen bg-[#0e0e10] flex flex-col items-center justify-center p-8 sm:p-16 selection:bg-neutral-800">
+      <div className="w-full max-w-5xl">
+        {/* Header - Simple, clean like Plex Select User */}
+        <div className="mb-8">
+          <h1 className="text-2xl sm:text-3xl font-semibold text-neutral-100 tracking-tight">
+            Select Library
+          </h1>
+        </div>
 
-      {/* Header Title Section */}
-      <div className="text-center max-w-xl mb-12 animate-in fade-in slide-in-from-bottom-2 duration-500">
-        <h1 className="text-4xl sm:text-5xl font-extrabold text-white tracking-tight">
-          Who&apos;s reading?
-        </h1>
-        <p className="text-slate-400 text-base sm:text-lg mt-3">
-          Select your Calibre library to enter your collection.
-        </p>
-      </div>
+        {/* Card Grid with ample whitespace */}
+        <div className="flex flex-wrap items-start gap-6 sm:gap-7">
+          {libraries.map((lib) => {
+            const displayName = lib.displayName || cleanLibraryName(lib.name);
 
-      {/* Library Wallpaper Cards Grid */}
-      <div className="flex flex-wrap items-stretch justify-center gap-8 max-w-6xl w-full">
-        {libraries.map((lib) => {
-          const displayName = lib.displayName || cleanLibraryName(lib.name);
-
-          return (
-            <div
-              key={lib.name}
-              role="button"
-              tabIndex={0}
-              onClick={() => handleSelect(lib.name)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  handleSelect(lib.name);
-                }
-              }}
-              className="group relative flex flex-col w-72 sm:w-80 h-[420px] rounded-3xl overflow-hidden cursor-pointer shadow-2xl transition-all duration-300 hover:scale-[1.03] hover:-translate-y-2 hover:shadow-cyan-500/25 border border-white/10"
-            >
-              {/* Full Tile Wallpaper Art */}
-              <div className="absolute inset-0 w-full h-full overflow-hidden -z-10">
-                <GeometricWallpaperSVG seed={lib.name} />
-              </div>
-
-              {/* Top Glass Badge Header */}
-              <div className="p-5 flex items-center justify-between z-10">
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/35 backdrop-blur-md border border-white/20 text-white/95 text-xs font-medium shadow-sm">
-                  <BookOpen className="w-3.5 h-3.5 text-cyan-300" />
-                  <span>{lib.bookCount ?? 0} books</span>
+            return (
+              <div
+                key={lib.name}
+                role="button"
+                tabIndex={0}
+                onClick={() => handleSelect(lib.name)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    handleSelect(lib.name);
+                  }
+                }}
+                className="group flex flex-col w-44 sm:w-48 rounded-xl overflow-hidden cursor-pointer border border-neutral-800 hover:border-neutral-600 hover:ring-2 hover:ring-neutral-600/40 transition-all duration-200 shadow-md bg-[#282828]"
+              >
+                {/* Top Gray Square with Avatar Circle */}
+                <div className="h-44 sm:h-48 w-full bg-[#282828] flex items-center justify-center p-4">
+                  <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-full overflow-hidden border-2 border-[#383838] group-hover:border-neutral-500 transition-colors shadow-inner flex items-center justify-center bg-black/40">
+                    <GeometricWallpaperAvatarSVG seed={lib.name} />
+                  </div>
                 </div>
 
-                <div className="w-8 h-8 rounded-full bg-black/30 backdrop-blur-md border border-white/20 flex items-center justify-center text-white/80 group-hover:text-white group-hover:bg-black/50 transition-all shadow-sm">
-                  <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
-                </div>
-              </div>
-
-              {/* Bottom Scrim & Informative Text Overlay */}
-              <div className="mt-auto p-6 pt-20 bg-gradient-to-t from-black/90 via-black/55 to-transparent flex flex-col justify-end z-10">
-                <h3 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight drop-shadow-md group-hover:text-cyan-200 transition-colors truncate">
-                  {displayName}
-                </h3>
-                
-                <div className="flex items-center gap-1.5 text-xs font-mono text-white/70 mt-1.5 drop-shadow">
-                  <FolderArchive className="w-3.5 h-3.5 text-cyan-300/80" />
-                  <span className="truncate">{lib.name}</span>
-                </div>
-
-                {/* Subtle Hover Action Bar */}
-                <div className="mt-4 pt-3 border-t border-white/15 flex items-center justify-between text-xs font-semibold text-white/90 group-hover:text-cyan-300 transition-colors">
-                  <span>Enter Collection</span>
-                  <span className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
-                    Explore &rarr;
+                {/* Bottom Darker Gray Area: Display Name at top, Book count at bottom */}
+                <div className="h-16 sm:h-18 px-3 py-2.5 flex flex-col justify-center items-center text-center bg-[#1c1c1c] border-t border-neutral-800/80">
+                  <span className="text-sm sm:text-base font-medium text-neutral-200 group-hover:text-white truncate w-full">
+                    {displayName}
+                  </span>
+                  <span className="text-xs text-neutral-400 mt-0.5">
+                    {lib.bookCount ?? 0} books
                   </span>
                 </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })}
 
-        {/* Add Library Card */}
-        <div
-          role="button"
-          tabIndex={0}
-          onClick={() => setIsManagerOpen(true)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              setIsManagerOpen(true);
-            }
-          }}
-          className="group flex flex-col items-center justify-center w-72 sm:w-80 h-[420px] rounded-3xl border-2 border-dashed border-slate-700/80 hover:border-cyan-400/80 bg-slate-900/40 hover:bg-slate-900/70 p-6 text-center cursor-pointer transition-all duration-300 hover:scale-[1.03] hover:-translate-y-2 shadow-xl hover:shadow-cyan-500/10 backdrop-blur-md"
-        >
-          <div className="w-16 h-16 rounded-2xl bg-slate-800/80 border border-slate-700/70 flex items-center justify-center text-slate-300 group-hover:text-cyan-300 group-hover:scale-110 group-hover:border-cyan-500/50 transition-all duration-300 shadow-inner">
-            <Plus className="w-8 h-8" />
+          {/* Add Library Card - Matching Avatar Style */}
+          <div
+            role="button"
+            tabIndex={0}
+            onClick={() => setIsManagerOpen(true)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                setIsManagerOpen(true);
+              }
+            }}
+            className="group flex flex-col w-44 sm:w-48 rounded-xl overflow-hidden cursor-pointer border border-neutral-800 hover:border-neutral-600 hover:ring-2 hover:ring-neutral-600/40 transition-all duration-200 shadow-md bg-[#282828]"
+          >
+            {/* Top Gray Square with Avatar Circle & Orange Plus */}
+            <div className="h-44 sm:h-48 w-full bg-[#282828] flex items-center justify-center p-4">
+              <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-full overflow-hidden border border-neutral-700 bg-[#1c1c1c] group-hover:border-neutral-500 transition-colors shadow-inner flex items-center justify-center">
+                <Plus className="w-12 h-12 text-[#d97706] stroke-[3]" />
+              </div>
+            </div>
+
+            {/* Bottom Darker Gray Area: Add Library... */}
+            <div className="h-16 sm:h-18 px-3 py-2.5 flex items-center justify-center text-center bg-[#1c1c1c] border-t border-neutral-800/80">
+              <span className="text-sm font-medium text-neutral-400 group-hover:text-neutral-200">
+                Add Library...
+              </span>
+            </div>
           </div>
-          <h4 className="text-xl font-bold text-slate-100 group-hover:text-white mt-5 transition-colors">
-            Add Library
-          </h4>
-          <p className="text-xs text-slate-400 mt-2 max-w-[200px] leading-relaxed">
-            Upload a Calibre .zip archive or connect existing directories
-          </p>
         </div>
       </div>
 
-      {/* Footer Management Button */}
-      <div className="mt-12 flex items-center">
-        <button
-          onClick={() => setIsManagerOpen(true)}
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-900/80 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-white text-xs font-semibold tracking-wide transition-all shadow-md active:scale-95"
-        >
-          <Settings2 className="w-4 h-4 text-slate-400" />
-          <span>Manage Libraries</span>
-        </button>
-      </div>
-
-      {/* Library Manager Modal */}
+      {/* Library Manager Modal (triggered by clicking "Add Library...") */}
       <LibraryManagerModal
         isOpen={isManagerOpen}
         onClose={() => {
