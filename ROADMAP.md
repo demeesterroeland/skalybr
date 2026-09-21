@@ -9,7 +9,7 @@ This document outlines the phased development roadmap for **Skalybr**, tracking 
 ```mermaid
 flowchart TD
     V01["v0.1.0: Core MVP Engine<br/>(✅ Released)"] --> V02["v0.2.0: RESTful Gateway & Security<br/>(✅ Released)"]
-    V02 --> V03["v0.3.0: Auth & Cascading ACL<br/>(🔄 In Progress - UI & Admin Panel)"]
+    V02 --> V03["v0.3.0: Auth & Cascading ACL<br/>(✅ Released 2026-09-21)"]
     V03 --> V04["v0.4.0: Hardware Sync & OPDS<br/>(📋 Planned)"]
     V04 --> V05["v0.5.0: In-Browser Readers & PWA<br/>(📋 Planned)"]
     V05 --> V06["v0.6.0: Ingestion & Scrapers<br/>(📋 Planned)"]
@@ -38,11 +38,7 @@ flowchart TD
 - [x] **Calibre-Web Migration Tool**: One-click import tool (`/api/v1/migration/calibre-web`) migrating existing user reading progress, custom shelves, and book links.
 - [x] **Remote Cloud Library Downloader**: Dropbox and Google Drive URL inspection and streaming importer.
 
----
-
-## 🔄 Active Development
-
-### 🔐 v0.3.0 — Authentication, Multi-Tenancy & Cascading ACL *(In Progress)*
+### 🔐 v0.3.0 — Authentication, Multi-Tenancy & Cascading ACL *(Released 2026-09-21)*
 
 Comprehensive multi-user support with Google Drive-style inherited permissions (`Global` $\rightarrow$ `Library` $\rightarrow$ `Shelf`).
 
@@ -63,15 +59,15 @@ Comprehensive multi-user support with Google Drive-style inherited permissions (
   - Route guard helpers (`requireLibraryAccess`, `requireAdmin`, `requireAuth`).
   - Protected API endpoints (`libraries`, `books`, `facets`, `download`, `cover`, `progress`).
   - Admin management APIs: `/api/v1/admin/users` and `/api/v1/admin/users/[id]/grants`.
-- [ ] **Phase 5: Frontend UI & Admin Panel** *(Current Focus)*:
+- [x] **Phase 5: Frontend UI & Admin Panel** (`commit a6e1466`):
   - User profile dropdown in header displaying active persona, library switcher, and auth buttons.
   - Clean Sign In and Register modal with pending approval alert.
-  - Admin User & ACL Management modal:
-    - Tab 1: Pending user approvals.
-    - Tab 2: Google Drive-style permission drawer (Global, Library, and Shelf overrides).
-  - Dev `QuickSwitch` persona bar (`Guest` $\leftrightarrow$ `Reader` $\leftrightarrow$ `Curator` $\leftrightarrow$ `Admin`) for rapid local testing.
-- [ ] **Phase 6: E2E Verification & Release Tagging**:
-  - Full end-to-end verification, automated CI validation, documentation review, and `v0.3.0` release.
+  - Admin User & ACL Management modal (Pending approvals + Google Drive-style permission drawer).
+  - Dev `QuickSwitch` persona bar (`Guest` $\leftrightarrow$ `Reader` $\leftrightarrow$ `Curator` $\leftrightarrow$ `Admin`).
+- [x] **Phase 6: E2E Verification & Release Tagging**:
+  - Playwright E2E test suite (`testing/e2e/`) covering auth, library access, admin panel, and QuickSwitch.
+  - CI workflow E2E job with Chromium, build, and artifact upload on failure.
+  - `v0.3.0` release tag.
 
 ---
 

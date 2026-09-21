@@ -9,7 +9,7 @@ export default defineConfig(({ mode }) => {
     test: {
       environment: 'node',
       globals: true,
-      exclude: ['**/node_modules/**', '**/.next/**'],
+      exclude: ['**/node_modules/**', '**/.next/**', '**/testing/e2e/**'],
       setupFiles: ['./testing/setup.ts'],
     },
     resolve: {

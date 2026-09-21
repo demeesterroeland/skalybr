@@ -236,4 +236,5 @@ Following `sacred-fire-songs`:
 | **Phase 3** | AuthN API & Session Engine (✅ Completed `4365148`) | Install `iron-session`, `bcryptjs`. Create `/api/v1/auth/login`, `register`, `logout`, `me`, and session helpers. |
 | **Phase 4** | ACL Resolution & Route Guards (✅ Completed `047fa59`) | Implement `getEffectiveRole()`. Wrap book/library routes to enforce read/curate/admin permissions. Filter `/api/v1/libraries` by visibility. Admin user/grant APIs. |
 | **Phase 5** | Frontend UI & Admin Panel (✅ Completed `a6e1466`) | AuthModal (Sign In/Register tabs), AdminModal (pending approvals + ACL drawer), Header auth dropdown with role badge, QuickSwitch dev persona bar, useAuth hook, `/api/v1/dev/quickswitch` endpoint. 126/126 tests ✅ |
-| **Phase 6** | E2E & Production Release | Run comprehensive test suite, verify CI workflow pass, update documentation, and release `v0.3.0`. |
+| **Phase 6** | E2E & Production Release (✅ Completed) | Playwright E2E test suite (`testing/e2e/`): auth journey, library access ACL, admin panel, QuickSwitch. CI workflow E2E job. `v0.3.0` release tag. |
+
