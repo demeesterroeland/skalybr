@@ -17,6 +17,9 @@ import { requireLibraryAccess, requireAdmin, requireAuth } from '@/lib/auth/guar
 import { POST as registerPost } from '@/app/api/v1/auth/register/route';
 import { POST as loginPost } from '@/app/api/v1/auth/login/route';
 import { GET as librariesGet, POST as librariesPost } from '@/app/api/v1/libraries/route';
+import { POST as installDemoPost } from '@/app/api/v1/libraries/install-demo/route';
+import { POST as inspectUrlPost } from '@/app/api/v1/libraries/inspect-url/route';
+import { POST as calibreWebPost } from '@/app/api/v1/migration/calibre-web/route';
 import {
   GET as libraryGet,
   PATCH as libraryPatch,
@@ -807,6 +810,139 @@ describe('Route Guard Helpers & Guarded API Endpoints (Phase 4)', () => {
         params: Promise.resolve({ library: 'public_vault' }),
       });
       expect(res.status).toBe(400);
+    });
+  });
+
+  describe('Fresh Installation / Bootstrap Hardening', () => {
+    let uninitTempDir: string;
+
+    beforeEach(() => {
+      uninitTempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'skalybr-uninit-test-'));
+      process.env.DATA_DIR = uninitTempDir;
+      clearCachedSessionSecret();
+      closeSkalybrDb();
+    });
+
+    afterEach(() => {
+      closeSkalybrDb();
+      if (fs.existsSync(uninitTempDir)) {
+        fs.rmSync(uninitTempDir, { recursive: true, force: true });
+      }
+    });
+
+    it('blocks library creation, demo install, URL inspect, and Calibre-Web migration when 0 users exist', async () => {
+      // 1. POST /api/v1/libraries/install-demo
+      const demoReq = new NextRequest('http://localhost/api/v1/libraries/install-demo', {
+        method: 'POST',
+      });
+      const demoRes = await installDemoPost(demoReq);
+      expect(demoRes.status).toBe(403);
+      const demoJson = await demoRes.json();
+      expect(demoJson.error).toMatch(/System uninitialized/i);
+
+      // 2. POST /api/v1/libraries
+      const libReq = new NextRequest('http://localhost/api/v1/libraries', {
+        method: 'POST',
+      });
+      const libRes = await librariesPost(libReq);
+      expect(libRes.status).toBe(403);
+      const libJson = await libRes.json();
+      expect(libJson.error).toMatch(/System uninitialized/i);
+
+      // 3. POST /api/v1/libraries/inspect-url
+      const inspectReq = new NextRequest('http://localhost/api/v1/libraries/inspect-url', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: 'https://example.com/library.zip' }),
+      });
+      const inspectRes = await inspectUrlPost(inspectReq);
+      expect(inspectRes.status).toBe(403);
+      const inspectJson = await inspectRes.json();
+      expect(inspectJson.error).toMatch(/System uninitialized/i);
+
+      // 4. POST /api/v1/migration/calibre-web
+      const calibreWebReq = new NextRequest('http://localhost/api/v1/migration/calibre-web', {
+        method: 'POST',
+      });
+      const calibreWebRes = await calibreWebPost(calibreWebReq);
+      expect(calibreWebRes.status).toBe(403);
+      const calibreWebJson = await calibreWebRes.json();
+      expect(calibreWebJson.error).toMatch(/System uninitialized/i);
+    });
+  });
+
+  describe('Library Ingestion & Maintenance Authentication Guards (Post-Bootstrap)', () => {
+    it('POST /api/v1/libraries/install-demo requires admin credentials', async () => {
+      // Unauthenticated -> 401
+      const unauthReq = new NextRequest('http://localhost/api/v1/libraries/install-demo', {
+        method: 'POST',
+      });
+      const res1 = await installDemoPost(unauthReq);
+      expect(res1.status).toBe(401);
+
+      // Authenticated reader -> 403
+      const readerReq = new NextRequest('http://localhost/api/v1/libraries/install-demo', {
+        method: 'POST',
+        headers: { cookie: readerCookie },
+      });
+      const res2 = await installDemoPost(readerReq);
+      expect(res2.status).toBe(403);
+
+      // Authenticated admin -> succeeds (200)
+      const adminReq = new NextRequest('http://localhost/api/v1/libraries/install-demo', {
+        method: 'POST',
+        headers: { cookie: adminCookie },
+      });
+      const res3 = await installDemoPost(adminReq);
+      expect(res3.status).toBe(200);
+      const data3 = await res3.json();
+      expect(data3.success).toBe(true);
+    });
+
+    it('POST /api/v1/libraries/inspect-url requires admin credentials', async () => {
+      // Unauthenticated -> 401
+      const unauthReq = new NextRequest('http://localhost/api/v1/libraries/inspect-url', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: 'https://example.com/test.zip' }),
+      });
+      const res1 = await inspectUrlPost(unauthReq);
+      expect(res1.status).toBe(401);
+
+      // Authenticated reader -> 403
+      const readerReq = new NextRequest('http://localhost/api/v1/libraries/inspect-url', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', cookie: readerCookie },
+        body: JSON.stringify({ url: 'https://example.com/test.zip' }),
+      });
+      const res2 = await inspectUrlPost(readerReq);
+      expect(res2.status).toBe(403);
+
+      // Authenticated admin with invalid url -> 400 Bad Request (proves authentication passed)
+      const adminReq = new NextRequest('http://localhost/api/v1/libraries/inspect-url', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', cookie: adminCookie },
+        body: JSON.stringify({ url: 'not-a-valid-url' }),
+      });
+      const res3 = await inspectUrlPost(adminReq);
+      expect(res3.status).toBe(400);
+    });
+
+    it('POST /api/v1/migration/calibre-web requires admin credentials', async () => {
+      // Unauthenticated -> 401
+      const unauthReq = new NextRequest('http://localhost/api/v1/migration/calibre-web', {
+        method: 'POST',
+      });
+      const res1 = await calibreWebPost(unauthReq);
+      expect(res1.status).toBe(401);
+
+      // Authenticated reader -> 403
+      const readerReq = new NextRequest('http://localhost/api/v1/migration/calibre-web', {
+        method: 'POST',
+        headers: { cookie: readerCookie },
+      });
+      const res2 = await calibreWebPost(readerReq);
+      expect(res2.status).toBe(403);
     });
   });
 });

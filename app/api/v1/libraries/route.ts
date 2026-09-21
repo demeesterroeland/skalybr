@@ -39,7 +39,7 @@ export async function GET(req: NextRequest) {
 }
 
 // POST: Upload a zipped Calibre library or create/register library
-import { upsertLibraryRecord } from '@/lib/db/skalybr-db';
+import { upsertLibraryRecord, countUsers } from '@/lib/db/skalybr-db';
 
 export function normalizeCloudDownloadUrl(inputUrl: string): string {
   try {
@@ -411,6 +411,16 @@ async function extractLibraryZip(
 // POST: Upload or download a zipped Calibre library from local file or remote URL
 export async function POST(req: NextRequest) {
   try {
+    if (countUsers() === 0) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'System uninitialized. Please create an administrator account before adding libraries.',
+        },
+        { status: 403 }
+      );
+    }
+
     const guard = await requireAdmin(req);
     if (!guard.authorized) {
       return guard.response!;

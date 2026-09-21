@@ -87,74 +87,30 @@ Styled with European phonetic clarity, **`Skalybr`** serves as the sovereign sag
 
 Skalybr is built following an **incremental capability milestone model**. Each phase delivers a complete, vertically verified slice of functionality from database to UI.
 
+> 🧭 **Authoritative Roadmap & Milestone Tracker**:
+> Detailed task breakdowns, released version changelogs, commit hashes, and upcoming milestone deliverables are tracked directly in **[ROADMAP.md](file:///home/roeland/projects/skalybr/ROADMAP.md)** at the root of the repository.
+
 ```mermaid
 flowchart LR
-    P1["Phase 1: Core MVP<br/>(✅ Completed)"] --> P2["Phase 2: E-Reader Sync<br/>(🔄 In Progress)"]
-    P2 --> P3["Phase 3: Shelves & Auth<br/>(📋 Planned)"]
-    P3 --> P4["Phase 4: In-Browser Readers<br/>(📋 Planned)"]
+    P1["Phase 1: Core MVP<br/>(✅ Completed)"] --> P2["Phase 2: Shelves, Auth & ACL<br/>(✅ Completed)"]
+    P2 --> P3["Phase 3: E-Reader Sync<br/>(📋 Planned)"]
+    P3 --> P4["Phase 4: In-Browser Readers & i18n<br/>(📋 Planned)"]
     P4 --> P5["Phase 5: Ingest & Scrapers<br/>(📋 Planned)"]
     P5 -.-> P6["Phase 6: Go Backend Swap<br/>(📋 Optional)"]
 ```
 
-### ✅ Phase 1: Core MVP & Catalog Engine *(Completed)*
-- [x] Auto-initializing `v_books_flattened` database view for sub-millisecond querying.
-- [x] Multi-library discovery and instant switching across sub-libraries.
-- [x] `better-sqlite3` connection pooling with SQLite WAL (Write-Ahead Logging) mode.
-- [x] `sharp` on-the-fly WebP cover thumbnail streaming with HTTP caching.
-- [x] Responsive React 19 / Tailwind CSS v4 book grid with instant debounced search and faceted filtering.
-- [x] Book details modal with blurb preview, download links, and metadata editing (Title, Rating, Description).
-- [x] OpenAPI 3.1 specification with interactive Scalar docs at `/api/reference`.
-- [x] Vitest automated test suite executing in `< 100ms`.
+### Milestone Alignment Summary
 
-### 🔄 Phase 2: E-Reader Protocols & Wireless Sync *(In Progress)*
-- [ ] **OPDS 1.2 XML Feed (`/opds`)**:
-  - Atom+XML catalog feeds for Moon+ Reader, FBReader, Thorium, and KyBook.
-  - Hierarchical navigation: By Author, Series, Tag, Collection, and Recent.
-  - OpenSearch XML integration for remote catalog searching.
-- [ ] **Kobo Wireless Sync API (`/api/v1/kobo/...`)**:
-  - Kobo Store protocol emulation (`v1/initialization`, `v1/library/sync`, `v1/books/{id}/reading_state`).
-  - Device token pairing, reading progress synchronization, and bookmark management.
-- [ ] **On-the-Fly KePub Transformation**:
-  - Dynamic KePub span tag injection for native Kobo page calculation and fast flipping.
+| Phase | Target Release | Core Capabilities | Status |
+| :--- | :--- | :--- | :--- |
+| **Phase 1** | **v0.1.0 / v0.2.0** | Flattened read view (`v_books_flattened`), RESTful API scoping, Netflix gateway, security hardening, Calibre-Web migration tool | ✅ Completed |
+| **Phase 2** | **v0.3.0 / v0.3.1** | Application schema (`skalybr.db` migrations 0001–0004), authentication (`iron-session` + `bcryptjs`), first-user bootstrap, cascading ACL resolution (`lib/auth/acl.ts`), route guards, Admin panel, and fresh install hardening | ✅ Completed |
+| **Phase 3** | **v0.4.0** | E-Reader wireless protocols: OPDS 1.2 XML feed, OPDS 2.0 JSON catalog, Kobo wireless sync, KePub on-the-fly transformation, and KOReader progress sync (`kosync`) | 📋 Planned |
+| **Phase 4** | **v0.5.0** | In-browser readers (EpubJS, PDF.js, CBZ/CBR canvas reader, M4B/MP3 audiobook streaming), offline PWA caching, and multi-language internationalization (i18n) | 📋 Planned |
+| **Phase 5** | **v0.6.0** | Drag-and-drop book file ingestion, online metadata scrapers (Google Books, Goodreads, ComicVine), Send-to-Kindle delivery, and filesystem directory sync | 📋 Planned |
+| **Phase 6** | **v1.0.0** | Optional single-binary compiled Go backend drop-in (`Chi`/`Echo` + `modernc.org/sqlite`) for ~25MB memory footprint | 💡 Future |
 
-### 📋 Phase 3: User Shelves, Reading Status & Authentication *(Planned)*
-- [ ] **Application Database Schema (`app.db`)**:
-  - SQL migrations for user accounts, reading state, custom shelves, and sync logs.
-- [ ] **Authentication & Access Control**:
-  - Stateless encrypted sessions (`iron-session`).
-  - Reverse-proxy header authentication (`Remote-User`) for Authelia / Authentik setups.
-  - Role-based permissions (Admin, Editor, Downloader, Viewer).
-- [ ] **Reading State Tracking**:
-  - Read / Unread / In-Progress status with timestamped reading history.
-- [ ] **Custom Shelves & Drag-and-Drop Organization**:
-  - Public and private user shelves with `@dnd-kit` reordering.
-
-### 📋 Phase 4: In-Browser E-Readers & PWA Offline Reading *(Planned)*
-- [ ] **Embedded EPUB Reader**:
-  - Fullscreen EpubJS reader with custom typography, themes (Light/Dark/Sepia), and progress saving.
-- [ ] **PDF Viewer**:
-  - Continuous-scroll PDF.js viewer with zoom and page bookmarks.
-- [ ] **Comic & Manga Canvas Reader**:
-  - Client-side CBZ/CBR image extractor and dual-page manga viewer.
-- [ ] **Audiobook Streaming Player**:
-  - HTML5 audio player with position bookmarking for M4B and MP3 audiobooks.
-- [ ] **Installable PWA & Offline Cache**:
-  - Progressive Web App service worker caching selected books for offline reading.
-
-### 📋 Phase 5: Ingestion, Metadata Scraping & Delivery *(Planned)*
-- [ ] **File Ingestion Engine**:
-  - Drag-and-drop uploader for EPUB, MOBI, PDF, CBZ, and CBR with automatic metadata extraction.
-- [ ] **Online Metadata Scraping**:
-  - Multi-provider search integration (Google Books, Goodreads, Amazon, ComicVine).
-- [ ] **Send-to-Kindle Delivery**:
-  - Direct SMTP and OAuth delivery to `@kindle.com` addresses.
-- [ ] **Calibre Directory Management**:
-  - Safe folder renaming (`Author/Title (id)/Title - Author.ext`) on metadata update.
-
-### ⚡ Phase 6: Optional Single-Binary Go Backend *(Future Evolution)*
-- [ ] Drop-in Go HTTP server implementing identical OpenAPI routes.
-- [ ] Embedded static React assets via `//go:embed`.
-- [ ] Standalone static executables for Linux (x86_64, ARM64), macOS, and Windows.
+*For itemized checkboxes, historical commits, and release notes, consult **[ROADMAP.md](file:///home/roeland/projects/skalybr/ROADMAP.md)**.*
 
 ---
 
@@ -309,12 +265,14 @@ While the flattened view provides an optimal read-model for catalog browsing, it
 ┌────────────────────────────────────────────────────────────────────────────────────────┐
 │                        THE FLATTENED VIEW ARCHITECTURAL LIFECYCLE                      │
 ├────────────────────────────────────────────────────────────────────────────────────────┤
-│ Phase 1 & 2 (MVP & Feeds)        │ 🟢 Core Engine: Ideal for single-pass catalog       │
-│                                  │    listing, filtering, OPDS XML & Kobo sync feeds.  │
+│ Phase 1 (MVP & Catalog Engine)   │ 🟢 Core Engine: Ideal for single-pass catalog       │
+│                                  │    listing and faceted filtering in sub-ms.         │
 ├──────────────────────────────────┼─────────────────────────────────────────────────────┤
-│ Phase 3 (Shelves & Multi-User)   │ 🟡 Partial Limit: Cannot represent user-specific    │
-│                                  │    read status, private shelves, or bookmarks       │
-│                                  │    (requires joining with user state in app.db).    │
+│ Phase 2 (Shelves, Auth & ACL)    │ 🟡 Multi-User Split: User-specific read progress,   │
+│                                  │    shelves, and ACLs cleanly stored in skalybr.db.  │
+├──────────────────────────────────┼─────────────────────────────────────────────────────┤
+│ Phase 3 (E-Reader Sync & Feeds)  │ 🟢 Feeds & Sync: OPDS XML feeds and Kobo sync feeds │
+│                                  │    generated from catalog view + user access grants.│
 ├──────────────────────────────────┼─────────────────────────────────────────────────────┤
 │ Phase 5 (Ingestion & Deep CRUD)  │ 🔴 Reaches End of Life for Writes: Calibre writes   │
 │                                  │    require normalized relational mutations          │
@@ -325,10 +283,10 @@ While the flattened view provides an optimal read-model for catalog browsing, it
 
 #### Where the Flattened View Reaches Its Limits:
 
-1. **Multi-User State Separation (Phase 3)**:
+1. **Multi-User State Separation (Phase 2)**:
    - The flattened view lives inside Calibre's `metadata.db` (which is shared across all users and strictly models book metadata).
-   - User-specific state (read progress, private shelves, personal bookmarks) is stored in `app.db`.
-   - **Transition**: Queries requiring combined book and user state will join the catalog repository with `app.db` repositories rather than relying solely on `v_books_flattened`.
+   - User-specific state (read progress, private shelves, personal bookmarks, and access grants) is stored in `skalybr.db`.
+   - **Transition**: Queries requiring combined book and user state join the catalog repository with `skalybr.db` DAOs rather than relying solely on `v_books_flattened`.
 
 2. **Complex Entity Normalization on Ingestion & Editing (Phase 5)**:
    - Updating complex multi-author books (e.g. splitting "Terry Pratchett & Neil Gaiman" into separate author rows with distinct sort keys and author links) cannot be done through a SQL view.

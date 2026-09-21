@@ -3,11 +3,27 @@ import { importFromCalibreWeb } from '@/lib/db/calibre-web-importer';
 import { getDefaultLibraryName } from '@/lib/config';
 import path from 'path';
 import fs from 'fs';
+import { requireAdmin } from '@/lib/auth/guard';
+import { countUsers } from '@/lib/db/skalybr-db';
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(req: NextRequest) {
   try {
+    if (countUsers() === 0) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'System uninitialized. Please create an administrator account first.',
+        },
+        { status: 403 }
+      );
+    }
+
+    const guard = await requireAdmin(req);
+    if (!guard.authorized) {
+      return guard.response!;
+    }
     const body = await req.json().catch(() => ({}));
     let { appDbPath, targetLibrary } = body;
 

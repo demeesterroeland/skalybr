@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { normalizeCloudDownloadUrl, resolveDirectDownloadUrl } from '../route';
 import { formatBytes } from '@/lib/calibre/repository';
 import path from 'path';
+import { requireAdmin } from '@/lib/auth/guard';
+import { countUsers } from '@/lib/db/skalybr-db';
 
 export const dynamic = 'force-dynamic';
 
@@ -22,6 +24,21 @@ export function parseContentDisposition(header: string | null): string | null {
 
 export async function POST(req: NextRequest) {
   try {
+    if (countUsers() === 0) {
+      return NextResponse.json(
+        {
+          success: false,
+          reachable: false,
+          error: 'System uninitialized. Please create an administrator account first.',
+        },
+        { status: 403 }
+      );
+    }
+
+    const guard = await requireAdmin(req);
+    if (!guard.authorized) {
+      return guard.response!;
+    }
     const json = await req.json().catch(() => null);
     const rawUrl = json?.url?.trim();
 

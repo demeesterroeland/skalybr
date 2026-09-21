@@ -86,13 +86,14 @@ Connecting Skalybr directly to hardware e-readers and mobile reading apps withou
 - [ ] **On-The-Fly KePub Transformation**:
   - Transparent KePub conversion for page-count precision and rapid flipping on Kobo hardware.
 
-### 📖 v0.5.0 — In-Browser E-Readers & Offline PWA
-Reading directly in modern browsers without installing third-party apps:
+### 📖 v0.5.0 — In-Browser E-Readers, Offline PWA & Multi-Language i18n
+Reading directly in modern browsers without installing third-party apps, with comprehensive multi-language support:
 - [ ] **Embedded EPUB Reader**: Fullscreen, responsive EpubJS reader with dark/sepia/light themes, font scaling, TOC navigation, and bookmark sync.
 - [ ] **PDF Reader**: High-performance PDF.js viewer with zoom, continuous scrolling, and text selection.
 - [ ] **Comic & Manga Reader**: Canvas-based CBZ/CBR image extractor and double-page manga/comic viewer.
 - [ ] **Audiobook Streaming**: HTML5 audio player with track position memory for M4B/MP3 audiobooks.
 - [ ] **Installable PWA & Offline Storage**: Progressive Web App service worker caching books for offline reading on trains and flights.
+- [ ] **Multi-Language Internationalization (i18n)**: Full UI localization (English, Dutch, French, German, Spanish, Italian, Portuguese), language selector in user settings, localized dates/metrics, and RTL layout readiness.
 
 ### 📥 v0.6.0 — Book Ingestion & Metadata Scrapers
 Importing new books, automating metadata tagging, and remote device delivery:

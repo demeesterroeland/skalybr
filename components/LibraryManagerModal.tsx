@@ -21,8 +21,10 @@ import {
   Globe,
   CheckCircle2,
   AlertCircle,
+  Shield,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { useAuth } from '@/lib/auth/use-auth';
 
 interface UrlInspection {
   status: 'idle' | 'checking' | 'reachable' | 'error';
@@ -46,6 +48,7 @@ export default function LibraryManagerModal({
   onSelectLibrary,
 }: LibraryManagerModalProps) {
   const queryClient = useQueryClient();
+  const { isAdmin } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [uploadMode, setUploadMode] = useState<'file' | 'url'>('file');
@@ -430,16 +433,37 @@ export default function LibraryManagerModal({
               </button>
             </Dialog.Close>
 
-            <div className="space-y-6">
-              <div>
-                <Dialog.Title className="text-xl sm:text-2xl font-black text-white flex items-center gap-2.5">
-                  <FolderArchive className="w-6 h-6 text-sky-400" />
-                  <span>Manage Calibre Libraries</span>
+            {!isAdmin ? (
+              <div className="py-12 px-4 text-center max-w-md mx-auto space-y-4">
+                <div className="w-14 h-14 rounded-2xl bg-purple-500/15 border border-purple-500/30 text-purple-400 flex items-center justify-center mx-auto">
+                  <Shield className="w-7 h-7" />
+                </div>
+                <Dialog.Title className="text-lg font-bold text-white">
+                  Administrator Access Required
                 </Dialog.Title>
-                <Dialog.Description className="text-xs sm:text-sm text-slate-400 mt-1">
-                  Upload ZIP archives of Calibre libraries, download backups, rename, or toggle dropdown visibility.
+                <Dialog.Description className="text-xs text-slate-400 leading-relaxed">
+                  Managing, uploading, and configuring Calibre libraries requires an active Administrator account.
                 </Dialog.Description>
+                <div className="pt-2">
+                  <button
+                    onClick={onClose}
+                    className="px-4 py-2 text-xs font-semibold rounded-lg bg-slate-800 hover:bg-slate-700 text-white transition-colors cursor-pointer"
+                  >
+                    Close
+                  </button>
+                </div>
               </div>
+            ) : (
+              <div className="space-y-6">
+                <div>
+                  <Dialog.Title className="text-xl sm:text-2xl font-black text-white flex items-center gap-2.5">
+                    <FolderArchive className="w-6 h-6 text-sky-400" />
+                    <span>Manage Calibre Libraries</span>
+                  </Dialog.Title>
+                  <Dialog.Description className="text-xs sm:text-sm text-slate-400 mt-1">
+                    Upload ZIP archives of Calibre libraries, download backups, rename, or toggle dropdown visibility.
+                  </Dialog.Description>
+                </div>
 
               {/* Upload / Import Section */}
               <div className="bg-slate-950/80 border border-slate-800/80 rounded-xl p-4 sm:p-5">
@@ -891,6 +915,7 @@ export default function LibraryManagerModal({
                 </div>
               </div>
             </div>
+          )}
           </Dialog.Content>
         </Dialog.Portal>
       </Dialog.Root>

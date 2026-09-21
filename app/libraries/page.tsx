@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import Header from '@/components/Header';
 import OnboardingZeroState from '@/components/onboarding-zero-state';
 import LibraryManagerModal from '@/components/LibraryManagerModal';
+import AuthModal from '@/components/auth/AuthModal';
 import { LibraryInfo } from '@/lib/types';
 import { Plus } from 'lucide-react';
 
@@ -230,6 +231,8 @@ export default function LibraryGateway() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const [isManagerOpen, setIsManagerOpen] = useState(false);
+  const [isAuthOpen, setIsAuthOpen] = useState(false);
+  const [authTab, setAuthTab] = useState<'signin' | 'register'>('signin');
 
   const { data: libraries = [], isLoading } = useQuery<LibraryInfo[]>({
     queryKey: ['libraries'],
@@ -254,7 +257,17 @@ export default function LibraryGateway() {
       <div className="min-h-screen bg-[#0e0e12] flex flex-col selection:bg-neutral-800">
         <Header currentLibrary="" />
         <div className="flex-1 flex flex-col items-center justify-center">
-          <OnboardingZeroState onOpenAddLibrary={() => setIsManagerOpen(true)} />
+          <OnboardingZeroState
+            onOpenAddLibrary={() => setIsManagerOpen(true)}
+            onOpenSetupAdmin={() => {
+              setAuthTab('register');
+              setIsAuthOpen(true);
+            }}
+            onOpenSignIn={() => {
+              setAuthTab('signin');
+              setIsAuthOpen(true);
+            }}
+          />
           <LibraryManagerModal
             isOpen={isManagerOpen}
             onClose={() => {
@@ -266,6 +279,11 @@ export default function LibraryGateway() {
               setIsManagerOpen(false);
               handleSelect(libName);
             }}
+          />
+          <AuthModal
+            isOpen={isAuthOpen}
+            onClose={() => setIsAuthOpen(false)}
+            defaultTab={authTab}
           />
         </div>
       </div>

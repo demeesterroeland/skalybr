@@ -107,15 +107,17 @@ export default function Header({ currentLibrary }: HeaderProps) {
 
         {/* Right Nav links & Auth */}
         <div className="flex items-center gap-2 sm:gap-3">
-          {/* Manage Libraries Button */}
-          <button
-            onClick={() => setIsManagerOpen(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg text-slate-300 hover:text-white bg-slate-900 border border-slate-800 hover:border-slate-700 transition-all cursor-pointer shadow-sm"
-            title="Upload, rename, download, or manage libraries"
-          >
-            <FolderArchive className="w-4 h-4 text-sky-400" />
-            <span className="hidden sm:inline">Manage Libraries</span>
-          </button>
+          {/* Manage Libraries Button (Admin only) */}
+          {isAdmin && (
+            <button
+              onClick={() => setIsManagerOpen(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg text-slate-300 hover:text-white bg-slate-900 border border-slate-800 hover:border-slate-700 transition-all cursor-pointer shadow-sm"
+              title="Upload, rename, download, or manage libraries"
+            >
+              <FolderArchive className="w-4 h-4 text-sky-400" />
+              <span className="hidden sm:inline">Manage Libraries</span>
+            </button>
+          )}
 
           <Link
             href="/api/reference"
