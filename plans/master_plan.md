@@ -104,13 +104,16 @@ flowchart LR
 | Phase | Target Release | Core Capabilities | Status |
 | :--- | :--- | :--- | :--- |
 | **Phase 1** | **v0.1.0 / v0.2.0** | Flattened read view (`v_books_flattened`), RESTful API scoping, Netflix gateway, security hardening, Calibre-Web migration tool | ✅ Completed |
-| **Phase 2** | **v0.3.0 / v0.3.1** | Application schema (`skalybr.db` migrations 0001–0004), authentication (`iron-session` + `bcryptjs`), first-user bootstrap, cascading ACL resolution (`lib/auth/acl.ts`), route guards, Admin panel, and fresh install hardening | ✅ Completed |
+| **Phase 2** | **v0.3.0 / v0.3.1** | Application schema (`skalybr.db` migrations 0001–0004), authentication (`iron-session` + `bcryptjs`), first-user bootstrap, cascading ACL resolution (`lib/auth/acl.ts`), route guards, Admin panel, and fresh install hardening. *(See [Auth & ACL Architecture Plan](./auth-and-acl-design-plan.md))* | ✅ Completed |
 | **Phase 3** | **v0.4.0** | E-Reader wireless protocols: OPDS 1.2 XML feed, OPDS 2.0 JSON catalog, Kobo wireless sync, KePub on-the-fly transformation, and KOReader progress sync (`kosync`) | 📋 Planned |
 | **Phase 4** | **v0.5.0** | In-browser readers (EpubJS, PDF.js, CBZ/CBR canvas reader, M4B/MP3 audiobook streaming), offline PWA caching, and multi-language internationalization (i18n) | 📋 Planned |
 | **Phase 5** | **v0.6.0** | Drag-and-drop book file ingestion, online metadata scrapers (Google Books, Goodreads, ComicVine), Send-to-Kindle delivery, and filesystem directory sync | 📋 Planned |
 | **Phase 6** | **v1.0.0** | Optional single-binary compiled Go backend drop-in (`Chi`/`Echo` + `modernc.org/sqlite`) for ~25MB memory footprint | 💡 Future |
 
-*For itemized checkboxes, historical commits, and release notes, consult **[ROADMAP.md](file:///home/roeland/projects/skalybr/ROADMAP.md)**.*
+> 🔐 **Auth & Cascading ACL Specification**:
+> For the deep architectural specification, Google Drive-style ripple-down permission algorithm, session epoch mechanics, and admin lifecycle, refer to the dedicated **[Skalybr Auth & Cascading ACL Architecture Plan](./auth-and-acl-design-plan.md)**.
+>
+> 📌 *For itemized checkboxes, historical commits, and release notes, consult **[ROADMAP.md](file:///home/roeland/projects/skalybr/ROADMAP.md)**.*
 
 ---
 
@@ -287,6 +290,7 @@ While the flattened view provides an optimal read-model for catalog browsing, it
    - The flattened view lives inside Calibre's `metadata.db` (which is shared across all users and strictly models book metadata).
    - User-specific state (read progress, private shelves, personal bookmarks, and access grants) is stored in `skalybr.db`.
    - **Transition**: Queries requiring combined book and user state join the catalog repository with `skalybr.db` DAOs rather than relying solely on `v_books_flattened`.
+   - **Specification**: Complete schema migrations (`0001_initial_schema.sql` through `0004_create_cascading_acl.sql`) and data access models are detailed in the [Auth & Cascading ACL Architecture Plan](./auth-and-acl-design-plan.md).
 
 2. **Complex Entity Normalization on Ingestion & Editing (Phase 5)**:
    - Updating complex multi-author books (e.g. splitting "Terry Pratchett & Neil Gaiman" into separate author rows with distinct sort keys and author links) cannot be done through a SQL view.
@@ -472,7 +476,7 @@ To deliver seamless interoperability across modern web apps, mobile e-readers, e
 The primary first-party API powering the Next.js React 19 UI, PWA offline clients, and external automation scripts.
 
 * **Documentation & Contract**: Interactive Scalar UI at `/api/reference`, raw schema at `/api/openapi.json`.
-* **Authentication**: Cookie session (`iron-session`), Bearer API Tokens (`Authorization: Bearer <token>`), or Reverse-Proxy header (`Remote-User`).
+* **Authentication & Authorization**: Cookie session (`iron-session`), Bearer API Tokens (`Authorization: Bearer <token>`), or Reverse-Proxy header (`Remote-User`), enforcing Google Drive-style cascading ACLs (`Global` $\rightarrow$ `Library` $\rightarrow$ `Shelf`). Full specification in the [Auth & Cascading ACL Architecture Plan](./auth-and-acl-design-plan.md).
 * **Key Endpoint Groups**:
   * `GET /api/v1/libraries`: Discovers all configured Calibre sub-libraries.
   * `GET /api/v1/libraries/{libraryId}/books`: Paginated catalog search with faceted filtering (`query`, `tag`, `author`, `series`, `collection`, `sort`, `order`, `limit`, `offset`).
