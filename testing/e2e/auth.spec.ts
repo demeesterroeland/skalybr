@@ -170,11 +170,11 @@ test.describe('Auth UI: registration and pending notice', () => {
     await page.getByRole('button', { name: /register/i }).first().click();
 
     // Fill the registration form
-    await page.getByLabel(/username/i).fill(pendingUsername);
-    await page.getByLabel(/password/i).first().fill(PASSWORD);
+    await page.locator('#reg-username').fill(pendingUsername);
+    await page.locator('#reg-password').fill(PASSWORD);
 
     // Submit
-    await page.getByRole('button', { name: /register/i }).last().click();
+    await page.getByRole('button', { name: /create account/i }).click();
 
     // Expect pending notice or success toast
     // The modal should show a pending confirmation message
@@ -191,8 +191,8 @@ test.describe('Auth UI: registration and pending notice', () => {
     await page.getByRole('button', { name: /sign in/i }).first().click();
 
     // Fill credentials of pending user
-    await page.getByLabel(/username/i).fill(pendingUsername);
-    await page.getByLabel(/password/i).first().fill(PASSWORD);
+    await page.locator('#signin-identifier').fill(pendingUsername);
+    await page.locator('#signin-password').fill(PASSWORD);
     await page.getByRole('button', { name: /sign in/i }).last().click();
 
     // Should show "Account Pending Approval" notice

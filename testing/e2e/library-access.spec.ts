@@ -12,9 +12,8 @@
  */
 
 import { test, expect } from '@playwright/test';
-import { apiLogin, apiLogout, apiMe, apiRegister, apiQuickSwitch, uniqueUsername } from './helpers';
+import { BASE, apiLogin, apiLogout, apiMe, apiRegister, apiQuickSwitch, uniqueUsername } from './helpers';
 
-const BASE = 'http://localhost:3000';
 const PASSWORD = 'E2eTestPass123!';
 
 test.describe('Library access control (API layer)', () => {
@@ -118,9 +117,9 @@ test.describe('Library access UI', () => {
 
   test('Home page loads and shows library-related content for authenticated user', async ({
     page,
-    request,
   }) => {
-    await apiLogin(request, { username: adminUsername, password: PASSWORD });
+    // Use page.context().request so cookies are shared with the page
+    await apiLogin(page.context().request, { username: adminUsername, password: PASSWORD });
     await page.goto('/');
     await page.waitForLoadState('networkidle');
 
@@ -131,8 +130,9 @@ test.describe('Library access UI', () => {
     await expect(page.getByText('Skalybr').first()).toBeVisible();
   });
 
-  test('Unauthenticated guest sees Sign In button in header', async ({ page, request }) => {
-    await apiLogout(request);
+  test('Unauthenticated guest sees Sign In button in header', async ({ page }) => {
+    // Ensure no session cookie is active by logging out via the page's context
+    await apiLogout(page.context().request);
     await page.goto('/');
     await page.waitForLoadState('networkidle');
 
@@ -141,9 +141,9 @@ test.describe('Library access UI', () => {
 
   test('Authenticated admin sees their username in header dropdown', async ({
     page,
-    request,
   }) => {
-    await apiLogin(request, { username: adminUsername, password: PASSWORD });
+    // Use page.context().request so the session cookie is available to the page
+    await apiLogin(page.context().request, { username: adminUsername, password: PASSWORD });
     await page.goto('/');
     await page.waitForLoadState('networkidle');
 
@@ -152,9 +152,6 @@ test.describe('Library access UI', () => {
     await expect(
       page.getByRole('button', { name: /sign in/i }).first()
     ).not.toBeVisible();
-    // A dropdown trigger with the user avatar should be visible
-    // It may show initials (first 2 chars of username)
-    const initials = adminUsername.slice(0, 2).toUpperCase();
     // Allow a few seconds for hydration
     await page.waitForTimeout(2000);
     // Look for the admin pill or the username itself in the nav area

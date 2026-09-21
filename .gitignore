@@ -36,3 +36,7 @@ boox/
 
 # Large demo library (generated, too big for git)
 /demo/large/
+
+# Playwright
+/test-results/
+/playwright-report/

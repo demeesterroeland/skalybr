@@ -13,9 +13,8 @@
  */
 
 import { test, expect } from '@playwright/test';
-import { apiQuickSwitch, apiMe, apiLogout } from './helpers';
+import { BASE, apiQuickSwitch, apiMe, apiLogout } from './helpers';
 
-const BASE = 'http://localhost:3000';
 
 test.describe('QuickSwitch dev persona bar', () => {
   // Check if dev mode is available before running tests

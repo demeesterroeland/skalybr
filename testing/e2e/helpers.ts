@@ -7,7 +7,7 @@
 
 import { type APIRequestContext, type Page } from '@playwright/test';
 
-export const BASE = process.env.E2E_BASE_URL || 'http://localhost:3000';
+export const BASE = process.env.E2E_BASE_URL || 'http://localhost:4099';
 
 // ---------------------------------------------------------------------------
 // State wipe

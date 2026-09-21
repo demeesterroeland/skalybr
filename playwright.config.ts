@@ -15,7 +15,7 @@ export default defineConfig({
     ['list'],
   ],
   use: {
-    baseURL: process.env.E2E_BASE_URL || 'http://localhost:3000',
+    baseURL: process.env.E2E_BASE_URL || 'http://localhost:4099',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
   },
@@ -25,8 +25,13 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'] },
     },
   ],
-  // No webServer block: tests expect the server to be running externally.
-  // Run `npm run start` (or `npm run dev`) before `npm run e2e`.
-  // Set E2E_BASE_URL env var to override (e.g. E2E_BASE_URL=http://localhost:3100).
+  // Playwright launches a fresh Next.js server with an isolated temp DATA_DIR
+  // so the "first user → admin" bootstrap always works and dev data is never touched.
+  webServer: {
+    command: `DATA_DIR=$(mktemp -d) SKALYBR_TEST_MODE=1 SESSION_SECRET=e2e-test-secret-32-chars-minimum PORT=4099 npm run start`,
+    url: 'http://localhost:4099',
+    timeout: 120_000,
+    reuseExistingServer: false,
+  },
 });
 

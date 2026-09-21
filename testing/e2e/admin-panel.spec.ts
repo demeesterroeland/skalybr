@@ -10,9 +10,8 @@
  */
 
 import { test, expect } from '@playwright/test';
-import { apiRegister, apiLogin, apiLogout, apiGetUsers, apiApproveUser } from './helpers';
+import { BASE, apiRegister, apiLogin, apiLogout, apiGetUsers, apiApproveUser } from './helpers';
 
-const BASE = 'http://localhost:3000';
 const PASSWORD = 'E2eTestPass123!';
 
 test.describe('Admin Panel (API)', () => {
@@ -129,9 +128,9 @@ test.describe('Admin Panel UI', () => {
 
   test('Admin sees pending approval badge in header after pending user registers', async ({
     page,
-    request,
   }) => {
-    await apiLogin(request, { username: adminUsername, password: PASSWORD });
+    // Use page.context().request so session cookies are shared with the page
+    await apiLogin(page.context().request, { username: adminUsername, password: PASSWORD });
     await page.goto('/');
     await page.waitForLoadState('networkidle');
     // Allow time for React Query to fetch pending users
@@ -147,8 +146,9 @@ test.describe('Admin Panel UI', () => {
     await expect(notificationDot).toBeVisible({ timeout: 10_000 });
   });
 
-  test('Admin can open Admin Panel modal via header dropdown', async ({ page, request }) => {
-    await apiLogin(request, { username: adminUsername, password: PASSWORD });
+  test('Admin can open Admin Panel modal via header dropdown', async ({ page }) => {
+    // Use page.context().request so session cookies are shared with the page
+    await apiLogin(page.context().request, { username: adminUsername, password: PASSWORD });
     await page.goto('/');
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2000);
@@ -171,8 +171,9 @@ test.describe('Admin Panel UI', () => {
     await expect(dialog).toContainText(/pending|approval/i);
   });
 
-  test('Admin Panel pending approvals tab shows pending user', async ({ page, request }) => {
-    await apiLogin(request, { username: adminUsername, password: PASSWORD });
+  test('Admin Panel pending approvals tab shows pending user', async ({ page }) => {
+    // Use page.context().request so session cookies are shared with the page
+    await apiLogin(page.context().request, { username: adminUsername, password: PASSWORD });
     await page.goto('/');
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2000);

@@ -117,7 +117,7 @@ export default function AuthModal({
 
       setRegPassword('');
 
-      if (isBootstrap || res.message?.includes('administrator')) {
+      if (res.user?.isAdmin) {
         toast.success('Admin account established! Welcome to Skalybr.');
         await refetch();
         onClose();
