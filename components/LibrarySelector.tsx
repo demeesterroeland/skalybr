@@ -28,6 +28,11 @@ export default function LibrarySelector({
 
   const active = libraries.find((l) => l.name === currentLibrary);
 
+  // Don't render if no libraries exist
+  if (libraries.length === 0) {
+    return null;
+  }
+
   return (
     <DropdownMenu.Root>
       <DropdownMenu.Trigger asChild>

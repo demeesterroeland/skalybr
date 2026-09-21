@@ -53,11 +53,8 @@ export function ensureFlattenedView(db: Database.Database): void {
     ? `(SELECT cc1.value FROM books_custom_column_1_link bccl JOIN custom_column_1 cc1 ON cc1.id = bccl.value WHERE bccl.book = b.id) AS collection`
     : `NULL AS collection`;
 
-  // Drop old view to ensure latest definition
-  db.exec('DROP VIEW IF EXISTS v_books_flattened;');
-
   const viewSql = `
-    CREATE VIEW v_books_flattened AS
+    CREATE TEMP VIEW IF NOT EXISTS v_books_flattened AS
     SELECT 
       b.id,
       b.title,
