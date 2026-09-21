@@ -24,6 +24,9 @@ import {
   ShieldCheck,
   CornerDownRight,
   RotateCcw,
+  Eye,
+  EyeOff,
+  Settings,
 } from 'lucide-react';
 import type { SafeUserRecord, AccessGrantRecord, LibraryInfo, AclRole, UserStatus } from '@/lib/types';
 import { toast } from 'sonner';
@@ -37,7 +40,7 @@ interface AdminModalProps {
 export default function AdminModal({ isOpen, onClose, currentUser }: AdminModalProps) {
   const queryClient = useQueryClient();
 
-  const [activeTab, setActiveTab] = useState<'pending' | 'users'>('pending');
+  const [activeTab, setActiveTab] = useState<'pending' | 'users' | 'libraries'>('pending');
   const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -65,11 +68,23 @@ export default function AdminModal({ isOpen, onClose, currentUser }: AdminModalP
     enabled: isOpen && !!currentUser?.isAdmin,
   });
 
-  // 3. Fetch libraries
+  // 3. Fetch libraries (for ACL panel)
   const { data: libraries = [] } = useQuery<LibraryInfo[]>({
     queryKey: ['libraries'],
     queryFn: async () => {
       const res = await fetch('/api/v1/libraries');
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || 'Failed to fetch libraries');
+      return json.data || [];
+    },
+    enabled: isOpen && !!currentUser?.isAdmin,
+  });
+
+  // 3b. Fetch all libraries for admin panel (including hidden)
+  const { data: allLibraries = [], isLoading: isLibrariesLoading } = useQuery<LibraryInfo[]>({
+    queryKey: ['admin', 'libraries', 'all'],
+    queryFn: async () => {
+      const res = await fetch('/api/v1/admin/libraries');
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || 'Failed to fetch libraries');
       return json.data || [];
@@ -227,6 +242,38 @@ export default function AdminModal({ isOpen, onClose, currentUser }: AdminModalP
     },
   });
 
+  const updateLibraryMutation = useMutation({
+    mutationFn: async ({
+      name,
+      isPublic,
+      displayName,
+      isHidden,
+    }: {
+      name: string;
+      isPublic?: boolean;
+      displayName?: string | null;
+      isHidden?: boolean;
+    }) => {
+      const res = await fetch(`/api/v1/admin/libraries/${encodeURIComponent(name)}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ isPublic, displayName, isHidden }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || 'Failed to update library');
+      return json.data;
+    },
+    onSuccess: () => {
+      toast.success('Library settings updated');
+      queryClient.invalidateQueries({ queryKey: ['admin', 'libraries', 'all'] });
+      queryClient.invalidateQueries({ queryKey: ['libraries'] });
+      queryClient.invalidateQueries({ queryKey: ['auth'] });
+    },
+    onError: (err: any) => {
+      toast.error(err.message || 'Error updating library');
+    },
+  });
+
   // Filtered users for master list
   const filteredUsers = useMemo(() => {
     if (!searchQuery.trim()) return allUsers;
@@ -287,7 +334,7 @@ export default function AdminModal({ isOpen, onClose, currentUser }: AdminModalP
                   </span>
                 </Dialog.Title>
                 <Dialog.Description className="text-xs text-slate-400">
-                  Manage user accounts, pending registrations, and cascading access permissions
+                  Manage users, library visibility, and cascading access permissions
                 </Dialog.Description>
               </div>
             </div>
@@ -305,7 +352,7 @@ export default function AdminModal({ isOpen, onClose, currentUser }: AdminModalP
           {/* Main Tabs Container */}
           <Tabs.Root
             value={activeTab}
-            onValueChange={(v) => setActiveTab(v as 'pending' | 'users')}
+            onValueChange={(v) => setActiveTab(v as 'pending' | 'users' | 'libraries')}
             className="flex-1 flex flex-col min-h-0"
           >
             {/* Tab Header Bar */}
@@ -332,6 +379,17 @@ export default function AdminModal({ isOpen, onClose, currentUser }: AdminModalP
                   <span>Users &amp; Permissions</span>
                   <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-800 text-slate-400 border border-slate-700">
                     {allUsers.length}
+                  </span>
+                </Tabs.Trigger>
+
+                <Tabs.Trigger
+                  value="libraries"
+                  className="flex items-center gap-2 px-3.5 py-1.5 text-xs font-semibold rounded-lg text-slate-400 data-[state=active]:bg-slate-800 data-[state=active]:text-white transition-all cursor-pointer"
+                >
+                  <Settings className="w-3.5 h-3.5" />
+                  <span>Libraries</span>
+                  <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-800 text-slate-400 border border-slate-700">
+                    {allLibraries.length}
                   </span>
                 </Tabs.Trigger>
               </Tabs.List>
@@ -936,6 +994,136 @@ export default function AdminModal({ isOpen, onClose, currentUser }: AdminModalP
                   </div>
                 )}
               </div>
+            </Tabs.Content>
+
+            {/* TAB 3: LIBRARIES */}
+            <Tabs.Content
+              value="libraries"
+              className="flex-1 p-6 overflow-y-auto outline-none min-h-0"
+            >
+              {isLibrariesLoading ? (
+                <div className="h-48 flex items-center justify-center gap-2 text-slate-500 text-sm">
+                  <Loader2 className="w-5 h-5 animate-spin text-sky-400" />
+                  <span>Loading libraries...</span>
+                </div>
+              ) : allLibraries.length === 0 ? (
+                <div className="h-64 flex flex-col items-center justify-center text-center p-6 rounded-2xl border border-dashed border-slate-800 bg-slate-950/40">
+                  <div className="w-12 h-12 rounded-full bg-slate-800 text-slate-400 flex items-center justify-center mb-3">
+                    <BookOpen className="w-6 h-6" />
+                  </div>
+                  <h3 className="text-sm font-semibold text-white">No Libraries</h3>
+                  <p className="text-xs text-slate-400 mt-1 max-w-sm">
+                    No libraries have been added to this instance yet.
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div className="mb-2">
+                    <p className="text-xs text-slate-400">
+                      Manage library visibility and public access settings. Public libraries are accessible to unauthenticated guests.
+                    </p>
+                  </div>
+
+                  {allLibraries.map((lib) => {
+                    const isPublic = lib.isPublic ?? false;
+                    const isHidden = lib.isHidden ?? false;
+
+                    return (
+                      <div
+                        key={lib.name}
+                        className="p-4 rounded-xl bg-slate-950/60 border border-slate-800 hover:border-slate-700 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+                      >
+                        <div className="flex items-center gap-3.5 min-w-0">
+                          <div className="w-10 h-10 rounded-lg bg-slate-800 text-sky-400 flex items-center justify-center shrink-0 border border-slate-700">
+                            <BookOpen className="w-5 h-5" />
+                          </div>
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-2">
+                              <span className="font-semibold text-sm text-white truncate">
+                                {lib.displayName || lib.name}
+                              </span>
+                              <span className="text-xs text-slate-400 font-mono">
+                                {lib.name}
+                              </span>
+                              {isPublic && (
+                                <span className="px-1.5 py-0.5 rounded text-[9px] font-semibold bg-sky-500/10 text-sky-300 border border-sky-500/20">
+                                  Public
+                                </span>
+                              )}
+                              {isHidden && (
+                                <span className="px-1.5 py-0.5 rounded text-[9px] font-semibold bg-slate-800 text-slate-400 border border-slate-700">
+                                  Hidden
+                                </span>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-3 text-xs text-slate-400 mt-0.5">
+                              <span>Path: {lib.path}</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-2 shrink-0">
+                          <button
+                            onClick={() =>
+                              updateLibraryMutation.mutate({
+                                name: lib.name,
+                                isPublic: !isPublic,
+                              })
+                            }
+                            disabled={updateLibraryMutation.isPending}
+                            className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg border transition-all cursor-pointer disabled:opacity-50 ${
+                              isPublic
+                                ? 'bg-sky-500/20 text-sky-300 border-sky-500/40 hover:bg-sky-500/30'
+                                : 'bg-slate-900 text-slate-400 border-slate-700 hover:text-slate-200'
+                            }`}
+                            title={isPublic ? 'Library is public (guests can access)' : 'Library is private (requires authentication)'}
+                          >
+                            {isPublic ? (
+                              <>
+                                <Eye className="w-3.5 h-3.5" />
+                                <span>Public</span>
+                              </>
+                            ) : (
+                              <>
+                                <EyeOff className="w-3.5 h-3.5" />
+                                <span>Private</span>
+                              </>
+                            )}
+                          </button>
+
+                          <button
+                            onClick={() =>
+                              updateLibraryMutation.mutate({
+                                name: lib.name,
+                                isHidden: !isHidden,
+                              })
+                            }
+                            disabled={updateLibraryMutation.isPending}
+                            className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg border transition-all cursor-pointer disabled:opacity-50 ${
+                              isHidden
+                                ? 'bg-amber-500/20 text-amber-300 border-amber-500/40 hover:bg-amber-500/30'
+                                : 'bg-slate-900 text-slate-400 border-slate-700 hover:text-slate-200'
+                            }`}
+                            title={isHidden ? 'Library is hidden (not shown in switcher)' : 'Library is visible in switcher'}
+                          >
+                            {isHidden ? (
+                              <>
+                                <EyeOff className="w-3.5 h-3.5" />
+                                <span>Hidden</span>
+                              </>
+                            ) : (
+                              <>
+                                <Eye className="w-3.5 h-3.5" />
+                                <span>Visible</span>
+                              </>
+                            )}
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </Tabs.Content>
           </Tabs.Root>
         </Dialog.Content>
