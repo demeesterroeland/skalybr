@@ -1,5 +1,32 @@
 # Changelog
 
+## [0.3.0](https://github.com/demeesterroeland/skalybr/compare/v0.2.0...v0.3.0) (2026-09-21)
+
+
+### ✨ New features
+
+* **auth:** implement phase 2 auth and acl database migrations and daos ([f922c66](https://github.com/demeesterroeland/skalybr/commit/f922c660a59e12a55a09795c3a73f65072e418c0))
+* **auth:** implement phase 3 authentication engine and api endpoints ([4365148](https://github.com/demeesterroeland/skalybr/commit/43651487d3c99c7202575c9dfc905cd6f0848a90))
+* **auth:** implement phase 4 cascading acl resolution and route guards ([047fa59](https://github.com/demeesterroeland/skalybr/commit/047fa595cf940920ed429967ceaf9b21b062be89))
+* **auth:** phase 5 — frontend auth ui, admin panel & dev quickswitch ([a6e1466](https://github.com/demeesterroeland/skalybr/commit/a6e14667b01f487991f3cdc9a2133e202516e139))
+* **db:** implement phase 1 migration infrastructure and ci validation ([95cde75](https://github.com/demeesterroeland/skalybr/commit/95cde75c7a78db54706b9c71a0f55fe7b07f00a0))
+* **demo:** add 10K-book large demo generator script ([3c87901](https://github.com/demeesterroeland/skalybr/commit/3c87901aa1bc7142c9b36e2b3a4106935f1dd326))
+* **e2e:** phase 6 — playwright e2e suite, ci job & v0.3.0 release ([b293226](https://github.com/demeesterroeland/skalybr/commit/b293226250eb7598f27b9420efe9ea9922c36f12))
+
+
+### 🐛 Bug fixes
+
+* **release:** bump package.json to 0.3.0 and stabilize E2E test suite ([d9eab18](https://github.com/demeesterroeland/skalybr/commit/d9eab18fec8fc33fc647cb111f6d3f91c171de94))
+
+
+### 📖 Documentation
+
+* add explicit references to Auth & Cascading ACL plan in master_plan.md ([395f1f2](https://github.com/demeesterroeland/skalybr/commit/395f1f213f9b7e1c0e35721f06c01efcce75c569))
+* modernize README with concise subtitle, Docker Compose, and ACL architecture ([84a50e2](https://github.com/demeesterroeland/skalybr/commit/84a50e2c8af995ad0d15fc1415fab8cf047fb88b))
+* **plan:** mark phase 5 completed (a6e1466) ([50dfb08](https://github.com/demeesterroeland/skalybr/commit/50dfb0857613f7ac701a41b72e5c304ba4e75a7c))
+* **plan:** update roadmap marking phase 4 completed ([09e9970](https://github.com/demeesterroeland/skalybr/commit/09e9970a66935d21f93007ee7b9c19bc581ea76b))
+* reorganize ROADMAP.md into versioned milestones and updated status ([be7aaad](https://github.com/demeesterroeland/skalybr/commit/be7aaada97aed8521c2ce35371a88724a8d77755))
+
 ## [0.2.0](https://github.com/demeesterroeland/skalybr/compare/v0.1.0...v0.2.0) (2026-09-20)
 
 
