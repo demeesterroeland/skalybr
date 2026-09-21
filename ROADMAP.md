@@ -67,7 +67,7 @@ Comprehensive multi-user support with Google Drive-style inherited permissions (
 - [x] **Phase 6: E2E Verification & Release Tagging**:
   - Playwright E2E test suite (`testing/e2e/`) covering auth, library access, admin panel, and QuickSwitch.
   - CI workflow E2E job with Chromium, build, and artifact upload on failure.
-  - `v0.3.0` release tag.
+  - `v0.3.0` and `v0.3.1` (patch release: version manifest sync & E2E stability).
 
 ---
 
